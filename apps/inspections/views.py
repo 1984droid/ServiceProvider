@@ -4,6 +4,7 @@ Inspection API Views
 ViewSets for inspection templates and inspection execution.
 """
 
+from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -840,3 +841,45 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
             'defects': serializer.data,
             'summary': summary
         })
+
+    @action(detail=True, methods=['get'])
+    def export_pdf(self, request, pk=None):
+        """
+        Export inspection as PDF report.
+
+        GET /api/inspections/{id}/export_pdf/
+
+        Returns:
+            200: PDF file download
+            404: Inspection not found
+            500: PDF generation failed
+        """
+        try:
+            inspection = self.get_queryset().get(pk=pk)
+        except InspectionRun.DoesNotExist:
+            return Response(
+                {'error': 'Inspection not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            from .services.pdf_export_service import InspectionPDFExporter
+
+            # Generate PDF
+            exporter = InspectionPDFExporter(inspection)
+            pdf_buffer = exporter.generate()
+
+            # Create HTTP response with PDF
+            response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+
+            # Set filename
+            filename = f"inspection_{inspection.id}_{inspection.template_key}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+            return response
+
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to generate PDF: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
