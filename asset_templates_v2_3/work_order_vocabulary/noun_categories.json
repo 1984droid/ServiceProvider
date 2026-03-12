@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-02-07",
+  "noun_categories": [
+    {
+      "category_key": "brakes_and_air_system",
+      "label": "Brakes & Air System",
+      "sort_order": 0,
+      "is_active": true
+    },
+    {
+      "category_key": "cab_body_and_frame",
+      "label": "Cab, Body & Frame",
+      "sort_order": 10,
+      "is_active": true
+    },
+    {
+      "category_key": "cooling_system",
+      "label": "Cooling System",
+      "sort_order": 20,
+      "is_active": true
+    },
+    {
+      "category_key": "diagnostics_and_testing",
+      "label": "Diagnostics & Testing",
+      "sort_order": 30,
+      "is_active": true
+    },
+    {
+      "category_key": "drivetrain_axles_and_wheel_ends",
+      "label": "Drivetrain, Axles & Wheel Ends",
+      "sort_order": 40,
+      "is_active": true
+    },
+    {
+      "category_key": "electrical_-_controls_sensors_and_modules",
+      "label": "Electrical - Controls, Sensors & Modules",
+      "sort_order": 50,
+      "is_active": true
+    },
+    {
+      "category_key": "electrical_-_power_starting_and_charging",
+      "label": "Electrical - Power, Starting & Charging",
+      "sort_order": 60,
+      "is_active": true
+    },
+    {
+      "category_key": "engine_-_mechanical",
+      "label": "Engine - Mechanical",
+      "sort_order": 70,
+      "is_active": true
+    },
+    {
+      "category_key": "equipment_and_hydraulics",
+      "label": "Equipment & Hydraulics",
+      "sort_order": 80,
+      "is_active": true
+    },
+    {
+      "category_key": "exhaust_and_aftertreatment",
+      "label": "Exhaust & Aftertreatment",
+      "sort_order": 90,
+      "is_active": true
+    },
+    {
+      "category_key": "fees_and_charges",
+      "label": "Fees & Charges",
+      "sort_order": 100,
+      "is_active": true
+    },
+    {
+      "category_key": "fluids_filters_and_shop_supplies",
+      "label": "Fluids, Filters & Shop Supplies",
+      "sort_order": 110,
+      "is_active": true
+    },
+    {
+      "category_key": "fuel_air_intake_and_turbo",
+      "label": "Fuel, Air Intake & Turbo",
+      "sort_order": 120,
+      "is_active": true
+    },
+    {
+      "category_key": "hvac_(cab)",
+      "label": "HVAC (Cab)",
+      "sort_order": 130,
+      "is_active": true
+    },
+    {
+      "category_key": "inspections_and_preventive_maintenance",
+      "label": "Inspections & Preventive Maintenance",
+      "sort_order": 140,
+      "is_active": true
+    },
+    {
+      "category_key": "steering",
+      "label": "Steering",
+      "sort_order": 150,
+      "is_active": true
+    },
+    {
+      "category_key": "suspension",
+      "label": "Suspension",
+      "sort_order": 160,
+      "is_active": true
+    },
+    {
+      "category_key": "tires_and_wheels",
+      "label": "Tires & Wheels",
+      "sort_order": 170,
+      "is_active": true
+    },
+    {
+      "category_key": "trailer_systems",
+      "label": "Trailer Systems",
+      "sort_order": 180,
+      "is_active": true
+    },
+    {
+      "category_key": "transmission_clutch_and_pto",
+      "label": "Transmission, Clutch & PTO",
+      "sort_order": 190,
+      "is_active": true
+    },
+    {
+      "category_key": "windows_mirrors_wipers_and_interior",
+      "label": "Windows, Mirrors, Wipers & Interior",
+      "sort_order": 200,
+      "is_active": true
+    }
+  ]
+}

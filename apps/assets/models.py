@@ -25,6 +25,80 @@ class BaseModel(models.Model):
         abstract = True
 
 
+class VINDecodeData(BaseModel):
+    """
+    VIN decode data from NHTSA vPIC API.
+
+    1:1 relationship with Vehicle. Stores structured decode results.
+    NHTSA returns standardized fields - we capture what we can, leave rest null.
+    """
+    vehicle = models.OneToOneField(
+        'Vehicle',
+        on_delete=models.CASCADE,
+        related_name='vin_decode',
+        help_text="Vehicle this decode belongs to"
+    )
+
+    # Core Vehicle Info
+    vin = models.CharField(max_length=17, db_index=True, help_text="VIN that was decoded")
+    model_year = models.IntegerField(null=True, blank=True)
+    make = models.CharField(max_length=100, blank=True)
+    model = models.CharField(max_length=100, blank=True)
+    manufacturer = models.CharField(max_length=200, blank=True, help_text="Full manufacturer name")
+
+    # Classification
+    vehicle_type = models.CharField(max_length=100, blank=True, help_text="Truck, Trailer, Passenger Car, etc.")
+    body_class = models.CharField(max_length=100, blank=True, help_text="Cab & Chassis, Van, Pickup, etc.")
+
+    # Engine & Drivetrain
+    engine_model = models.CharField(max_length=100, blank=True)
+    engine_configuration = models.CharField(max_length=50, blank=True)
+    engine_cylinders = models.IntegerField(null=True, blank=True)
+    displacement_liters = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    fuel_type_primary = models.CharField(max_length=50, blank=True, help_text="Diesel, Gasoline, Electric, etc.")
+    fuel_type_secondary = models.CharField(max_length=50, blank=True, help_text="For dual-fuel vehicles")
+
+    # Ratings & Capacity
+    gvwr = models.CharField(max_length=100, blank=True, help_text="Gross Vehicle Weight Rating")
+    gvwr_min_lbs = models.IntegerField(null=True, blank=True, help_text="GVWR minimum in pounds")
+    gvwr_max_lbs = models.IntegerField(null=True, blank=True, help_text="GVWR maximum in pounds")
+
+    # Safety & Equipment
+    abs = models.CharField(max_length=50, blank=True, help_text="Anti-lock Braking System")
+    airbag_locations = models.CharField(max_length=200, blank=True)
+
+    # Manufacturing
+    plant_city = models.CharField(max_length=100, blank=True)
+    plant_state = models.CharField(max_length=100, blank=True)
+    plant_country = models.CharField(max_length=100, blank=True)
+
+    # NHTSA Metadata
+    error_code = models.CharField(max_length=10, blank=True, help_text="0 = success, other = error")
+    error_text = models.TextField(blank=True, help_text="Any error message from NHTSA")
+    decoded_at = models.DateTimeField(auto_now_add=True, help_text="When decode was performed")
+
+    # Raw Response (for any fields we don't explicitly capture)
+    raw_response = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Complete raw JSON response from NHTSA for reference"
+    )
+
+    class Meta:
+        db_table = 'vin_decode_data'
+        verbose_name = 'VIN Decode Data'
+        verbose_name_plural = 'VIN Decode Data'
+        ordering = ['-decoded_at']
+        indexes = [
+            models.Index(fields=['vin']),
+            models.Index(fields=['make', 'model']),
+            models.Index(fields=['decoded_at']),
+        ]
+
+    def __str__(self):
+        return f"VIN Decode: {self.vin} - {self.model_year} {self.make} {self.model}"
+
+
 class Vehicle(BaseModel):
     """
     Vehicle asset (VIN-based).
@@ -51,16 +125,16 @@ class Vehicle(BaseModel):
         db_index=True,
         help_text="Customer's internal unit/fleet number"
     )
+    license_plate = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Current license plate number"
+    )
 
     # Vehicle Info (from VIN decode or manual entry)
     year = models.IntegerField(null=True, blank=True, help_text="Model year")
     make = models.CharField(max_length=100, blank=True, db_index=True)
     model = models.CharField(max_length=100, blank=True)
-    vehicle_type = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Truck, Trailer, Van, etc."
-    )
 
     # Status
     is_active = models.BooleanField(default=True, db_index=True)
@@ -77,23 +151,11 @@ class Vehicle(BaseModel):
         help_text="Current engine hour meter reading"
     )
 
-    # VIN Decode Data (store complete NHTSA response)
-    vin_decode_data = models.JSONField(
-        null=True,
-        blank=True,
-        help_text="Complete VIN decode data from NHTSA vPIC API"
-    )
-    vin_decode_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When VIN was last decoded"
-    )
-
-    # Tags for inspection applicability and filtering
-    tags = models.JSONField(
+    # Capabilities - single source of truth for template applicability and vehicle features
+    capabilities = models.JSONField(
         default=list,
         blank=True,
-        help_text="Tags for inspection applicability (e.g., ['INSULATED_BOOM', 'DIELECTRIC'])"
+        help_text="Vehicle capabilities and features (e.g., ['UTILITY_TRUCK', 'INSULATED_BOOM', 'DIELECTRIC'])"
     )
 
     # Notes
@@ -108,6 +170,48 @@ class Vehicle(BaseModel):
             models.Index(fields=['unit_number']),
             models.Index(fields=['make', 'model']),
         ]
+
+    def clean(self):
+        """Validate model fields."""
+        from django.core.exceptions import ValidationError
+        errors = {}
+
+        # VIN must be exactly 17 characters
+        if self.vin and len(self.vin) != 17:
+            errors['vin'] = 'VIN must be exactly 17 characters'
+
+        # Odometer must be positive
+        if self.odometer_miles is not None and self.odometer_miles < 0:
+            errors['odometer_miles'] = 'Odometer reading must be positive'
+
+        # Engine hours must be positive
+        if self.engine_hours is not None and self.engine_hours < 0:
+            errors['engine_hours'] = 'Engine hours must be positive'
+
+        # Year must be in valid range if provided
+        if self.year is not None:
+            if self.year < 1900 or self.year > 2100:
+                errors['year'] = 'Year must be between 1900 and 2100'
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Override save to call full_clean() first."""
+        from django.core.exceptions import ValidationError
+        from django.db import IntegrityError as DBIntegrityError
+
+        # Skip validation if explicitly disabled
+        if not kwargs.pop('skip_validation', False):
+            try:
+                self.full_clean()
+            except ValidationError as e:
+                # If it's a uniqueness error, let database handle it (for tests expecting IntegrityError)
+                if 'vin' in e.message_dict and 'already exists' in str(e.message_dict.get('vin', '')):
+                    pass  # Let database raise IntegrityError
+                else:
+                    raise
+        super().save(*args, **kwargs)
 
     def __str__(self):
         if self.unit_number:
@@ -194,24 +298,20 @@ class Equipment(BaseModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='mounted_equipment',
+        related_name='equipment',
         help_text="Vehicle this equipment is mounted on (if applicable)"
     )
-    mount_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text="Date equipment was mounted on current vehicle"
-    )
 
-    # Tags for inspection applicability and filtering
-    tags = models.JSONField(
+    # Capabilities - single source of truth for template applicability and equipment features
+    # Combines equipment type (e.g., AERIAL_DEVICE) and specific features (e.g., INSULATING_SYSTEM)
+    capabilities = models.JSONField(
         default=list,
         blank=True,
-        help_text="Tags for inspection applicability (e.g., ['AERIAL_DEVICE', 'INSULATED_BOOM', 'DIELECTRIC'])"
+        help_text="Equipment capabilities and features (e.g., ['AERIAL_DEVICE', 'INSULATING_SYSTEM', 'BARE_HAND_WORK_UNIT'])"
     )
 
-    # Equipment-Specific Data (placard info, capabilities)
-    # Populated during inspection setup based on tags
+    # Equipment-Specific Data (placard info, detailed specs)
+    # Populated during inspection setup based on capabilities
     equipment_data = models.JSONField(
         default=dict,
         blank=True,
@@ -232,6 +332,40 @@ class Equipment(BaseModel):
             models.Index(fields=['equipment_type']),
             models.Index(fields=['mounted_on_vehicle']),
         ]
+
+    def clean(self):
+        """Validate model fields."""
+        from django.core.exceptions import ValidationError
+        errors = {}
+
+        # Year must be in valid range if provided
+        if self.year is not None:
+            if self.year < 1900 or self.year > 2100:
+                errors['year'] = 'Year must be between 1900 and 2100'
+
+        # Equipment data must be a dict
+        if self.equipment_data is not None and not isinstance(self.equipment_data, dict):
+            errors['equipment_data'] = 'Equipment data must be a dictionary'
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Override save to call full_clean() first."""
+        from django.core.exceptions import ValidationError
+        from django.db import IntegrityError as DBIntegrityError
+
+        # Skip validation if explicitly disabled
+        if not kwargs.pop('skip_validation', False):
+            try:
+                self.full_clean()
+            except ValidationError as e:
+                # If it's a uniqueness error, let database handle it (for tests expecting IntegrityError)
+                if 'serial_number' in e.message_dict and 'already exists' in str(e.message_dict.get('serial_number', '')):
+                    pass  # Let database raise IntegrityError
+                else:
+                    raise
+        super().save(*args, **kwargs)
 
     def __str__(self):
         if self.asset_number:

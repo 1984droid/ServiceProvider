@@ -1,0 +1,7 @@
+flowchart TD
+  A[WO needs part] --> B[SpecialOrderPartRequest REQUESTED]
+  B --> C[Convert to PurchaseOrderLine linked to WO]
+  C --> D[ReceivingReceipt to Special Order Staging]
+  D --> E[Reservation created for WO]
+  E --> F[Issue part to WO]
+  F --> G[WorkOrder COMPLETE]

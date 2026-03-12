@@ -1,0 +1,3 @@
+"""
+Inspection tests package
+"""

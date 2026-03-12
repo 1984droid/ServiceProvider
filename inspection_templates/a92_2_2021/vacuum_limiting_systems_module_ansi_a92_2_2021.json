@@ -1,0 +1,377 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+    "name": "ANSI A92.2-2021 – Vacuum Limiting Systems (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["vacuum_limiting", "insulating_system", "hydraulic", "testing"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR", "POST_EVENT"],
+    "symptom_type": [
+      "HOUSING_DAMAGE",
+      "CORROSION",
+      "LEAK",
+      "LOOSE_CONNECTION",
+      "MISSING_FASTENERS",
+      "SEAL_GASKET_DAMAGE",
+      "DIRT_DEBRIS_MOISTURE",
+      "IMPROPER_OPERATION",
+      "VACUUM_EXCEEDS_LIMIT",
+      "UNUSUAL_NOISE",
+      "VIBRATION",
+      "OTHER"
+    ],
+    "action_taken": ["NONE", "CLEANED", "TIGHTENED", "REPAIRED", "REPLACED", "REMOVED_FROM_SERVICE", "DEFERRED"],
+    "vacuum_unit": ["ATM_PERCENT", "IN_HG", "KPA", "PSI"]
+  },
+
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "vacuum_limit_measurements",
+        "title": "Vacuum Limiting System Measurements",
+        "fields": [
+          {
+            "field_id": "vacuum_unit",
+            "label": "Measurement unit",
+            "type": "ENUM",
+            "enum_ref": "vacuum_unit",
+            "required": true
+          },
+          {
+            "field_id": "measured_partial_vacuum_value",
+            "label": "Measured partial vacuum value",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 0
+          },
+          {
+            "field_id": "measured_as_atmosphere_percent",
+            "label": "Measured partial vacuum as % of atmospheric pressure",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 2,
+            "min": 0,
+            "max": 200,
+            "help_text": "If unit is not ATM_PERCENT, record the direct measurement and compute/record the equivalent percent per manufacturer method."
+          },
+          {
+            "field_id": "pressure_gauge_calibrated",
+            "label": "Calibrated gauge used?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "oem_spec_reference",
+            "label": "Manufacturer procedure/spec reference",
+            "type": "TEXT",
+            "required": false
+          }
+        ]
+      }
+    ],
+
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OUTRIGGERS", "CHASSIS", "OTHER"],
+          "required": false
+        },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "rules": [
+    {
+      "rule_id": "vacuum_must_not_exceed_75_percent_atm",
+      "title": "Vacuum limiting system must limit partial vacuum to ≤ 75% of atmospheric pressure",
+      "standard_reference": "ANSI A92.2-2021 5.2.2",
+      "when": { "step_key": "vacuum_pressure_testing" },
+      "assert": {
+        "type": "NUMERIC_LTE",
+        "left": { "path": "measurements.measured_as_atmosphere_percent" },
+        "right": 75.0
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Vacuum limiting system exceeds 75% atmospheric pressure limit"
+      }
+    }
+  ],
+
+  "procedure": {
+    "inputs": [
+      { "input_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": true },
+      { "input_id": "asset_capabilities", "type": "ASSET_CAPABILITIES", "required": false }
+    ],
+
+    "steps": [
+      {
+        "step_key": "vacuum_system_applicability",
+        "type": "INSTRUCTION",
+        "title": "Applicability: Vacuum limiting systems",
+        "standard_reference": "ANSI A92.2-2021 5.2.2 / 8.2.4(8)",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "This module applies to aerial devices equipped with vacuum limiting systems (typically hydraulic lines crossing insulating portions). If the asset does not have this system, mark as Not Applicable at the bundle level."
+          }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_preparation",
+        "type": "SETUP",
+        "title": "Preparation for vacuum limiting system inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(8)",
+        "required": true,
+        "fields": [
+          { "field_id": "worksite_safe", "type": "BOOLEAN", "required": true },
+          { "field_id": "device_setup_complete", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "access_provided_for_testing_service", "type": "BOOLEAN", "required": false, "help_text": "Suitable access to vacuum limiting components for testing/service must be provided." },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "vacuum_visual_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Visual inspection of vacuum limiting system components",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(8)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect system components and housings for damage/wear/corrosion.",
+            "Inspect connections for loose/damaged fittings.",
+            "Inspect seals/gaskets for wear/cracks/leaks.",
+            "Check for dirt/debris/moisture accumulation."
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "no_defects_found",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "If true, you must have zero defects recorded for this step."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "validations": [
+          {
+            "validation_id": "no_defects_true_requires_zero_defects",
+            "type": "CONSISTENCY",
+            "rule": "IF fields.no_defects_found == true THEN defect_count == 0"
+          }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_functional_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Functional testing of vacuum limiting system",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(8), 5.2.2",
+        "required": true,
+        "fields": [
+          { "field_id": "activated_and_observed", "type": "BOOLEAN", "required": true },
+          { "field_id": "responds_to_pressure_changes", "type": "BOOLEAN", "required": true },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false,
+            "help_text": "Describe response behavior, any sticking/binding/noise/vibration, and observed limitations."
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.activated_and_observed", "equals": false },
+            "defect": {
+              "title": "Vacuum limiting system functional test not performed",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(8)"
+            }
+          },
+          {
+            "when": { "path": "fields.responds_to_pressure_changes", "equals": false },
+            "defect": {
+              "title": "Vacuum limiting system does not respond properly to pressure changes",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 5.2.2"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_pressure_testing",
+        "type": "MEASUREMENT",
+        "title": "Pressure (vacuum) testing of vacuum limiting system",
+        "standard_reference": "ANSI A92.2-2021 5.2.2",
+        "required": true,
+        "measurement_set_ref": "vacuum_limit_measurements",
+        "fields": [
+          {
+            "field_id": "computed_method_note",
+            "type": "TEXTAREA",
+            "required": false,
+            "help_text": "If measured in in.Hg/kPa/psi, record how % atmospheric equivalent was derived (OEM method)."
+          }
+        ],
+        "validations": [
+          {
+            "validation_id": "must_provide_atm_percent_equivalent",
+            "type": "CONSISTENCY",
+            "rule": "IF measurements.vacuum_unit != 'ATM_PERCENT' THEN measurements.measured_as_atmosphere_percent IS NOT NULL"
+          }
+        ],
+        "evaluations": [
+          { "apply_rule_ids": ["vacuum_must_not_exceed_75_percent_atm"] }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "measurements.pressure_gauge_calibrated", "equals": false },
+            "defect": {
+              "title": "Vacuum measurement performed without calibrated gauge",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 5.2.2"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_component_installation_alignment",
+        "type": "VISUAL_CHECK",
+        "title": "Verify installation, alignment, and service access",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(8), 5.2.2",
+        "required": true,
+        "fields": [
+          { "field_id": "proper_installation_alignment", "type": "BOOLEAN", "required": true },
+          { "field_id": "service_access_ok", "type": "BOOLEAN", "required": false },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.proper_installation_alignment", "equals": false },
+            "defect": {
+              "title": "Vacuum limiting components not properly installed/aligned",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 5.2.2"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_post_repair_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair functional verification",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" },
+            { "path": "inspection_context", "equals": "POST_EVENT" }
+          ]
+        },
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_units_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Manufacturer must provide check/vent valve values in specific units",
+        "standard_reference": "ANSI A92.2-2021 6.4",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Manufacturer maintenance manual should express in-line hydraulic check valve values in psi and bar, and atmospheric check/vent valve values in in.Hg and kPa. Record OEM reference used when testing."
+          }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_modifications_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Modifications require manufacturer permission",
+        "standard_reference": "ANSI A92.2-2021 8.5",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Modifications to vacuum limiting systems require prior written permission from the manufacturer; if unavailable, approval by an equivalent entity after engineering analysis."
+          }
+        ]
+      },
+
+      {
+        "step_key": "vacuum_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Vacuum limiting system inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_person", "type": "TEXT", "required": true },
+          { "field_id": "results_summary", "type": "TEXTAREA", "required": true },
+          {
+            "field_id": "vacuum_level_recorded",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Confirm test results include measured vacuum level(s) and corrective actions if needed."
+          },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,977 @@
+{
+  "schema_version": "1.0.1",
+  "generated_at": "2026-02-07",
+  "standard": {
+    "code": "ANSI/SAIA A92.2",
+    "revision": "2021"
+  },
+  "engine": "AF_INSPECTION_TEMPLATE",
+  "seed_mapping": [
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:0",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_torque_verification",
+      "defect_title": "Torque verification not performed",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 6.6.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "measure",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:1",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_torque_verification",
+      "defect_title": "Fastener torque outside OEM specification",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 6.6.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "torque",
+          "noun_key": "equipment_and_hydraulics.aerial_boom",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:2",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_torque_verification",
+      "defect_title": "Torque verification performed with uncalibrated wrench",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 6.6.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "torque",
+          "noun_key": "equipment_and_hydraulics.aerial_boom",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:2",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_critical_review:0",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_critical_review",
+      "defect_title": "Critical bolt or locking device deficiency",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 4.2 / 6.6.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "torque",
+          "noun_key": "equipment_and_hydraulics.aerial_boom",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_critical_review:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_boom_movements_module:boom_functional_movements:0",
+      "template_key": "ansi_a92_2_2021_boom_movements_module",
+      "step_key": "boom_functional_movements",
+      "defect_title": "Unsafe boom movement or instability observed",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(12)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "inspect",
+          "noun_key": "equipment_and_hydraulics.aerial_lift",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_boom_movements_module:boom_functional_movements:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_boom_movements_module:boom_position_holding:0",
+      "template_key": "ansi_a92_2_2021_boom_movements_module",
+      "step_key": "boom_position_holding",
+      "defect_title": "Boom fails to hold position when controls released",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 6.6.1",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "inspect",
+          "noun_key": "equipment_and_hydraulics.aerial_lift",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_boom_movements_module:boom_position_holding:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_boom_movements_module:boom_securing_devices:0",
+      "template_key": "ansi_a92_2_2021_boom_movements_module",
+      "step_key": "boom_securing_devices",
+      "defect_title": "Boom securing devices not functioning correctly",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 4.4.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "inspect",
+          "noun_key": "equipment_and_hydraulics.aerial_lift",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_boom_movements_module:boom_securing_devices:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_functional_testing:0",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_functional_testing",
+      "defect_title": "Component did not start/run during functional test",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(6)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_pump",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cpmg_module:cpmg_functional_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_functional_testing:1",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_functional_testing",
+      "defect_title": "Abnormal operation observed during functional test (noise/vibration/speed/heat/output)",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(6)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_pump",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cpmg_module:cpmg_functional_testing:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_performance_under_load:0",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_performance_under_load",
+      "defect_title": "Performance under load not within OEM specification",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(6)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_pump",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cpmg_module:cpmg_performance_under_load:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_fasteners:0",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_fasteners",
+      "defect_title": "Fastener condition/tightness issue on compressor/pump/motor/generator",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(13)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_pump",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cpmg_module:cpmg_fasteners:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_functional_testing:0",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_functional_testing",
+      "defect_title": "Not all cylinders were functionally tested",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(9)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_cylinder",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_functional_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_functional_testing:1",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_functional_testing",
+      "defect_title": "Cylinder/holding valve functional abnormality observed",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(9)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_cylinder",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_functional_testing:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_position_holding_drift_test:0",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_position_holding_drift_test",
+      "defect_title": "Drift/creep position holding test not performed",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(9)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "measure",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_position_holding_drift_test:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_position_holding_drift_test:1",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_position_holding_drift_test",
+      "defect_title": "Drift/creep exceeds OEM allowable limits or holding failure observed",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(9)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_cylinder",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_position_holding_drift_test:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_holding_valve_safety_intent:0",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_holding_valve_safety_intent",
+      "defect_title": "Holding valve safety function not verified / potential uncontrolled motion",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 4.7.3",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_holding_valve_safety_intent:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_pressure_verification_optional:0",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_pressure_verification_optional",
+      "defect_title": "Pressure verification not within OEM limits or leaks/deformation observed",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 4.7.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_cylinder",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_pressure_verification_optional:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_pressure_verification_optional:1",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_pressure_verification_optional",
+      "defect_title": "Pressure verification performed without calibrated gauge",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 4.7.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_cylinder",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_pressure_verification_optional:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_threaded_component_locks:0",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_threaded_component_locks",
+      "defect_title": "Missing/insufficient locking devices on critical threaded cylinder components",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 4.7.4",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_cylinder",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_threaded_component_locks:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_periodic_dielectric:insulating_visual_inspection:0",
+      "template_key": "ansi_a92_2_periodic_dielectric",
+      "step_key": "insulating_visual_inspection",
+      "defect_title": "Insulating system condition may be compromised (cleanliness/damage)",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(16)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "test",
+          "noun_key": "inspections_and_preventive_maintenance.dielectric_testing",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_periodic_dielectric:insulating_visual_inspection:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_electrical_non_dielectric_module:electrical_functional_testing:0",
+      "template_key": "ansi_a92_2_2021_electrical_non_dielectric_module",
+      "step_key": "electrical_functional_testing",
+      "defect_title": "Electrical system does not respond correctly to control inputs",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(11) / 4.3",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "diagnostic",
+          "verb_key": "diagnose",
+          "noun_key": "diagnostics_and_testing.electrical_diagnostics",
+          "location_code": "aerial_device",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_electrical_non_dielectric_module:electrical_functional_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_electrical_non_dielectric_module:control_systems_requirements:0",
+      "template_key": "ansi_a92_2_2021_electrical_non_dielectric_module",
+      "step_key": "control_systems_requirements",
+      "defect_title": "Control system requirement not satisfied (ID/protection/neutral return)",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 4.3",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "diagnostic",
+          "verb_key": "diagnose",
+          "noun_key": "diagnostics_and_testing.electrical_diagnostics",
+          "location_code": "aerial_device",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_electrical_non_dielectric_module:control_systems_requirements:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_electrical_non_dielectric_module:electrical_performance_optional:0",
+      "template_key": "ansi_a92_2_2021_electrical_non_dielectric_module",
+      "step_key": "electrical_performance_optional",
+      "defect_title": "Electrical performance not within OEM specification",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 6.4 / 8.2.4(11)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "diagnostic",
+          "verb_key": "diagnose",
+          "noun_key": "diagnostics_and_testing.electrical_diagnostics",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_electrical_non_dielectric_module:electrical_performance_optional:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module:filters_functional_observation:0",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module",
+      "step_key": "filters_functional_observation",
+      "defect_title": "System not operated; filtration-related function not observed",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(10)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "test",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module:filters_functional_observation:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module:filters_cleanliness_verification_optional:0",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module",
+      "step_key": "filters_cleanliness_verification_optional",
+      "defect_title": "Fluid cleanliness/filtration effectiveness not acceptable per OEM criteria",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 4.6.5",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "replace",
+          "noun_key": "equipment_and_hydraulics.hydraulic_filter",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module:filters_cleanliness_verification_optional:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_relief_valve_settings_module:relief_valve_visual_inspection:0",
+      "template_key": "ansi_a92_2_2021_relief_valve_settings_module",
+      "step_key": "relief_valve_visual_inspection",
+      "defect_title": "Relief valve visual condition issue",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(3)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "adjust",
+          "noun_key": "equipment_and_hydraulics.hydraulic_control_valve",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_relief_valve_settings_module:relief_valve_visual_inspection:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module:valves_functional_testing:0",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module",
+      "step_key": "valves_functional_testing",
+      "defect_title": "Not all valves were functionally tested",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(7)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_control_valve",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module:valves_functional_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module:valves_functional_testing:1",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module",
+      "step_key": "valves_functional_testing",
+      "defect_title": "Valve functional issue (binding/sticking/return-to-neutral/response)",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(7)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_control_valve",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module:valves_functional_testing:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_visual_inspection:0",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_visual_inspection",
+      "defect_title": "Hydraulic reservoir fluid level not within normal range",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(4) / 4.6.4",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_system",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_visual_inspection:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_visual_inspection:1",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_visual_inspection",
+      "defect_title": "Hydraulic fluid condition indicates contamination or overheating",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(4) / 4.6.5",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_system",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_visual_inspection:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_functional_testing:0",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_functional_testing",
+      "defect_title": "Hydraulic system functional operation not smooth / abnormal response",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(4)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_system",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_functional_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_pressure_limiting_device_check:0",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_pressure_limiting_device_check",
+      "defect_title": "Pressure limiting device did not verify / may allow overpressure",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 4.6.7",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_system",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_pressure_limiting_device_check:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_pressure_limiting_device_check:1",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_pressure_limiting_device_check",
+      "defect_title": "Pressure limiting device adjustment/sealing requirements not satisfied",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 4.6.7",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.hydraulic_system",
+          "location_code": "boom",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_pressure_limiting_device_check:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_load_test_module:load_test_execute:0",
+      "template_key": "ansi_a92_2_2021_load_test_module",
+      "step_key": "load_test_execute",
+      "defect_title": "Unsafe condition observed during load test",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 8.2.5(1)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "test",
+          "noun_key": "inspections_and_preventive_maintenance.load_testing",
+          "location_code": "aerial_device",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_load_test_module:load_test_execute:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_load_test_module:load_test_post_inspection:0",
+      "template_key": "ansi_a92_2_2021_load_test_module",
+      "step_key": "load_test_post_inspection",
+      "defect_title": "Structural damage observed after load test",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 8.2.5(1)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "test",
+          "noun_key": "inspections_and_preventive_maintenance.load_testing",
+          "location_code": "aerial_device",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_load_test_module:load_test_post_inspection:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_markings_module:markings_required_content_checklist:0",
+      "template_key": "ansi_a92_2_2021_markings_module",
+      "step_key": "markings_required_content_checklist",
+      "defect_title": "Required markings content missing (identification / controls / warnings)",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 4.12.1 / 6.5.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "replace",
+          "noun_key": "equipment_and_hydraulics.aerial_placard_decal",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_markings_module:markings_required_content_checklist:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_parts_module:parts_walkaround_visual:0",
+      "template_key": "ansi_a92_2_2021_periodic_parts_module",
+      "step_key": "parts_walkaround_visual",
+      "defect_title": "Walk-around inspection not performed",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.3(1)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_periodic_parts_module:parts_walkaround_visual:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_parts_module:parts_functional_testing:0",
+      "template_key": "ansi_a92_2_2021_periodic_parts_module",
+      "step_key": "parts_functional_testing",
+      "defect_title": "Emergency stop did not verify during functional testing",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 8.2.3(8)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_periodic_parts_module:parts_functional_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_inspection_documentation_module:doc_required_record_fields:0",
+      "template_key": "ansi_a92_2_2021_periodic_inspection_documentation_module",
+      "step_key": "doc_required_record_fields",
+      "defect_title": "Periodic inspection documentation marked incomplete",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.3.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_periodic_inspection_documentation_module:doc_required_record_fields:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_inspection_documentation_module:doc_placard_application:0",
+      "template_key": "ansi_a92_2_2021_periodic_inspection_documentation_module",
+      "step_key": "doc_placard_application",
+      "defect_title": "Periodic inspection placard not applied",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.3.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "replace",
+          "noun_key": "equipment_and_hydraulics.aerial_placard_decal",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_periodic_inspection_documentation_module:doc_placard_application:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_functional_testing:0",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_functional_testing",
+      "defect_title": "Vacuum limiting system functional test not performed",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.2.4(8)",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "test",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_functional_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_functional_testing:1",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_functional_testing",
+      "defect_title": "Vacuum limiting system does not respond properly to pressure changes",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 5.2.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "equipment_and_hydraulics.aerial_lift",
+          "location_code": "aerial_device",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_functional_testing:1",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_pressure_testing:0",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_pressure_testing",
+      "defect_title": "Vacuum measurement performed without calibrated gauge",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 5.2.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "equipment_and_hydraulics.aerial_lift",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_pressure_testing:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_component_installation_alignment:0",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_component_installation_alignment",
+      "defect_title": "Vacuum limiting components not properly installed/aligned",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 5.2.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "equipment_and_hydraulics.aerial_lift",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_component_installation_alignment:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_welds_module:welds_critical_welds_review:0",
+      "template_key": "ansi_a92_2_2021_welds_module",
+      "step_key": "welds_critical_welds_review",
+      "defect_title": "Critical welds not explicitly inspected (manufacturer-designated)",
+      "severity": "SERVICE_REQUIRED",
+      "standard_reference": "ANSI A92.2-2021 8.4.2",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "inspection",
+          "verb_key": "inspect",
+          "noun_key": "inspections_and_preventive_maintenance.ansi_aerial_lift_inspection",
+          "location_code": "aerial_device",
+          "priority": "high",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_welds_module:welds_critical_welds_review:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_welds_module:welds_nde_optional:0",
+      "template_key": "ansi_a92_2_2021_welds_module",
+      "step_key": "welds_nde_optional",
+      "defect_title": "NDE indicates unacceptable weld condition",
+      "severity": "UNSAFE_OUT_OF_SERVICE",
+      "standard_reference": "ANSI A92.2-2021 6.9",
+      "suggested_work_order_lines": [
+        {
+          "line_type": "labor",
+          "verb_key": "repair",
+          "noun_key": "equipment_and_hydraulics.aerial_boom",
+          "location_code": "boom",
+          "priority": "urgent",
+          "source": "inspection",
+          "source_ref": "ansi_a92_2_2021_welds_module:welds_nde_optional:0",
+          "short_note": null
+        }
+      ],
+      "notes": "Seed mapping generated with simple heuristics; refine per defect over time."
+    }
+  ]
+}

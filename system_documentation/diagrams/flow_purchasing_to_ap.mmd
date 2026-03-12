@@ -1,0 +1,7 @@
+flowchart TD
+  A[ReorderSuggestion / SpecialOrder] --> B[PurchaseOrder SENT]
+  B --> C[ReceivingReceipt]
+  C --> D[InventoryTransaction RECEIVE]
+  D --> E[InventoryStock updated]
+  C --> F[VendorBill ISSUED]
+  F --> G[Outbox -> QBO Bill Sync]

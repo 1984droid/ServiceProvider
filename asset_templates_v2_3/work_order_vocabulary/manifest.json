@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-02-07",
+  "counts": {
+    "noun_categories": 21,
+    "nouns": 682,
+    "verbs": 89,
+    "service_locations": 69,
+    "location_categories": 9
+  },
+  "notes": "Vocabulary imported from provided CSVs; noun_key generated as <category_key>.<slug(item)>"
+}

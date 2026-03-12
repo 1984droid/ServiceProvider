@@ -1,0 +1,102 @@
+{
+  "schema_version": "2.0.0",
+  "generated_at": "2026-02-07",
+  "maintenance_programs": [
+    {
+      "key": "mp.fleet.tractor.pm_15000_miles",
+      "name": "Tractor PM (15,000 miles)",
+      "meter_type": "odometer_miles",
+      "interval": {
+        "miles": 15000
+      },
+      "tasks": [
+        "pm.general.visual",
+        "pm.fluids.check",
+        "pm.brakes.inspect",
+        "pm.tires.inspect",
+        "pm.lights.inspect"
+      ]
+    },
+    {
+      "key": "mp.fleet.tractor.pm_45000_miles",
+      "name": "Tractor Service (45,000 miles)",
+      "meter_type": "odometer_miles",
+      "interval": {
+        "miles": 45000
+      },
+      "tasks": [
+        "pm.general.visual",
+        "pm.fluids.change_oil",
+        "pm.filters.air",
+        "pm.brakes.inspect",
+        "pm.tires.inspect",
+        "pm.lights.inspect"
+      ]
+    },
+    {
+      "key": "mp.fleet.trailer.pm_quarterly",
+      "name": "Trailer PM (Quarterly)",
+      "meter_type": "none",
+      "interval": {
+        "days": 90
+      },
+      "tasks": [
+        "pm.general.visual",
+        "pm.brakes.inspect",
+        "pm.tires.inspect",
+        "pm.lights.inspect"
+      ]
+    },
+    {
+      "key": "mp.equipment.forklift.pm_250_hours",
+      "name": "Forklift PM (250 hours)",
+      "meter_type": "engine_hours",
+      "interval": {
+        "hours": 250
+      },
+      "tasks": [
+        "pm.general.visual",
+        "pm.fluids.check",
+        "pm.brakes.inspect",
+        "pm.tires.inspect",
+        "pm.safety_devices.verify"
+      ]
+    },
+    {
+      "key": "mp.shop.air_compressor.pm_semiannual",
+      "name": "Air Compressor PM (Semiannual)",
+      "meter_type": "none",
+      "interval": {
+        "days": 182
+      },
+      "tasks": [
+        "pm.general.visual",
+        "pm.filters.air",
+        "pm.electrical.inspect",
+        "pm.safety_devices.verify"
+      ]
+    },
+    {
+      "key": "mp.safety.fire_extinguisher.monthly",
+      "name": "Fire Extinguisher Monthly Check",
+      "meter_type": "none",
+      "interval": {
+        "days": 30
+      },
+      "tasks": [
+        "pm.fire_extinguisher.monthly"
+      ]
+    },
+    {
+      "key": "mp.tools.calibration.annual",
+      "name": "Annual Calibration",
+      "meter_type": "none",
+      "interval": {
+        "days": 365
+      },
+      "tasks": [
+        "pm.calibration.verify"
+      ]
+    }
+  ]
+}

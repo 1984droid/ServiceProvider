@@ -1,0 +1,238 @@
+{
+  "schema_version": "2.3.0",
+  "generated_at": "2026-02-08",
+  "capability_packs": {
+    "core.universal": [
+      "asset_class",
+      "criticality",
+      "risk_category",
+      "service_environment",
+      "department",
+      "site",
+      "site_detail",
+      "gps_lat",
+      "gps_lng",
+      "lifecycle_status",
+      "condition_rating",
+      "out_of_service",
+      "retired_date",
+      "disposal_method",
+      "purchase_date",
+      "in_service_date",
+      "purchase_price",
+      "replacement_cost",
+      "current_book_value",
+      "salvage_value",
+      "depreciation_method",
+      "useful_life_months",
+      "valuation_basis",
+      "last_valuation_date",
+      "warranty_expiration",
+      "warranty_provider",
+      "maintenance_strategy",
+      "maintenance_program_key",
+      "requires_inspection",
+      "inspection_program_key"
+    ],
+    "maintenance.time_metered": [
+      "maintenance_strategy",
+      "service_interval_days",
+      "service_interval_miles",
+      "service_interval_hours",
+      "last_service_date",
+      "last_service_miles",
+      "last_service_hours",
+      "next_service_due_date",
+      "next_service_due_miles",
+      "next_service_due_hours",
+      "meter_type",
+      "last_meter_reading",
+      "last_meter_reading_date"
+    ],
+    "inspection.scheduled": [
+      "requires_inspection",
+      "inspection_frequency",
+      "inspection_interval_days",
+      "inspection_interval_miles",
+      "inspection_interval_hours",
+      "last_inspection_date",
+      "next_inspection_due_date"
+    ],
+    "identity.serialized": [],
+    "identity.vehicle": [
+      "fuel_type",
+      "gvwr_lbs",
+      "axle_count",
+      "license_plate",
+      "registration_state",
+      "registration_expiration",
+      "insurance_policy_number",
+      "insurance_expiration"
+    ],
+    "identity.trailer_dimensions": [
+      "length_ft",
+      "width_in",
+      "height_in",
+      "payload_capacity_lbs",
+      "has_air_ride",
+      "has_liftgate",
+      "liftgate_capacity_lbs",
+      "door_type",
+      "floor_type",
+      "wall_type",
+      "has_e_track",
+      "has_logistic_posts",
+      "has_side_door"
+    ],
+    "identity.reefer": [
+      "reefer_make",
+      "reefer_model",
+      "temp_min_f",
+      "temp_max_f",
+      "has_multi_temp_zones",
+      "reefer_hours"
+    ],
+    "equipment.mewp": [
+      "mewp_type",
+      "platform_height_ft",
+      "working_height_ft",
+      "horizontal_reach_ft",
+      "platform_capacity_lbs",
+      "power_source",
+      "drive_type",
+      "is_self_propelled",
+      "is_indoor_rated",
+      "is_outdoor_rated",
+      "ansi_category"
+    ],
+    "equipment.aerial_device": [
+      "aerial_device_type",
+      "insulated",
+      "rated_line_voltage_kv",
+      "dielectric_test_date",
+      "dielectric_test_due_date"
+    ],
+    "equipment.forklift": [
+      "forklift_type",
+      "lift_capacity_lbs",
+      "max_lift_height_in",
+      "mast_type",
+      "power_type",
+      "battery_voltage",
+      "tire_type",
+      "has_side_shift",
+      "has_fork_positioner"
+    ],
+    "shop_equipment.powered": [
+      "power_source",
+      "voltage",
+      "phase",
+      "capacity_lbs",
+      "cfm",
+      "pressure_psi_max",
+      "tank_size_gallons"
+    ],
+    "body_shop.paint_booth": [
+      "booth_type",
+      "filter_change_interval_days",
+      "flammable_storage_required"
+    ],
+    "graphics.print": [
+      "print_width_in",
+      "ink_type",
+      "requires_ventilation"
+    ],
+    "safety.ppe": [
+      "ppe_size",
+      "cert_standard",
+      "expiration_date",
+      "nrr_rating"
+    ],
+    "safety.gas_monitor": [
+      "gas_monitor_sensor_type",
+      "expiration_date"
+    ],
+    "safety.lockout": [
+      "lockout_device_type"
+    ],
+    "tools.calibrated": [
+      "calibration_required",
+      "calibration_interval_days",
+      "last_calibration_date",
+      "next_calibration_due_date",
+      "calibration_standard",
+      "calibration_certificate_id"
+    ],
+    "facilities.compliance": [
+      "code_standard",
+      "inspection_regime"
+    ],
+    "facilities.hydraulic": [
+      "flow_gpm",
+      "pressure_psi"
+    ],
+    "facilities.power": [
+      "capacity_kw",
+      "voltage",
+      "phase"
+    ],
+    "real_estate.property": [
+      "parcel_number",
+      "property_address",
+      "legal_description",
+      "building_sqft",
+      "land_acres",
+      "space_type",
+      "zoning_code",
+      "occupancy_limit"
+    ],
+    "it.device": [
+      "device_type",
+      "hostname",
+      "mac_address",
+      "imei",
+      "os_type",
+      "os_version",
+      "warranty_contract_id"
+    ],
+    "containers.basic": [
+      "container_type",
+      "capacity_gallons",
+      "material"
+    ],
+    "equipment.powered_engine": [
+      "engine_model",
+      "engine_manufacturer",
+      "engine_cylinders",
+      "displacement_l",
+      "engine_hp",
+      "fuel_type"
+    ],
+    "equipment.aerial_compliance": [
+      "insulated",
+      "electrical_category",
+      "rated_line_voltage_kv",
+      "dielectric_test_date",
+      "dielectric_test_due_date",
+      "high_resistance_upper_controls",
+      "barehand_capable",
+      "dc_barehand_capable"
+    ],
+    "equipment.generator_output": [
+      "power_output_kw",
+      "voltage",
+      "phase",
+      "fuel_type"
+    ],
+    "fleet.manual_specs": [
+      "transmission_style",
+      "transmission_speeds",
+      "axle_configuration",
+      "body_class",
+      "gvwr_lbs",
+      "axle_count",
+      "fuel_type",
+      "drive_type"
+    ]
+  }
+}

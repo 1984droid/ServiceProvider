@@ -1,0 +1,278 @@
+# API Summary - ServiceProvider
+
+Quick reference for all available API endpoints.
+
+**Base URL:** `http://localhost:8100/api/`
+
+---
+
+## Organization Management
+
+### Company
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/company/` | List companies (should only be one) |
+| GET | `/company/current/` | Get current company |
+| POST | `/company/` | Create company (only if none exists) |
+| PATCH | `/company/{id}/` | Update company |
+
+**Note:** Single-tenant - only one company record allowed.
+
+### Departments
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/departments/` | List all departments |
+| POST | `/departments/` | Create department |
+| GET | `/departments/{id}/` | Get department detail |
+| PATCH | `/departments/{id}/` | Update department |
+| DELETE | `/departments/{id}/` | Delete department |
+| GET | `/departments/{id}/employees/` | Get all employees (base + floating) |
+
+**Filters:** `is_active`, `allows_floating`
+**Search:** `name`, `code`, `description`
+
+### Employees
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/employees/` | List all employees |
+| GET | `/employees/active/` | Get active employees only |
+| POST | `/employees/` | Create employee |
+| GET | `/employees/{id}/` | Get employee detail |
+| PATCH | `/employees/{id}/` | Update employee |
+| DELETE | `/employees/{id}/` | Delete employee |
+| GET | `/employees/{id}/can_work_in/?department_id={id}` | Check department access |
+
+**Filters:** `is_active`, `base_department`
+**Search:** `employee_number`, `first_name`, `last_name`, `email`
+
+---
+
+## Customer Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/customers/` | List all customers |
+| POST | `/customers/` | Create customer |
+| GET | `/customers/{id}/` | Get customer detail |
+| PATCH | `/customers/{id}/` | Update customer |
+| DELETE | `/customers/{id}/` | Delete customer (soft) |
+| POST | `/customers/{id}/set_primary_contact/` | Set primary contact |
+| GET | `/customers/{id}/contacts/` | Get customer contacts |
+| GET | `/customers/search_by_usdot/?usdot=123456` | Search by USDOT |
+
+**Filters:** `is_active`, `state`, `has_usdot`, `has_mc`, `has_contacts`
+**Search:** `name`, `legal_name`, `city`, `usdot_number`, `mc_number`
+
+---
+
+## Contact Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/contacts/` | List all contacts |
+| POST | `/contacts/` | Create contact |
+| GET | `/contacts/{id}/` | Get contact detail |
+| PATCH | `/contacts/{id}/` | Update contact |
+| DELETE | `/contacts/{id}/` | Delete contact |
+| POST | `/contacts/{id}/make_primary/` | Make primary contact |
+
+**Filters:** `is_active`, `is_automated`, `customer`, `primary`, `has_email`
+**Search:** `first_name`, `last_name`, `email`, `phone`
+
+---
+
+## USDOT Profile Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/usdot-profiles/` | List all profiles |
+| POST | `/usdot-profiles/` | Create profile |
+| GET | `/usdot-profiles/{id}/` | Get profile detail |
+| PATCH | `/usdot-profiles/{id}/` | Update profile |
+| DELETE | `/usdot-profiles/{id}/` | Delete profile |
+| GET | `/usdot-profiles/lookup_by_usdot/?usdot=123456` | Lookup by USDOT |
+| POST | `/usdot-profiles/{id}/copy_to_customer/` | Copy to customer |
+
+**Filters:** `customer`, `safety_rating`
+**Search:** `usdot_number`, `mc_number`, `legal_name`, `dba_name`
+
+---
+
+## Vehicle Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/vehicles/` | List all vehicles |
+| POST | `/vehicles/` | Create vehicle |
+| GET | `/vehicles/{id}/` | Get vehicle detail |
+| PATCH | `/vehicles/{id}/` | Update vehicle |
+| DELETE | `/vehicles/{id}/` | Delete vehicle (soft) |
+| GET | `/vehicles/lookup_by_vin/?vin=...` | Lookup by VIN |
+| GET | `/vehicles/lookup_by_unit/?unit_number=...` | Lookup by unit number |
+| GET | `/vehicles/{id}/equipment/` | Get mounted equipment |
+| POST | `/vehicles/{id}/decode_vin/` | Decode VIN (TODO) |
+
+**Filters:** `is_active`, `customer`, `make`, `year`, `has_equipment`, `tags`, `year_min`, `year_max`
+**Search:** `vin`, `unit_number`, `make`, `model`, `license_plate`
+
+---
+
+## Equipment Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/equipment/` | List all equipment |
+| POST | `/equipment/` | Create equipment |
+| GET | `/equipment/{id}/` | Get equipment detail |
+| PATCH | `/equipment/{id}/` | Update equipment |
+| DELETE | `/equipment/{id}/` | Delete equipment (soft) |
+| GET | `/equipment/lookup_by_serial/?serial_number=...` | Lookup by serial |
+| POST | `/equipment/{id}/mount/` | Mount on vehicle |
+| POST | `/equipment/{id}/unmount/` | Unmount from vehicle |
+| POST | `/equipment/{id}/update_data/` | Update equipment_data |
+| GET | `/equipment/{id}/required_data_fields/` | Get required fields by tags |
+
+**Filters:** `is_active`, `customer`, `equipment_type`, `mounted_on_vehicle`, `tags`, `mounted`, `has_data`
+**Search:** `serial_number`, `asset_number`, `manufacturer`, `model`
+
+---
+
+## VIN Decode Data Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/vin-decode-data/` | List all decode records |
+| POST | `/vin-decode-data/` | Create decode record |
+| GET | `/vin-decode-data/{id}/` | Get decode detail |
+| PATCH | `/vin-decode-data/{id}/` | Update decode record |
+| DELETE | `/vin-decode-data/{id}/` | Delete decode record |
+| GET | `/vin-decode-data/lookup_by_vin/?vin=...` | Lookup by VIN |
+| POST | `/vin-decode-data/decode_vin/` | Decode VIN (NHTSA - TODO) |
+
+**Filters:** `vehicle`, `make`, `model_year`, `fuel_type_primary`
+**Search:** `vin`, `make`, `model`, `manufacturer`
+
+---
+
+## Common Features
+
+### Pagination
+All list endpoints support pagination:
+```
+GET /api/customers/?page=2&page_size=50
+```
+
+### Filtering
+Filter by specific fields:
+```
+GET /api/vehicles/?is_active=true&customer={uuid}&make=Ford
+```
+
+### Search
+Full-text search across relevant fields:
+```
+GET /api/customers/?search=acme
+```
+
+### Ordering
+Sort results:
+```
+GET /api/customers/?ordering=name           # Ascending
+GET /api/customers/?ordering=-created_at    # Descending
+```
+
+### Soft Delete
+Most DELETE operations set `is_active=False`. For hard delete:
+```
+DELETE /api/customers/{id}/?force_delete=true
+```
+
+---
+
+## Example Requests
+
+### Create Customer with Initial Contact
+```bash
+curl -X POST http://localhost:8100/api/customers/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ABC Trucking",
+    "city": "Chicago",
+    "state": "IL",
+    "initial_contact": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john@abctrucking.com"
+    }
+  }'
+```
+
+### Create Vehicle
+```bash
+curl -X POST http://localhost:8100/api/vehicles/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer": "uuid",
+    "vin": "1HGCM82633A123456",
+    "unit_number": "T-101",
+    "year": 2020,
+    "make": "Ford",
+    "model": "F-350",
+    "tags": ["BUCKET_TRUCK"]
+  }'
+```
+
+### Mount Equipment on Vehicle
+```bash
+curl -X POST http://localhost:8100/api/equipment/{equipment_id}/mount/ \
+  -H "Content-Type: application/json" \
+  -d '{"vehicle_id": "uuid"}'
+```
+
+### Update Equipment Data
+```bash
+curl -X POST http://localhost:8100/api/equipment/{id}/update_data/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data_type": "placard",
+    "data": {
+      "max_platform_height": 40,
+      "max_working_height": 46,
+      "platform_capacity": 500
+    }
+  }'
+```
+
+---
+
+## Response Codes
+
+- `200 OK` - Success
+- `201 Created` - Resource created
+- `204 No Content` - Success (no body)
+- `400 Bad Request` - Validation error
+- `404 Not Found` - Resource not found
+- `500 Internal Server Error` - Server error
+- `501 Not Implemented` - Feature not yet implemented
+
+---
+
+## Next Steps
+
+1. **Authentication** - Add JWT authentication
+2. **Permissions** - Implement role-based access
+3. **Rate Limiting** - Protect API endpoints
+4. **NHTSA Integration** - Implement VIN decode
+5. **Inspection System** - Add inspection models and endpoints
+6. **Webhooks** - Event notifications
+
+---
+
+**See [API_REFERENCE.md](docs/API_REFERENCE.md) for complete documentation with detailed examples.**
+
+**Version:** 1.0
+**Base URL:** http://localhost:8100/api/
+**Port:** 8100 (avoids conflict with legacy app on 8000)

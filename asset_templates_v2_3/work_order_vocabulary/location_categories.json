@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-02-07",
+  "location_categories": [
+    {
+      "location_category_key": "body___upfit",
+      "label": "Body / Upfit"
+    },
+    {
+      "location_category_key": "bus___school_bus",
+      "label": "Bus / School Bus"
+    },
+    {
+      "location_category_key": "cab_and_interior",
+      "label": "Cab & Interior"
+    },
+    {
+      "location_category_key": "equipment___attachments",
+      "label": "Equipment / Attachments"
+    },
+    {
+      "location_category_key": "general_orientation",
+      "label": "General Orientation"
+    },
+    {
+      "location_category_key": "trailer_areas",
+      "label": "Trailer Areas"
+    },
+    {
+      "location_category_key": "trailer_axles_and_wheel_ends",
+      "label": "Trailer Axles & Wheel Ends"
+    },
+    {
+      "location_category_key": "truck___tractor_areas",
+      "label": "Truck / Tractor Areas"
+    },
+    {
+      "location_category_key": "truck___tractor_axles_and_wheel_ends",
+      "label": "Truck / Tractor Axles & Wheel Ends"
+    }
+  ]
+}

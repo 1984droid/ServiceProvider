@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     # Local apps
     'apps.customers',
     'apps.assets',
+    'apps.inspections',
+    'apps.work_orders',
+    'apps.organization',
 ]
 
 MIDDLEWARE = [
@@ -78,7 +81,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'service_provider'),
+        'NAME': os.getenv('DB_NAME', 'service_provider_new'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
         'HOST': os.getenv('DB_HOST', 'localhost'),

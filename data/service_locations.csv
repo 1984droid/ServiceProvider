@@ -1,0 +1,11 @@
+code,label,categories,is_quick_pick,ordering
+LF,Left Front,wheel|brake,true,10
+RF,Right Front,wheel|brake,true,20
+LR,Left Rear,wheel|brake,true,30
+RR,Right Rear,wheel|brake,true,40
+ENGINE,Engine Compartment,engine|electrical,true,50
+HYDR,Hydraulic System,hydraulic,true,60
+ELEC,Electrical System,electrical,false,70
+CHASSIS,Chassis,structural,false,80
+BOOM,Boom Assembly,aerial,false,90
+PLATFORM,Platform,aerial,true,100

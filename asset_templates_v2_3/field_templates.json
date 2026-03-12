@@ -1,0 +1,1059 @@
+{
+  "schema_version": "2.3.0",
+  "generated_at": "2026-02-08",
+  "notes": "Field templates define what data to capture for each subtype. Use together with field_registry.json. Fields are grouped into sections and can include show_if conditions.",
+  "field_templates": [
+    {
+      "template_key": "ft.core",
+      "name": "Core Asset Intake",
+      "description": "Core fields shown for all assets (repair facility focus).",
+      "tags": [
+        "core"
+      ],
+      "sections": [
+        {
+          "section_key": "core",
+          "name": "Core",
+          "fields": [
+            {
+              "field": "asset.display_name",
+              "required": true
+            },
+            {
+              "field": "asset.identifier",
+              "required": true
+            },
+            {
+              "field": "asset.description"
+            },
+            {
+              "field": "asset.owned_by_organization"
+            },
+            {
+              "field": "asset.is_active",
+              "required": true
+            }
+          ]
+        },
+        {
+          "section_key": "classification",
+          "name": "Classification & Status",
+          "fields": [
+            {
+              "field": "capability.asset_class"
+            },
+            {
+              "field": "capability.criticality"
+            },
+            {
+              "field": "capability.risk_category"
+            },
+            {
+              "field": "capability.lifecycle_status"
+            },
+            {
+              "field": "capability.condition_rating"
+            },
+            {
+              "field": "capability.out_of_service"
+            }
+          ]
+        },
+        {
+          "section_key": "location",
+          "name": "Location",
+          "fields": [
+            {
+              "field": "capability.department"
+            },
+            {
+              "field": "capability.site"
+            },
+            {
+              "field": "capability.site_detail"
+            }
+          ]
+        }
+      ],
+      "required_fields": [
+        "asset.display_name",
+        "asset.identifier",
+        "asset.is_active"
+      ]
+    },
+    {
+      "template_key": "ft.financial_value",
+      "name": "Financial & Value Tracking",
+      "description": "Purchase and valuation fields for assets (optional but recommended).",
+      "tags": [
+        "financial"
+      ],
+      "sections": [
+        {
+          "section_key": "financial",
+          "name": "Financial",
+          "fields": [
+            {
+              "field": "capability.purchase_date"
+            },
+            {
+              "field": "capability.in_service_date"
+            },
+            {
+              "field": "capability.purchase_price"
+            },
+            {
+              "field": "capability.replacement_cost"
+            },
+            {
+              "field": "capability.current_book_value"
+            },
+            {
+              "field": "capability.salvage_value"
+            },
+            {
+              "field": "capability.valuation_basis"
+            },
+            {
+              "field": "capability.last_valuation_date"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.schedules",
+      "name": "Maintenance & Inspection Scheduling",
+      "description": "Standard scheduling fields used by auto-generated PM and inspection due logic.",
+      "tags": [
+        "scheduling"
+      ],
+      "sections": [
+        {
+          "section_key": "metering",
+          "name": "Metering",
+          "fields": [
+            {
+              "field": "capability.meter_type"
+            },
+            {
+              "field": "capability.odometer_miles",
+              "show_if": {
+                "capability.meter_type": [
+                  "odometer_miles"
+                ]
+              }
+            },
+            {
+              "field": "capability.engine_hours",
+              "show_if": {
+                "capability.meter_type": [
+                  "engine_hours"
+                ]
+              }
+            },
+            {
+              "field": "capability.reefer_hours",
+              "show_if": {
+                "capability.meter_type": [
+                  "reefer_hours"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "section_key": "maintenance",
+          "name": "Maintenance",
+          "fields": [
+            {
+              "field": "capability.maintenance_strategy"
+            },
+            {
+              "field": "capability.maintenance_program_key"
+            },
+            {
+              "field": "capability.service_interval_days"
+            },
+            {
+              "field": "capability.service_interval_miles"
+            },
+            {
+              "field": "capability.service_interval_hours"
+            },
+            {
+              "field": "capability.next_service_due_date"
+            },
+            {
+              "field": "capability.next_service_due_miles"
+            },
+            {
+              "field": "capability.next_service_due_hours"
+            }
+          ]
+        },
+        {
+          "section_key": "inspection",
+          "name": "Inspections",
+          "fields": [
+            {
+              "field": "capability.requires_inspection"
+            },
+            {
+              "field": "capability.inspection_program_key",
+              "show_if": {
+                "capability.requires_inspection": [
+                  true
+                ]
+              }
+            },
+            {
+              "field": "capability.inspection_frequency",
+              "show_if": {
+                "capability.requires_inspection": [
+                  true
+                ]
+              }
+            },
+            {
+              "field": "capability.inspection_interval_days",
+              "show_if": {
+                "capability.requires_inspection": [
+                  true
+                ]
+              }
+            },
+            {
+              "field": "capability.inspection_interval_miles",
+              "show_if": {
+                "capability.requires_inspection": [
+                  true
+                ]
+              }
+            },
+            {
+              "field": "capability.inspection_interval_hours",
+              "show_if": {
+                "capability.requires_inspection": [
+                  true
+                ]
+              }
+            },
+            {
+              "field": "capability.next_inspection_due_date",
+              "show_if": {
+                "capability.requires_inspection": [
+                  true
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.fleet.vehicle_repair_vin_profile",
+      "name": "Fleet Vehicle (VIN + Repair-Relevant VIN Profile)",
+      "description": "Fleet vehicle fields (VIN) plus repair-relevant VIN decode profile fields. Excludes non-repair-relevant VIN fields.",
+      "tags": [
+        "fleet",
+        "vin_profile"
+      ],
+      "sections": [
+        {
+          "section_key": "identity",
+          "name": "Vehicle Identity",
+          "fields": [
+            {
+              "field": "asset.vin",
+              "required": true
+            },
+            {
+              "field": "asset.manufacturer"
+            },
+            {
+              "field": "asset.model"
+            },
+            {
+              "field": "asset.model_year"
+            },
+            {
+              "field": "capability.license_plate"
+            },
+            {
+              "field": "capability.registration_state"
+            },
+            {
+              "field": "capability.registration_expiration"
+            }
+          ]
+        },
+        {
+          "section_key": "vin_decode",
+          "name": "VIN Profile (Auto)",
+          "fields": [
+            {
+              "field": "computed.vin_decode_status",
+              "read_only": true
+            },
+            {
+              "field": "computed.vin_decode_last_run",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.manufacturer",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.model",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.model_year",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.trim",
+              "read_only": true
+            }
+          ]
+        },
+        {
+          "section_key": "powertrain",
+          "name": "Powertrain (Auto)",
+          "fields": [
+            {
+              "field": "vin_profile.engine_model",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.engine_manufacturer",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.engine_cylinders",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.displacement_l",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.engine_hp",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.fuel_type_primary",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.fuel_type_secondary",
+              "read_only": true
+            }
+          ]
+        },
+        {
+          "section_key": "drivetrain",
+          "name": "Drivetrain (Auto)",
+          "fields": [
+            {
+              "field": "vin_profile.drive_type",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.transmission_style",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.transmission_speeds",
+              "read_only": true
+            }
+          ]
+        },
+        {
+          "section_key": "classification",
+          "name": "Vehicle Class (Auto)",
+          "fields": [
+            {
+              "field": "vin_profile.vehicle_type",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.body_class",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.gvwr",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.axles",
+              "read_only": true
+            },
+            {
+              "field": "vin_profile.axle_configuration",
+              "read_only": true
+            }
+          ]
+        },
+        {
+          "section_key": "manual_overrides",
+          "name": "Manual Overrides (If VIN decode missing)",
+          "fields": [
+            {
+              "field": "capability.fuel_type"
+            },
+            {
+              "field": "capability.drive_type"
+            },
+            {
+              "field": "capability.gvwr_lbs"
+            },
+            {
+              "field": "capability.axle_count"
+            },
+            {
+              "field": "capability.body_class"
+            },
+            {
+              "field": "capability.axle_configuration"
+            },
+            {
+              "field": "capability.transmission_style"
+            },
+            {
+              "field": "capability.transmission_speeds"
+            }
+          ]
+        }
+      ],
+      "required_fields": [
+        "asset.vin"
+      ]
+    },
+    {
+      "template_key": "ft.fleet.trailer",
+      "name": "Trailer (Repair & Compliance)",
+      "description": "Trailer fields focusing on identification and trailer-specific dimensions/features.",
+      "tags": [
+        "fleet",
+        "trailer"
+      ],
+      "sections": [
+        {
+          "section_key": "identity",
+          "name": "Trailer Identity",
+          "fields": [
+            {
+              "field": "asset.serial_number"
+            },
+            {
+              "field": "asset.vin"
+            },
+            {
+              "field": "asset.manufacturer"
+            },
+            {
+              "field": "asset.model"
+            },
+            {
+              "field": "asset.model_year"
+            }
+          ]
+        },
+        {
+          "section_key": "dimensions",
+          "name": "Dimensions & Capacity",
+          "fields": [
+            {
+              "field": "capability.length_ft"
+            },
+            {
+              "field": "capability.width_in"
+            },
+            {
+              "field": "capability.height_in"
+            },
+            {
+              "field": "capability.payload_capacity_lbs"
+            },
+            {
+              "field": "capability.gvwr_lbs"
+            },
+            {
+              "field": "capability.axle_count"
+            }
+          ]
+        },
+        {
+          "section_key": "features",
+          "name": "Features",
+          "fields": [
+            {
+              "field": "capability.has_air_ride"
+            },
+            {
+              "field": "capability.has_liftgate"
+            },
+            {
+              "field": "capability.liftgate_capacity_lbs",
+              "show_if": {
+                "capability.has_liftgate": [
+                  true
+                ]
+              }
+            },
+            {
+              "field": "capability.door_type"
+            },
+            {
+              "field": "capability.floor_type"
+            },
+            {
+              "field": "capability.wall_type"
+            },
+            {
+              "field": "capability.has_e_track"
+            },
+            {
+              "field": "capability.has_logistic_posts"
+            },
+            {
+              "field": "capability.has_side_door"
+            }
+          ]
+        },
+        {
+          "section_key": "reefer",
+          "name": "Reefer (If applicable)",
+          "fields": [
+            {
+              "field": "capability.reefer_make"
+            },
+            {
+              "field": "capability.reefer_model"
+            },
+            {
+              "field": "capability.reefer_hours"
+            },
+            {
+              "field": "capability.temp_min_f"
+            },
+            {
+              "field": "capability.temp_max_f"
+            },
+            {
+              "field": "capability.has_multi_temp_zones"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.equipment.serialized",
+      "name": "Equipment (Serialized)",
+      "description": "Serialized equipment fields: serial + make/model/year + powered equipment engine/fuel (manual).",
+      "tags": [
+        "equipment"
+      ],
+      "sections": [
+        {
+          "section_key": "identity",
+          "name": "Equipment Identity",
+          "fields": [
+            {
+              "field": "asset.serial_number",
+              "required": true
+            },
+            {
+              "field": "asset.manufacturer"
+            },
+            {
+              "field": "asset.model"
+            },
+            {
+              "field": "asset.model_year"
+            }
+          ]
+        },
+        {
+          "section_key": "power",
+          "name": "Power (If powered)",
+          "fields": [
+            {
+              "field": "capability.fuel_type"
+            },
+            {
+              "field": "capability.engine_model"
+            },
+            {
+              "field": "capability.engine_manufacturer"
+            },
+            {
+              "field": "capability.engine_cylinders"
+            },
+            {
+              "field": "capability.displacement_l"
+            },
+            {
+              "field": "capability.engine_hp"
+            }
+          ]
+        }
+      ],
+      "required_fields": [
+        "asset.serial_number"
+      ]
+    },
+    {
+      "template_key": "ft.equipment.mewp",
+      "name": "MEWP Specs",
+      "description": "MEWP core specification fields.",
+      "tags": [
+        "equipment",
+        "mewp"
+      ],
+      "sections": [
+        {
+          "section_key": "mewp",
+          "name": "MEWP",
+          "fields": [
+            {
+              "field": "capability.mewp_type"
+            },
+            {
+              "field": "capability.platform_height_ft"
+            },
+            {
+              "field": "capability.working_height_ft"
+            },
+            {
+              "field": "capability.horizontal_reach_ft"
+            },
+            {
+              "field": "capability.platform_capacity_lbs"
+            },
+            {
+              "field": "capability.power_source"
+            },
+            {
+              "field": "capability.drive_type"
+            },
+            {
+              "field": "capability.is_self_propelled"
+            },
+            {
+              "field": "capability.is_indoor_rated"
+            },
+            {
+              "field": "capability.is_outdoor_rated"
+            },
+            {
+              "field": "capability.ansi_category"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.equipment.aerial_device_compliance",
+      "name": "Aerial Device Electrical/Dielectric Compliance",
+      "description": "Aerial-device specific compliance fields used for dielectric requirements and visibility in A92.2 templates.",
+      "tags": [
+        "equipment",
+        "aerial_device",
+        "compliance"
+      ],
+      "sections": [
+        {
+          "section_key": "electrical",
+          "name": "Electrical/Dielectric",
+          "fields": [
+            {
+              "field": "capability.insulated",
+              "required": true,
+              "aliases": [
+                "capability.insulating"
+              ]
+            },
+            {
+              "field": "capability.electrical_category"
+            },
+            {
+              "field": "capability.rated_line_voltage_kv"
+            },
+            {
+              "field": "capability.dielectric_test_date"
+            },
+            {
+              "field": "capability.dielectric_test_due_date"
+            },
+            {
+              "field": "capability.high_resistance_upper_controls",
+              "aliases": [
+                "capability.upper_controls_high_resistance"
+              ]
+            },
+            {
+              "field": "capability.barehand_capable"
+            },
+            {
+              "field": "capability.dc_barehand_capable"
+            }
+          ]
+        }
+      ],
+      "required_fields": [
+        "capability.insulated"
+      ]
+    },
+    {
+      "template_key": "ft.equipment.forklift",
+      "name": "Forklift Specs",
+      "description": "Forklift fields needed for service/parts.",
+      "tags": [
+        "equipment",
+        "forklift"
+      ],
+      "sections": [
+        {
+          "section_key": "forklift",
+          "name": "Forklift",
+          "fields": [
+            {
+              "field": "capability.forklift_type"
+            },
+            {
+              "field": "capability.lift_capacity_lbs",
+              "aliases": [
+                "capability.lift_capacity"
+              ]
+            },
+            {
+              "field": "capability.max_lift_height_in"
+            },
+            {
+              "field": "capability.mast_type"
+            },
+            {
+              "field": "capability.power_type"
+            },
+            {
+              "field": "capability.battery_voltage"
+            },
+            {
+              "field": "capability.tire_type"
+            },
+            {
+              "field": "capability.has_side_shift"
+            },
+            {
+              "field": "capability.has_fork_positioner"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.equipment.generator",
+      "name": "Generator Output & Electrical",
+      "description": "Generator fields used for load and electrical service.",
+      "tags": [
+        "equipment",
+        "generator"
+      ],
+      "sections": [
+        {
+          "section_key": "generator",
+          "name": "Generator",
+          "fields": [
+            {
+              "field": "capability.power_output_kw",
+              "aliases": [
+                "capability.output_kw",
+                "capability.capacity_kw"
+              ]
+            },
+            {
+              "field": "capability.voltage"
+            },
+            {
+              "field": "capability.phase"
+            },
+            {
+              "field": "capability.fuel_type"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.shop_equipment.powered",
+      "name": "Shop Equipment (Powered)",
+      "description": "Powered shop equipment fields: power source, voltage, phase, and capacity.",
+      "tags": [
+        "shop_equipment"
+      ],
+      "sections": [
+        {
+          "section_key": "shop_power",
+          "name": "Power & Capacity",
+          "fields": [
+            {
+              "field": "capability.power_source"
+            },
+            {
+              "field": "capability.voltage"
+            },
+            {
+              "field": "capability.phase"
+            },
+            {
+              "field": "capability.capacity_lbs"
+            },
+            {
+              "field": "capability.cfm"
+            },
+            {
+              "field": "capability.pressure_psi_max"
+            },
+            {
+              "field": "capability.tank_size_gallons"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.tools.core",
+      "name": "Tools",
+      "description": "Tool identity fields (minimal).",
+      "tags": [
+        "tools"
+      ],
+      "sections": [
+        {
+          "section_key": "tool",
+          "name": "Tool",
+          "fields": [
+            {
+              "field": "asset.serial_number"
+            },
+            {
+              "field": "asset.manufacturer"
+            },
+            {
+              "field": "asset.model"
+            },
+            {
+              "field": "asset.model_year"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.tools.calibration",
+      "name": "Calibrated Tools",
+      "description": "Calibration tracking fields.",
+      "tags": [
+        "tools",
+        "calibration"
+      ],
+      "sections": [
+        {
+          "section_key": "calibration",
+          "name": "Calibration",
+          "fields": [
+            {
+              "field": "capability.calibration_required"
+            },
+            {
+              "field": "capability.calibration_interval_days"
+            },
+            {
+              "field": "capability.last_calibration_date"
+            },
+            {
+              "field": "capability.next_calibration_due_date"
+            },
+            {
+              "field": "capability.calibration_standard"
+            },
+            {
+              "field": "capability.calibration_certificate_id"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.safety.ppe",
+      "name": "PPE & Safety",
+      "description": "PPE fields used for periodic inspection and replacement.",
+      "tags": [
+        "safety"
+      ],
+      "sections": [
+        {
+          "section_key": "ppe",
+          "name": "PPE",
+          "fields": [
+            {
+              "field": "capability.ppe_size"
+            },
+            {
+              "field": "capability.cert_standard"
+            },
+            {
+              "field": "capability.expiration_date"
+            },
+            {
+              "field": "capability.nrr_rating"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.facilities.compliance",
+      "name": "Facilities Compliance",
+      "description": "Facilities fields for code standard and inspection regime.",
+      "tags": [
+        "facilities"
+      ],
+      "sections": [
+        {
+          "section_key": "facility",
+          "name": "Facilities",
+          "fields": [
+            {
+              "field": "capability.code_standard"
+            },
+            {
+              "field": "capability.inspection_regime"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.real_estate",
+      "name": "Real Estate Property",
+      "description": "Real estate assets do not have VIN/model/serial; capture parcel/address and property stats.",
+      "tags": [
+        "real_estate"
+      ],
+      "sections": [
+        {
+          "section_key": "property",
+          "name": "Property",
+          "fields": [
+            {
+              "field": "capability.parcel_number",
+              "required": true
+            },
+            {
+              "field": "capability.property_address",
+              "required": true
+            },
+            {
+              "field": "capability.legal_description"
+            },
+            {
+              "field": "capability.space_type"
+            },
+            {
+              "field": "capability.building_sqft"
+            },
+            {
+              "field": "capability.land_acres"
+            },
+            {
+              "field": "capability.zoning_code"
+            },
+            {
+              "field": "capability.occupancy_limit"
+            }
+          ]
+        }
+      ],
+      "required_fields": [
+        "capability.parcel_number",
+        "capability.property_address"
+      ]
+    },
+    {
+      "template_key": "ft.it.device",
+      "name": "IT Device",
+      "description": "IT asset fields for inventory and support.",
+      "tags": [
+        "it"
+      ],
+      "sections": [
+        {
+          "section_key": "it",
+          "name": "Device",
+          "fields": [
+            {
+              "field": "capability.device_type"
+            },
+            {
+              "field": "capability.hostname"
+            },
+            {
+              "field": "capability.mac_address"
+            },
+            {
+              "field": "capability.imei"
+            },
+            {
+              "field": "capability.os_type"
+            },
+            {
+              "field": "capability.os_version"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    },
+    {
+      "template_key": "ft.containers",
+      "name": "Containers",
+      "description": "Containers and tanks: type, material, capacity.",
+      "tags": [
+        "containers"
+      ],
+      "sections": [
+        {
+          "section_key": "container",
+          "name": "Container",
+          "fields": [
+            {
+              "field": "capability.container_type"
+            },
+            {
+              "field": "capability.material"
+            },
+            {
+              "field": "capability.capacity_gallons"
+            }
+          ]
+        }
+      ],
+      "required_fields": []
+    }
+  ]
+}

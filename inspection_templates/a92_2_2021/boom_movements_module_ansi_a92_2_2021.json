@@ -1,0 +1,256 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_boom_movements_module",
+    "name": "ANSI A92.2-2021 – Boom Movements & Functional Performance (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["boom", "movement", "stability", "performance", "hydraulics", "controls"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR", "POST_EVENT"],
+    "boom_motion": [
+      "ELEVATE",
+      "LOWER",
+      "EXTEND",
+      "RETRACT",
+      "ROTATE",
+      "TELESCOPE",
+      "ARTICULATE",
+      "OTHER"
+    ],
+    "symptom_type": [
+      "JERKY_MOVEMENT",
+      "BINDING",
+      "UNCONTROLLED_MOVEMENT",
+      "DELAYED_RESPONSE",
+      "MISALIGNMENT",
+      "EXCESSIVE_VIBRATION",
+      "EXCESSIVE_SWAY",
+      "UNUSUAL_NOISE",
+      "FAILS_TO_HOLD_POSITION",
+      "HYDRAULIC_LEAK",
+      "INTERLOCK_FAIL",
+      "SECURING_DEVICE_FAIL",
+      "OTHER"
+    ],
+    "action_taken": ["NONE", "ADJUSTED", "REPAIRED", "REPLACED", "REMOVED_FROM_SERVICE", "DEFERRED"]
+  },
+
+  "schemas": {
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "boom_motion", "type": "ENUM", "enum_ref": "boom_motion", "required": false },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OTHER"],
+          "required": false
+        },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        { "field_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      { "input_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": true },
+      { "input_id": "asset_capabilities", "type": "ASSET_CAPABILITIES", "required": false }
+    ],
+
+    "steps": [
+      {
+        "step_key": "boom_preparation",
+        "type": "SETUP",
+        "title": "Preparation for boom movement inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(12), 6.6.1",
+        "required": true,
+        "fields": [
+          { "field_id": "worksite_safe", "type": "BOOLEAN", "required": true },
+          { "field_id": "device_setup_complete", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "boom_visual_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Visual inspection of boom structure and related components",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(12)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect boom structure for cracks, deformation, corrosion.",
+            "Inspect pins, fasteners, bearings, bushings for wear or looseness.",
+            "Inspect hydraulic cylinders for leaks, damage, misalignment.",
+            "Verify boom securing devices are present and intact."
+          ]
+        },
+        "fields": [
+          { "field_id": "no_defects_found", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "boom_functional_movements",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Operate boom through full range of motion",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(12), 6.6.1",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "motions_tested",
+            "type": "CHOICE_MULTI",
+            "choices": ["ELEVATE", "LOWER", "EXTEND", "RETRACT", "ROTATE", "TELESCOPE", "ARTICULATE"],
+            "required": true
+          },
+          { "field_id": "smooth_controlled_movement", "type": "BOOLEAN", "required": true },
+          { "field_id": "unusual_noise_or_vibration", "type": "BOOLEAN", "required": true },
+          { "field_id": "excessive_sway_or_instability", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "any": [
+                { "path": "fields.smooth_controlled_movement", "equals": false },
+                { "path": "fields.excessive_sway_or_instability", "equals": true }
+              ]
+            },
+            "defect": {
+              "title": "Unsafe boom movement or instability observed",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(12)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "boom_position_holding",
+        "type": "VISUAL_CHECK",
+        "title": "Verify boom holds position when controls are released",
+        "standard_reference": "ANSI A92.2-2021 6.6.1",
+        "required": true,
+        "fields": [
+          { "field_id": "holds_position", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.holds_position", "equals": false },
+            "defect": {
+              "title": "Boom fails to hold position when controls released",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 6.6.1"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "boom_stability_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Stability requirements and load testing",
+        "standard_reference": "ANSI A92.2-2021 4.5",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Boom stability must meet Section 4.5 requirements (1.5× rated load on level surface; 1.33× on slopes). Execution and recording of load/stability tests are handled in the Load Test module."
+          }
+        ]
+      },
+
+      {
+        "step_key": "boom_securing_devices",
+        "type": "VISUAL_CHECK",
+        "title": "Inspect boom securing devices (transport/cradle)",
+        "standard_reference": "ANSI A92.2-2021 4.4.2",
+        "required": true,
+        "fields": [
+          { "field_id": "securing_devices_functional", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.securing_devices_functional", "equals": false },
+            "defect": {
+              "title": "Boom securing devices not functioning correctly",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 4.4.2"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "boom_post_repair_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair boom functional verification",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" },
+            { "path": "inspection_context", "equals": "POST_EVENT" }
+          ]
+        },
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "boom_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Boom movement inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_person", "type": "TEXT", "required": true },
+          { "field_id": "movements_tested_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "findings_and_actions_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1028 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-02-07",
+  "service_locations": [
+    {
+      "location_code": "aerial_device",
+      "label": "Aerial Device",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 0,
+      "active": true
+    },
+    {
+      "location_code": "truck_battery_box",
+      "label": "Battery Box",
+      "categories": [
+        "body___upfit",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 10,
+      "active": true
+    },
+    {
+      "location_code": "boom",
+      "label": "Boom",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 20,
+      "active": true
+    },
+    {
+      "location_code": "bucket",
+      "label": "Bucket",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 30,
+      "active": true
+    },
+    {
+      "location_code": "truck_cab_exterior",
+      "label": "Cab - Exterior",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 40,
+      "active": true
+    },
+    {
+      "location_code": "truck_cab_interior",
+      "label": "Cab - Interior",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 50,
+      "active": true
+    },
+    {
+      "location_code": "truck_cooling_pack_area",
+      "label": "Cooling Pack Area",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 60,
+      "active": true
+    },
+    {
+      "location_code": "crane",
+      "label": "Crane",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 70,
+      "active": true
+    },
+    {
+      "location_code": "truck_def_tank_area",
+      "label": "DEF Tank Area",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 80,
+      "active": true
+    },
+    {
+      "location_code": "drive_axle_forward",
+      "label": "Drive Axle (Forward)",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 90,
+      "active": true
+    },
+    {
+      "location_code": "drive_axle_forward_left_outer",
+      "label": "Drive Axle (Forward) - Left Outer",
+      "categories": [
+        "general_orientation",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 100,
+      "active": true
+    },
+    {
+      "location_code": "drive_axle_forward_right_outer",
+      "label": "Drive Axle (Forward) - Right Outer",
+      "categories": [
+        "general_orientation",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 110,
+      "active": true
+    },
+    {
+      "location_code": "drive_axle_rear",
+      "label": "Drive Axle (Rear)",
+      "categories": [
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 120,
+      "active": true
+    },
+    {
+      "location_code": "drive_axle_rear_left_outer",
+      "label": "Drive Axle (Rear) - Left Outer",
+      "categories": [
+        "general_orientation",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 130,
+      "active": true
+    },
+    {
+      "location_code": "drive_axle_rear_right_outer",
+      "label": "Drive Axle (Rear) - Right Outer",
+      "categories": [
+        "general_orientation",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 140,
+      "active": true
+    },
+    {
+      "location_code": "driver_door",
+      "label": "Driver Door",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 150,
+      "active": true
+    },
+    {
+      "location_code": "driver_side",
+      "label": "Driver Side (Left)",
+      "categories": [
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 160,
+      "active": true
+    },
+    {
+      "location_code": "dump_body",
+      "label": "Dump Body",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 170,
+      "active": true
+    },
+    {
+      "location_code": "truck_engine_compartment",
+      "label": "Engine Compartment",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 180,
+      "active": true
+    },
+    {
+      "location_code": "truck_exhaust_area",
+      "label": "Exhaust Area",
+      "categories": [
+        "general_orientation",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 190,
+      "active": true
+    },
+    {
+      "location_code": "truck_frame_left",
+      "label": "Frame - Left Rail",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 200,
+      "active": true
+    },
+    {
+      "location_code": "truck_frame_right",
+      "label": "Frame - Right Rail",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 210,
+      "active": true
+    },
+    {
+      "location_code": "front",
+      "label": "Front",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 220,
+      "active": true
+    },
+    {
+      "location_code": "truck_front_bumper",
+      "label": "Front Bumper",
+      "categories": [
+        "general_orientation",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 230,
+      "active": true
+    },
+    {
+      "location_code": "truck_fuel_tank_area",
+      "label": "Fuel Tank Area",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 240,
+      "active": true
+    },
+    {
+      "location_code": "general",
+      "label": "General",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 250,
+      "active": true
+    },
+    {
+      "location_code": "hydraulic_pump_area",
+      "label": "Hydraulic Pump Area",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 260,
+      "active": true
+    },
+    {
+      "location_code": "hydraulic_reservoir_area",
+      "label": "Hydraulic Reservoir Area",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 270,
+      "active": true
+    },
+    {
+      "location_code": "left",
+      "label": "Left",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 280,
+      "active": true
+    },
+    {
+      "location_code": "liftgate_equipment",
+      "label": "Liftgate",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 290,
+      "active": true
+    },
+    {
+      "location_code": "multiple_locations",
+      "label": "Multiple Locations",
+      "categories": [
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 300,
+      "active": true
+    },
+    {
+      "location_code": "outrigger_front_left",
+      "label": "Outrigger - Front Left",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 310,
+      "active": true
+    },
+    {
+      "location_code": "outrigger_front_right",
+      "label": "Outrigger - Front Right",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 320,
+      "active": true
+    },
+    {
+      "location_code": "outrigger_rear_left",
+      "label": "Outrigger - Rear Left",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 330,
+      "active": true
+    },
+    {
+      "location_code": "outrigger_rear_right",
+      "label": "Outrigger - Rear Right",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 340,
+      "active": true
+    },
+    {
+      "location_code": "pto_area",
+      "label": "PTO Area",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 350,
+      "active": true
+    },
+    {
+      "location_code": "passenger_door",
+      "label": "Passenger Door",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 360,
+      "active": true
+    },
+    {
+      "location_code": "passenger_side",
+      "label": "Passenger Side (Right)",
+      "categories": [
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 370,
+      "active": true
+    },
+    {
+      "location_code": "rear",
+      "label": "Rear",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 380,
+      "active": true
+    },
+    {
+      "location_code": "right",
+      "label": "Right",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 390,
+      "active": true
+    },
+    {
+      "location_code": "service_body_left",
+      "label": "Service Body - Left",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 400,
+      "active": true
+    },
+    {
+      "location_code": "service_body_right",
+      "label": "Service Body - Right",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 410,
+      "active": true
+    },
+    {
+      "location_code": "steer_axle",
+      "label": "Steer Axle",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 420,
+      "active": true
+    },
+    {
+      "location_code": "steer_axle_left",
+      "label": "Steer Axle - Left",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 430,
+      "active": true
+    },
+    {
+      "location_code": "steer_axle_left_wheel_end",
+      "label": "Steer Axle - Left Wheel End",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 440,
+      "active": true
+    },
+    {
+      "location_code": "steer_axle_right",
+      "label": "Steer Axle - Right",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 450,
+      "active": true
+    },
+    {
+      "location_code": "steer_axle_right_wheel_end",
+      "label": "Steer Axle - Right Wheel End",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 460,
+      "active": true
+    },
+    {
+      "location_code": "tailgate",
+      "label": "Tailgate",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 470,
+      "active": true
+    },
+    {
+      "location_code": "trailer_air_electrical_front",
+      "label": "Trailer - Air/Electrical (Front)",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 480,
+      "active": true
+    },
+    {
+      "location_code": "trailer_floor",
+      "label": "Trailer - Floor",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 490,
+      "active": true
+    },
+    {
+      "location_code": "trailer_front",
+      "label": "Trailer - Front",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 500,
+      "active": true
+    },
+    {
+      "location_code": "trailer_kingpin_area",
+      "label": "Trailer - Kingpin Area",
+      "categories": [
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 510,
+      "active": true
+    },
+    {
+      "location_code": "trailer_landing_gear",
+      "label": "Trailer - Landing Gear",
+      "categories": [
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 520,
+      "active": true
+    },
+    {
+      "location_code": "trailer_left_side",
+      "label": "Trailer - Left Side",
+      "categories": [
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 530,
+      "active": true
+    },
+    {
+      "location_code": "trailer_rear",
+      "label": "Trailer - Rear",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 540,
+      "active": true
+    },
+    {
+      "location_code": "trailer_rear_doors",
+      "label": "Trailer - Rear Doors",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 550,
+      "active": true
+    },
+    {
+      "location_code": "trailer_right_side",
+      "label": "Trailer - Right Side",
+      "categories": [
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 560,
+      "active": true
+    },
+    {
+      "location_code": "trailer_tandems",
+      "label": "Trailer - Tandems",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 570,
+      "active": true
+    },
+    {
+      "location_code": "trailer_axle_front",
+      "label": "Trailer Axle (Front)",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 580,
+      "active": true
+    },
+    {
+      "location_code": "trailer_axle_front_left",
+      "label": "Trailer Axle (Front) - Left",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 590,
+      "active": true
+    },
+    {
+      "location_code": "trailer_axle_front_right",
+      "label": "Trailer Axle (Front) - Right",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 600,
+      "active": true
+    },
+    {
+      "location_code": "trailer_axle_rear",
+      "label": "Trailer Axle (Rear)",
+      "categories": [
+        "cab_and_interior",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 610,
+      "active": true
+    },
+    {
+      "location_code": "trailer_axle_rear_left",
+      "label": "Trailer Axle (Rear) - Left",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 620,
+      "active": true
+    },
+    {
+      "location_code": "trailer_axle_rear_right",
+      "label": "Trailer Axle (Rear) - Right",
+      "categories": [
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 630,
+      "active": true
+    },
+    {
+      "location_code": "under_dash",
+      "label": "Under Dash",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 640,
+      "active": true
+    },
+    {
+      "location_code": "truck_underbody",
+      "label": "Underbody",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "trailer_axles_and_wheel_ends",
+        "truck___tractor_areas",
+        "truck___tractor_axles_and_wheel_ends"
+      ],
+      "is_quick_pick": true,
+      "ordering": 650,
+      "active": true
+    },
+    {
+      "location_code": "truck_underhood",
+      "label": "Underhood",
+      "categories": [
+        "body___upfit",
+        "bus___school_bus",
+        "cab_and_interior",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 660,
+      "active": true
+    },
+    {
+      "location_code": "valve_bank_area",
+      "label": "Valve Bank Area",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 670,
+      "active": true
+    },
+    {
+      "location_code": "winch_attachment",
+      "label": "Winch",
+      "categories": [
+        "body___upfit",
+        "equipment___attachments",
+        "general_orientation",
+        "trailer_areas",
+        "truck___tractor_areas"
+      ],
+      "is_quick_pick": true,
+      "ordering": 680,
+      "active": true
+    }
+  ]
+}

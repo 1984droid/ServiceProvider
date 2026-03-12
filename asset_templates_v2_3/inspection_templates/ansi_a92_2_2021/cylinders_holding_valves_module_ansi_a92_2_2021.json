@@ -1,0 +1,473 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+    "name": "ANSI A92.2-2021 – Cylinders & Holding Valves (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["hydraulic", "pneumatic", "cylinders", "holding_valves", "drift", "creep", "pressure"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR", "POST_EVENT"],
+    "system_type": ["HYDRAULIC", "PNEUMATIC"],
+    "component_type": ["CYLINDER", "HOLDING_VALVE", "OTHER"],
+    "symptom_type": [
+      "HOUSING_CRACK",
+      "ROD_DAMAGE_SCRATCH_DENT",
+      "CORROSION",
+      "LEAK",
+      "LOOSE_CONNECTION",
+      "MISSING_FASTENERS",
+      "SEAL_GASKET_DAMAGE",
+      "DIRT_DEBRIS_MOISTURE",
+      "MISALIGNMENT",
+      "UNUSUAL_NOISE",
+      "VIBRATION",
+      "ERRATIC_MOVEMENT",
+      "DRIFT_CREEP",
+      "FAILS_HOLD_ON_POWER_LOSS",
+      "DEFORMATION_UNDER_PRESSURE",
+      "OTHER"
+    ],
+    "action_taken": ["NONE", "CLEANED", "TIGHTENED", "REPAIRED", "REPLACED", "REMOVED_FROM_SERVICE", "DEFERRED"],
+    "drift_unit": ["INCHES", "MM", "DEGREES", "UNKNOWN"]
+  },
+
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "drift_creep_measurements",
+        "title": "Drift/Creep Measurements (Position Holding Under Load)",
+        "fields": [
+          {
+            "field_id": "test_performed",
+            "label": "Drift/creep test performed?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "test_duration_minutes",
+            "label": "Test duration (minutes)",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 1,
+            "min": 0
+          },
+          {
+            "field_id": "drift_amount",
+            "label": "Observed drift/creep amount",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 2,
+            "min": 0
+          },
+          {
+            "field_id": "drift_unit",
+            "label": "Drift/creep unit",
+            "type": "ENUM",
+            "enum_ref": "drift_unit",
+            "required": false
+          },
+          {
+            "field_id": "within_oem_spec",
+            "label": "Within OEM allowable drift/creep?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "oem_spec_reference",
+            "label": "OEM spec/procedure reference",
+            "type": "TEXT",
+            "required": false
+          }
+        ]
+      },
+      {
+        "measurement_set_id": "pressure_verification_measurements",
+        "title": "Pressure Verification (Optional, OEM-based)",
+        "fields": [
+          {
+            "field_id": "performed",
+            "label": "Pressure verification performed?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "max_operating_pressure",
+            "label": "Maximum operating pressure",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 2,
+            "min": 0
+          },
+          {
+            "field_id": "test_pressure_applied",
+            "label": "Test pressure applied",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 2,
+            "min": 0
+          },
+          {
+            "field_id": "leaks_or_deformation_observed",
+            "label": "Leaks or deformation observed under pressure?",
+            "type": "BOOLEAN",
+            "required": false
+          },
+          {
+            "field_id": "within_oem_spec",
+            "label": "Within OEM pressure/hold spec?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "pressure_gauge_calibrated",
+            "label": "Calibrated gauge used?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "oem_spec_reference",
+            "label": "OEM spec/procedure reference",
+            "type": "TEXT",
+            "required": false
+          }
+        ]
+      }
+    ],
+
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "system_type", "type": "ENUM", "enum_ref": "system_type", "required": true },
+        { "field_id": "component_type", "type": "ENUM", "enum_ref": "component_type", "required": true },
+        { "field_id": "component_identifier", "type": "TEXT", "required": false },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OUTRIGGERS", "CHASSIS", "OTHER"],
+          "required": false
+        },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      { "input_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": true },
+      { "input_id": "asset_capabilities", "type": "ASSET_CAPABILITIES", "required": false }
+    ],
+
+    "steps": [
+      {
+        "step_key": "cylhv_preparation",
+        "type": "SETUP",
+        "title": "Preparation for cylinders and holding valves inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9)",
+        "required": true,
+        "fields": [
+          { "field_id": "worksite_safe", "type": "BOOLEAN", "required": true },
+          { "field_id": "device_setup_complete", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "cylhv_visual_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Visual inspection of cylinders, rods, seals, and holding valves",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(9)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect cylinder housings for cracks, deformation, corrosion.",
+            "Inspect cylinder rods for scratches, dents, corrosion, pitting.",
+            "Inspect seals/gaskets for wear, cracks, leakage.",
+            "Inspect holding valves for damage/wear/leaks.",
+            "Check for dirt/debris/moisture that could compromise operation."
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "no_defects_found",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "If true, you must have zero defects recorded for this step."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "validations": [
+          {
+            "validation_id": "no_defects_true_requires_zero_defects",
+            "type": "CONSISTENCY",
+            "rule": "IF fields.no_defects_found == true THEN defect_count == 0"
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_functional_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Functional testing of cylinders and holding valves",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9), 4.7.2, 4.7.3",
+        "required": true,
+        "fields": [
+          { "field_id": "activated_each_cylinder", "type": "BOOLEAN", "required": true },
+          { "field_id": "smooth_operation", "type": "BOOLEAN", "required": true },
+          { "field_id": "unusual_noise_or_vibration", "type": "BOOLEAN", "required": true },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false,
+            "help_text": "Describe any erratic movement, binding, noise/vibration, or abnormal response."
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.activated_each_cylinder", "equals": false },
+            "defect": {
+              "title": "Not all cylinders were functionally tested",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+            }
+          },
+          {
+            "when": {
+              "any": [
+                { "path": "fields.smooth_operation", "equals": false },
+                { "path": "fields.unusual_noise_or_vibration", "equals": true }
+              ]
+            },
+            "defect": {
+              "title": "Cylinder/holding valve functional abnormality observed",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_position_holding_drift_test",
+        "type": "MEASUREMENT",
+        "title": "Position holding verification (drift/creep under load)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9), 4.7.2, 4.7.3",
+        "required": true,
+        "measurement_set_ref": "drift_creep_measurements",
+        "fields": [
+          {
+            "field_id": "test_description",
+            "type": "TEXTAREA",
+            "required": false,
+            "help_text": "Describe configuration and load condition used for drift/creep check."
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "measurements.test_performed", "equals": false },
+            "defect": {
+              "title": "Drift/creep position holding test not performed",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+            }
+          },
+          {
+            "when": { "path": "measurements.within_oem_spec", "equals": false },
+            "defect": {
+              "title": "Drift/creep exceeds OEM allowable limits or holding failure observed",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_holding_valve_safety_intent",
+        "type": "VISUAL_CHECK",
+        "title": "Holding valve safety intent verification (prevents motion on power loss/line failure)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9), 4.7.3",
+        "required": true,
+        "fields": [
+          { "field_id": "verified_prevents_motion_on_power_loss", "type": "BOOLEAN", "required": true },
+          { "field_id": "verified_prevents_motion_on_line_failure", "type": "BOOLEAN", "required": false },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.verified_prevents_motion_on_power_loss", "equals": false },
+            "defect": {
+              "title": "Holding valve safety function not verified / potential uncontrolled motion",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 4.7.3"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_pressure_verification_optional",
+        "type": "MEASUREMENT",
+        "title": "Pressure verification of cylinders/holding valves (optional, OEM-based)",
+        "standard_reference": "ANSI A92.2-2021 4.6.1, 4.7.2",
+        "required": false,
+        "measurement_set_ref": "pressure_verification_measurements",
+        "auto_defect_on": [
+          {
+            "when": {
+              "all": [
+                { "path": "measurements.performed", "equals": true },
+                { "path": "measurements.within_oem_spec", "equals": false }
+              ]
+            },
+            "defect": {
+              "title": "Pressure verification not within OEM limits or leaks/deformation observed",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 4.7.2"
+            }
+          },
+          {
+            "when": {
+              "all": [
+                { "path": "measurements.performed", "equals": true },
+                { "path": "measurements.pressure_gauge_calibrated", "equals": false }
+              ]
+            },
+            "defect": {
+              "title": "Pressure verification performed without calibrated gauge",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 4.7.2"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_threaded_component_locks",
+        "type": "VISUAL_CHECK",
+        "title": "Verify threaded critical components are secured against rotation",
+        "standard_reference": "ANSI A92.2-2021 4.7.4",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "locking_devices_present",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Threaded members securing critical components (pistons, barrel bases, head glands, rod eyes) must be secured with suitable locking devices."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.locking_devices_present", "equals": false },
+            "defect": {
+              "title": "Missing/insufficient locking devices on critical threaded cylinder components",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 4.7.4"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_pressure_rise_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Limiting hydraulic pressure rise due to thermal expansion/leakage (informational)",
+        "standard_reference": "ANSI A92.2-2021 4.7.5",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "A means must be provided to limit pressure rise from thermal expansion/leakage that could exceed yield strength. Field inspection typically verifies condition and correct components; engineering/OEM procedures govern design compliance."
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_bursting_strength_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Bursting safety factors (informational)",
+        "standard_reference": "ANSI A92.2-2021 4.6.1",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Section 4.6.1 defines minimum bursting strength factors (4×/3×/2×). Field inspection verifies condition and correct parts per manufacturer specifications; engineering verification applies for design compliance."
+          }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_post_repair_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair functional verification",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" },
+            { "path": "inspection_context", "equals": "POST_EVENT" }
+          ]
+        },
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "cylhv_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Cylinders and holding valves inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_person", "type": "TEXT", "required": true },
+          { "field_id": "components_inspected_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "findings_and_actions_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,280 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_welds_module",
+    "name": "ANSI A92.2-2021 – Welds (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["welds", "structural", "nde", "vt", "mt", "pt", "ut"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR", "POST_EVENT"],
+    "weld_material": ["STEEL", "ALUMINUM", "UNKNOWN", "OTHER"],
+    "weld_criticality": ["CRITICAL", "NON_CRITICAL", "UNKNOWN"],
+    "nde_method": ["VT", "MT", "PT", "UT", "OTHER"],
+    "symptom_type": [
+      "CRACK",
+      "POROSITY",
+      "UNDERCUT",
+      "INCOMPLETE_FUSION",
+      "LACK_OF_FUSION",
+      "INCLUSION_VOID",
+      "DEFORMATION_WARPING",
+      "CORROSION",
+      "OVERHEAT_DISCOLORATION_HAZ",
+      "OTHER"
+    ],
+    "action_taken": ["NONE", "CLEANED", "REPAIRED", "REWELDED", "REPLACED", "REMOVED_FROM_SERVICE", "DEFERRED"]
+  },
+
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "nde_results",
+        "title": "NDE Results (Optional / As Required)",
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "nde_method", "type": "ENUM", "enum_ref": "nde_method", "required": false },
+          { "field_id": "performed_by", "type": "TEXT", "required": false },
+          { "field_id": "qualification_or_cert", "type": "TEXT", "required": false },
+          { "field_id": "result_passed", "type": "BOOLEAN", "required": false },
+          { "field_id": "report_reference", "type": "TEXT", "required": false },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      }
+    ],
+
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "weld_criticality", "type": "ENUM", "enum_ref": "weld_criticality", "required": false },
+        { "field_id": "weld_material", "type": "ENUM", "enum_ref": "weld_material", "required": false },
+        { "field_id": "weld_identifier", "type": "TEXT", "required": false },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OUTRIGGERS", "CHASSIS", "OTHER"],
+          "required": false
+        },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        { "field_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      { "input_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": true }
+    ],
+
+    "steps": [
+      {
+        "step_key": "welds_preparation",
+        "type": "SETUP",
+        "title": "Preparation for weld inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(14), 6.6.2",
+        "required": true,
+        "fields": [
+          { "field_id": "worksite_safe", "type": "BOOLEAN", "required": true },
+          { "field_id": "device_setup_complete", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "critical_welds_list_available", "type": "BOOLEAN", "required": false, "help_text": "If manufacturer designates critical welds, ensure list/locations are available." },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "welds_visual_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Visual inspection of welds and heat-affected zones",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(14)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect welded joints for cracks, deformation, corrosion.",
+            "Inspect weld beads for uniformity, porosity, undercutting, incomplete fusion.",
+            "Inspect heat-affected zones for discoloration, warping, signs of overheating."
+          ]
+        },
+        "fields": [
+          { "field_id": "no_defects_found", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "welds_critical_welds_review",
+        "type": "VISUAL_CHECK",
+        "title": "Critical welds review (manufacturer-designated)",
+        "standard_reference": "ANSI A92.2-2021 4.2, 6.6.2, 8.4.2",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "critical_welds_inspected",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "If the manufacturer designates critical welds, confirm they were specifically inspected."
+          },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.critical_welds_inspected", "equals": false },
+            "defect": {
+              "title": "Critical welds not explicitly inspected (manufacturer-designated)",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.4.2"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "welds_nde_optional",
+        "type": "MEASUREMENT",
+        "title": "Non-Destructive Examination (NDE) (as required / OEM-directed)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(14), 6.9",
+        "required": false,
+        "measurement_set_ref": "nde_results",
+        "fields": [
+          {
+            "field_id": "trigger_reason",
+            "type": "TEXTAREA",
+            "required": false,
+            "help_text": "Examples: suspected crack, post-repair verification, OEM requirement, critical weld program."
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "all": [
+                { "path": "measurements.performed", "equals": true },
+                { "path": "measurements.result_passed", "equals": false }
+              ]
+            },
+            "defect": {
+              "title": "NDE indicates unacceptable weld condition",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 6.9"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "welds_repair_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Welding standards and NDE guides (informational)",
+        "standard_reference": "ANSI A92.2-2021 6.9",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Weld repairs and inspection practices should align with applicable AWS standards (e.g., AWS D1.1 steel, AWS D1.2 aluminum) and NDE guidance (e.g., AWS B1.10). Use manufacturer repair procedures where provided."
+          }
+        ]
+      },
+
+      {
+        "step_key": "welds_post_repair_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair verification after weld repair",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c), 8.4.2",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" },
+            { "path": "inspection_context", "equals": "POST_EVENT" }
+          ]
+        },
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "welds_design_stress_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Design stress limits (informational)",
+        "standard_reference": "ANSI A92.2-2021 4.2",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Section 4.2 design stress limits apply to engineering/design validation. Field inspection focuses on condition, defects, and OEM repair compliance."
+          }
+        ]
+      },
+
+      {
+        "step_key": "welds_modifications_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Modifications require manufacturer permission",
+        "standard_reference": "ANSI A92.2-2021 8.5",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Modifications to welded structures require prior written permission from the manufacturer; if unavailable, approval by equivalent entity after engineering analysis."
+          }
+        ]
+      },
+
+      {
+        "step_key": "welds_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Weld inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_person", "type": "TEXT", "required": true },
+          { "field_id": "welds_inspected_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "findings_and_actions_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

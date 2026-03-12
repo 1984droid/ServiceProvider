@@ -1,0 +1,323 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_load_test_module",
+    "name": "ANSI A92.2-2021 Load Test (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["load_test", "stability", "structural", "high_risk"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "test_position": ["NORMAL", "OVER_CENTER"],
+    "load_method": ["DEAD_WEIGHT", "HYDRAULIC", "OTHER"],
+    "ground_condition": ["LEVEL", "NOT_LEVEL"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR"]
+  },
+
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "load_test_measurements",
+        "title": "Load Test Measurements",
+        "fields": [
+          {
+            "field_id": "rated_load_capacity",
+            "label": "Rated load capacity",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 1
+          },
+          {
+            "field_id": "test_load_applied",
+            "label": "Applied test load",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 1
+          },
+          {
+            "field_id": "load_multiplier",
+            "label": "Load multiplier",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "readonly": true,
+            "compute_from": "test_load_applied / rated_load_capacity"
+          }
+        ]
+      }
+    ],
+
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "test_position", "type": "ENUM", "enum_ref": "test_position", "required": false },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "rules": [
+    {
+      "rule_id": "load_test_must_be_1_5x",
+      "title": "Load test must be at least 1.5 times rated capacity",
+      "standard_reference": "ANSI A92.2-2021 8.2.5(1)",
+      "when": { "step_key": "load_test_execute" },
+      "assert": {
+        "type": "NUMERIC_GTE",
+        "left": { "path": "measurements.load_multiplier" },
+        "right": 1.5
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Load test did not reach required 1.5× rated capacity"
+      }
+    }
+  ],
+
+  "procedure": {
+    "inputs": [
+      {
+        "input_id": "inspection_context",
+        "type": "ENUM",
+        "enum_ref": "inspection_context",
+        "required": true
+      },
+      {
+        "input_id": "asset_capabilities",
+        "type": "ASSET_CAPABILITIES",
+        "required": false
+      }
+    ],
+
+    "steps": [
+      {
+        "step_key": "load_test_preconditions",
+        "type": "SETUP",
+        "title": "Verify load test preconditions",
+        "standard_reference": "ANSI A92.2-2021 4.5.1 / 8.2.5",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "ground_condition",
+            "type": "ENUM",
+            "enum_ref": "ground_condition",
+            "required": true
+          },
+          {
+            "field_id": "stabilizers_deployed",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "test_area_clear",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false
+          }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "load_test_configuration",
+        "type": "SETUP",
+        "title": "Configure load test",
+        "standard_reference": "ANSI A92.2-2021 8.2.5(1)",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "load_method",
+            "type": "ENUM",
+            "enum_ref": "load_method",
+            "required": true
+          },
+          {
+            "field_id": "test_position",
+            "type": "ENUM",
+            "enum_ref": "test_position",
+            "required": true
+          },
+          {
+            "field_id": "over_center_required",
+            "type": "BOOLEAN",
+            "required": false,
+            "readonly": true,
+            "compute_from": "asset_capabilities.contains('OVER_CENTER')"
+          },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false
+          }
+        ],
+        "validations": [
+          {
+            "validation_id": "over_center_position_required",
+            "type": "CONSISTENCY",
+            "rule": "IF over_center_required == true THEN test_position == 'OVER_CENTER'"
+          }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "load_test_execute",
+        "type": "MEASUREMENT",
+        "title": "Perform load test",
+        "standard_reference": "ANSI A92.2-2021 8.2.5(1)",
+        "required": true,
+        "measurement_set_ref": "load_test_measurements",
+        "fields": [
+          {
+            "field_id": "observed_behavior",
+            "type": "CHOICE_MULTI",
+            "choices": [
+              "NO_ABNORMALITY",
+              "EXCESSIVE_DEFLECTION",
+              "UNUSUAL_NOISE",
+              "STRUCTURAL_DISTRESS",
+              "LOSS_OF_STABILITY",
+              "HYDRAULIC_ANOMALY"
+            ],
+            "required": true
+          },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false
+          },
+          {
+            "field_id": "photos",
+            "type": "ATTACHMENTS",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "fields.observed_behavior",
+              "contains_any": [
+                "STRUCTURAL_DISTRESS",
+                "LOSS_OF_STABILITY"
+              ]
+            },
+            "defect": {
+              "title": "Unsafe condition observed during load test",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 8.2.5(1)"
+            }
+          }
+        ],
+        "evaluations": [
+          { "apply_rule_ids": ["load_test_must_be_1_5x"] }
+        ]
+      },
+
+      {
+        "step_key": "load_test_post_inspection",
+        "type": "VISUAL_CHECK",
+        "title": "Post-load-test inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.5(1)",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "structural_damage_present",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false
+          },
+          {
+            "field_id": "photos",
+            "type": "ATTACHMENTS",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.structural_damage_present", "equals": true },
+            "defect": {
+              "title": "Structural damage observed after load test",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 8.2.5(1)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "load_test_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Load test documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "date_of_test",
+            "type": "DATE",
+            "required": true
+          },
+          {
+            "field_id": "performed_by_entity",
+            "type": "TEXT",
+            "required": true
+          },
+          {
+            "field_id": "rated_load_capacity",
+            "type": "NUMBER",
+            "required": true
+          },
+          {
+            "field_id": "applied_test_load",
+            "type": "NUMBER",
+            "required": true
+          },
+          {
+            "field_id": "test_position",
+            "type": "ENUM",
+            "enum_ref": "test_position",
+            "required": true
+          },
+          {
+            "field_id": "inspection_context",
+            "type": "ENUM",
+            "enum_ref": "inspection_context",
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+}

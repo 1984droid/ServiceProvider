@@ -7,10 +7,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # Admin interface
     path('admin/', admin.site.urls),
-    # API endpoints will be added here as apps are developed
-    # path('api/customers/', include('apps.customers.urls')),
-    # path('api/assets/', include('apps.assets.urls')),
+
+    # API endpoints
+    path('api/', include('apps.customers.urls')),
+    path('api/', include('apps.assets.urls')),
+    path('api/', include('apps.organization.urls')),
+    path('api/', include('apps.inspections.urls')),
+
+    # DRF browsable API auth
+    path('api-auth/', include('rest_framework.urls')),
 ]
 
 # Serve media files in development

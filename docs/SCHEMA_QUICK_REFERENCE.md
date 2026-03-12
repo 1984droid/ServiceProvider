@@ -152,16 +152,14 @@ Visual guide to all models, fields, and relationships.
 │ FK  customer_id        UUID    ────┐│
 │     vin                string(17)  ││ UNIQUE, Required, indexed
 │     unit_number        string      ││ Indexed
-│     year               integer      │
+│     license_plate      string       │
+│     year               integer      │ Can be from decode or manual
 │     make               string       │ Indexed
 │     model              string       │
-│     vehicle_type       string       │
 │     is_active          boolean      │ Default: True, indexed
 │     odometer_miles     integer      │ Nullable, >= 0
 │     engine_hours       integer      │ Nullable, >= 0
-│     vin_decode_data    JSON         │ NHTSA data
-│     vin_decode_date    datetime     │
-│     tags               JSON         │ NEW: Array ['INSULATED_BOOM', 'DIELECTRIC']
+│     tags               JSON         │ Array ['INSULATED_BOOM', 'DIELECTRIC']
 │     notes              text         │
 │     created_at         datetime     │
 │     updated_at         datetime     │
@@ -174,18 +172,72 @@ Visual guide to all models, fields, and relationships.
               │ Customer │
               └──────────┘
                     ↑
-                    │ Has many (1:N)
-                    └─────────────────┐
-                                      │
-┌─────────────────────────────────────┐
-│ Equipment (mounted)                 │
-│   mounted_on_vehicle_id → Vehicle   │
-└─────────────────────────────────────┘
+                    │ Has (1:1) and (1:N)
+                    ├─────────────────┐
+                    │                 │
+┌───────────────────┐     ┌───────────────────┐
+│ VINDecodeData     │     │ Equipment         │
+│ (1:1 optional)    │     │ (mounted)         │
+└───────────────────┘     └───────────────────┘
 ```
 
 **PROTECT DELETE: Cannot delete customer with vehicles**
+**CASCADE DELETE: Deleting vehicle deletes VINDecodeData**
 **VIN must be exactly 17 characters**
 **Tags: e.g., ['INSULATED_BOOM', 'DIELECTRIC', 'BOOM_TRUCK']**
+
+---
+
+## VINDecodeData
+
+**Purpose:** Structured NHTSA vPIC decode data (1:1 with Vehicle)
+
+```
+┌─────────────────────────────────────┐
+│ VINDecodeData                       │
+├─────────────────────────────────────┤
+│ PK  id                 UUID         │
+│ FK  vehicle_id         UUID    ────┐│ OneToOne, UNIQUE
+│     vin                string(17)  ││ Indexed
+│     model_year         integer      │
+│     make               string       │ Indexed
+│     model              string       │ Indexed
+│     manufacturer       string       │
+│     vehicle_type       string       │ Truck, Trailer, etc.
+│     body_class         string       │ Cab & Chassis, Van, etc.
+│     engine_model       string       │
+│     engine_configuration string     │
+│     engine_cylinders   integer      │
+│     displacement_liters decimal(5,2)│
+│     fuel_type_primary  string       │ Diesel, Gasoline, Electric
+│     fuel_type_secondary string      │
+│     gvwr               string       │
+│     gvwr_min_lbs       integer      │
+│     gvwr_max_lbs       integer      │
+│     abs                string       │
+│     airbag_locations   string       │
+│     plant_city         string       │
+│     plant_state        string       │
+│     plant_country      string       │
+│     error_code         string       │ "0" = success
+│     error_text         text         │
+│     decoded_at         datetime     │ Auto, indexed
+│     raw_response       JSON         │ Complete NHTSA response
+│     created_at         datetime     │
+│     updated_at         datetime     │
+└─────────────────────────────────────┘
+                                      │
+                    ┌─────────────────┘
+                    │ Belongs to (1:1)
+                    ↓
+              ┌──────────┐
+              │ Vehicle  │
+              └──────────┘
+```
+
+**CASCADE DELETE: Deleting vehicle deletes decode data**
+**Type-safe access to NHTSA fields - no JSON parsing needed**
+**raw_response preserves complete API response**
 
 ---
 
@@ -209,9 +261,8 @@ Visual guide to all models, fields, and relationships.
 │     is_active          boolean      │ Default: True, indexed
 │     engine_hours       integer      │ Nullable, >= 0
 │     cycles             integer      │ Nullable, >= 0
-│     mount_date         date         │ Nullable
-│     tags               JSON         │ NEW: Array ['AERIAL_DEVICE', 'DIELECTRIC']
-│     equipment_data     JSON         │ NEW: Placard info, capabilities, etc.
+│     tags               JSON         │ Array ['AERIAL_DEVICE', 'DIELECTRIC']
+│     equipment_data     JSON         │ Placard info, capabilities, etc.
 │     notes              text         │
 │     created_at         datetime     │
 │     updated_at         datetime     │
@@ -263,6 +314,27 @@ Visual guide to all models, fields, and relationships.
   "last_updated": "2025-01-15T10:30:00Z"
 }
 ```
+
+---
+
+## Testing
+
+**Test Infrastructure Location:** `tests/`
+
+**Test Suite Status:**
+- ✅ 62 unit tests covering Customer, Contact, USDOTProfile, Vehicle, VINDecodeData, Equipment
+- ✅ Configuration-driven testing (NO hardcoded values)
+- ✅ Factory pattern for consistent test data creation
+- ✅ 20+ pytest fixtures for common scenarios
+
+**Run Tests:**
+```bash
+pytest                              # All tests
+pytest tests/test_customer_models.py  # Customer/Contact/USDOTProfile
+pytest tests/test_asset_models.py     # Vehicle/Equipment/VINDecodeData
+```
+
+**See:** `tests/README.md` for complete testing documentation
 
 ---
 

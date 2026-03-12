@@ -1,0 +1,195 @@
+meta:
+  seed_version: v1
+  generated: '2026-02-08'
+  notes: Domain-level seed definition; loader script maps this into your DB models.
+tenants:
+- slug: demo_repair_shop
+  name: Demo Repair Shop
+  type_flags:
+    is_repair_shop: true
+- slug: demo_leasing_co
+  name: Demo Leasing Co
+  type_flags:
+    is_leasing_company: true
+- slug: demo_customer_fleet
+  name: Demo Customer Fleet
+  type_flags:
+    is_customer: true
+users:
+- email: admin.repair@example.com
+  tenant_slug: demo_repair_shop
+  role: ADMIN
+- email: writer.repair@example.com
+  tenant_slug: demo_repair_shop
+  role: SERVICE_WRITER
+- email: inspector.repair@example.com
+  tenant_slug: demo_repair_shop
+  role: INSPECTOR
+- email: parts.repair@example.com
+  tenant_slug: demo_repair_shop
+  role: PARTS_MANAGER
+- email: admin.leasing@example.com
+  tenant_slug: demo_leasing_co
+  role: ADMIN
+- email: admin.fleet@example.com
+  tenant_slug: demo_customer_fleet
+  role: ADMIN
+assets:
+- key: asset_tractor_1
+  tenant_slug: demo_customer_fleet
+  subtype: fleet.tractor.sleeper
+  name: 2022 Freightliner Cascadia (Demo)
+  identifiers:
+    vin: 1FUJGLDRXNLXXXXXX
+    unit: TR-1001
+- key: asset_trailer_1
+  tenant_slug: demo_customer_fleet
+  subtype: fleet.trailer.dryvan
+  name: 2019 Dry Van Trailer (Demo)
+  identifiers:
+    vin: 1XKYDP9X9KJXXXXXX
+    unit: TL-2001
+- key: asset_aerial_1
+  tenant_slug: demo_customer_fleet
+  subtype: aerial_device.boom_truck
+  name: Boom Lift / Aerial Device (Demo)
+  identifiers:
+    serial: A92-DEMO-0001
+    unit: AD-3001
+meters:
+- asset_key: asset_tractor_1
+  meter_type: odometer_miles
+  value: 48250
+  source: seed
+- asset_key: asset_tractor_1
+  meter_type: engine_hours
+  value: 1875
+  source: seed
+- asset_key: asset_aerial_1
+  meter_type: engine_hours
+  value: 620
+  source: seed
+maintenance_programs:
+- key: mp.tractor.pm_15k
+  asset_subtype: fleet.tractor.sleeper
+  interval_miles: 15000
+  requires_post_pm_inspection: true
+  post_pm_inspection_program_key: insp.post_pm.quickcheck
+- key: mp.aerial.annual
+  asset_subtype: aerial_device.boom_truck
+  interval_days: 365
+  requires_post_pm_inspection: false
+inspection_programs:
+- program_key: insp.ansi_a92_2_2021.annual
+  template_pack_key: ansi_a92_2_2021
+  standards_version: ANSI/SAIA A92.2-2021
+- program_key: insp.recheck.post_repair
+  template_pack_key: ansi_a92_2_2021
+  standards_version: ANSI/SAIA A92.2-2021
+- program_key: insp.post_pm.quickcheck
+  template_pack_key: fleet_pm_quickcheck
+  standards_version: INTERNAL-PM-1.0
+inventory_locations:
+- tenant_slug: demo_repair_shop
+  code: WH-MAIN
+  name: Main Warehouse
+  type: WAREHOUSE
+- tenant_slug: demo_repair_shop
+  code: BIN-COUNTER
+  name: Counter Stock Bin
+  type: BIN
+  parent_code: WH-MAIN
+- tenant_slug: demo_repair_shop
+  code: TRUCK-12
+  name: Service Truck 12
+  type: TRUCK
+  assigned_to_asset_key: asset_tractor_1
+- tenant_slug: demo_repair_shop
+  code: SO-STAGE
+  name: Special Order Staging
+  type: CAGE
+  parent_code: WH-MAIN
+parts:
+- key: part_brake_pad
+  tenant_slug: demo_repair_shop
+  sku: BPAD-DEMO-01
+  description: Brake Pad Set (Demo)
+  noun_key: brakes_and_air.brake_pad
+  uom: each
+  is_stocked: true
+  default_cost: 45.0
+  default_price: 85.0
+- key: part_hyd_hose
+  tenant_slug: demo_repair_shop
+  sku: HOSE-DEMO-01
+  description: Hydraulic Hose (Demo)
+  noun_key: hydraulics.hose
+  uom: each
+  is_stocked: true
+  default_cost: 28.0
+  default_price: 62.0
+- key: part_reman_alt
+  tenant_slug: demo_repair_shop
+  sku: ALT-REMAN-DEMO
+  description: Reman Alternator (Demo)
+  noun_key: electrical.alternator
+  uom: each
+  is_stocked: true
+  default_cost: 180.0
+  default_price: 349.0
+  core:
+    core_charge_amount: 75.0
+    core_due_days: 30
+- key: part_dielectric_gloves
+  tenant_slug: demo_repair_shop
+  sku: DIEL-GLOVE-DEMO
+  description: Dielectric Gloves (Demo)
+  noun_key: safety.dielectric_gloves
+  uom: each
+  is_stocked: true
+  default_cost: 12.0
+  default_price: 29.0
+initial_stock:
+- part_key: part_brake_pad
+  location_code: WH-MAIN
+  qty: 20
+- part_key: part_hyd_hose
+  location_code: WH-MAIN
+  qty: 15
+- part_key: part_dielectric_gloves
+  location_code: BIN-COUNTER
+  qty: 10
+- part_key: part_brake_pad
+  location_code: TRUCK-12
+  qty: 4
+vendors:
+- key: vendor_fleet_supplier
+  tenant_slug: demo_repair_shop
+  name: Fleet Supplier Co (Demo)
+  terms: net30
+special_orders:
+- key: so_hose_for_aerial
+  tenant_slug: demo_repair_shop
+  asset_key: asset_aerial_1
+  part_key: part_hyd_hose
+  qty: 2
+  preferred_vendor_key: vendor_fleet_supplier
+  status: REQUESTED
+leasing:
+  sharing_contracts:
+  - leasing_tenant_slug: demo_leasing_co
+    customer_tenant_slug: demo_customer_fleet
+    permissions:
+      work_orders: summary
+      asset_costs: summary
+      provider_identity: true
+  billing_schedules:
+  - tenant_slug: demo_leasing_co
+    customer_tenant_slug: demo_customer_fleet
+    cadence: MONTHLY
+    next_run_date: '2026-02-08'
+    auto_issue: false
+    lines:
+    - charge_type: LEASE_RENT
+      asset_key: asset_tractor_1
+      amount: 2500.0

@@ -1,0 +1,85 @@
+{
+  "schema_version": "2.1.0",
+  "generated_at": "2026-02-07",
+  "subtype_program_defaults": {
+    "fleet.tractor": {
+      "maintenance_programs": [
+        "mp.fleet.tractor.pm_15000_miles",
+        "mp.fleet.tractor.pm_45000_miles"
+      ],
+      "inspection_programs": [
+        "ip.fleet.dot_daily"
+      ]
+    },
+    "fleet.trailer": {
+      "maintenance_programs": [
+        "mp.fleet.trailer.pm_quarterly"
+      ],
+      "inspection_programs": [
+        "ip.fleet.trailer_annual"
+      ]
+    },
+    "equipment.forklift": {
+      "maintenance_programs": [
+        "mp.equipment.forklift.pm_250_hours"
+      ],
+      "inspection_programs": []
+    },
+    "shop_equipment.air_system.compressor": {
+      "maintenance_programs": [
+        "mp.shop.air_compressor.pm_semiannual"
+      ],
+      "inspection_programs": []
+    },
+    "safety.ppe": {
+      "maintenance_programs": [],
+      "inspection_programs": [
+        "ip.safety.ppe_quarterly"
+      ]
+    },
+    "facilities.fire_safety.extinguisher": {
+      "maintenance_programs": [
+        "mp.safety.fire_extinguisher.monthly"
+      ],
+      "inspection_programs": [
+        "ip.facilities.fire_extinguisher_monthly"
+      ]
+    },
+    "tools.calibrated": {
+      "maintenance_programs": [
+        "mp.tools.calibration.annual"
+      ],
+      "inspection_programs": []
+    },
+    "equipment.mewp": {
+      "maintenance_programs": [],
+      "inspection_programs": [
+        "ip.ansi_a92_2_2021_periodic_aerial_device"
+      ]
+    },
+    "equipment.mewp.aerial_device": {
+      "maintenance_programs": [],
+      "inspection_programs": [
+        "ip.ansi_a92_2_2021_periodic_aerial_device"
+      ]
+    },
+    "equipment.mewp.boom_lift": {
+      "maintenance_programs": [],
+      "inspection_programs": [
+        "ip.ansi_a92_2_2021_periodic_aerial_device"
+      ]
+    },
+    "equipment.mewp.scissor_lift": {
+      "maintenance_programs": [],
+      "inspection_programs": [
+        "ip.ansi_a92_2_2021_periodic_aerial_device"
+      ]
+    },
+    "equipment.mewp.personnel_lift": {
+      "maintenance_programs": [],
+      "inspection_programs": [
+        "ip.ansi_a92_2_2021_periodic_aerial_device"
+      ]
+    }
+  }
+}

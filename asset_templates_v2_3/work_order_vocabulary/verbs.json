@@ -1,0 +1,629 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-02-07",
+  "verbs": [
+    {
+      "verb_key": "inspect",
+      "label": "Inspect",
+      "category": "inspection",
+      "sort_order": 0,
+      "is_active": true
+    },
+    {
+      "verb_key": "verify",
+      "label": "Verify",
+      "category": "diagnostic",
+      "sort_order": 10,
+      "is_active": true
+    },
+    {
+      "verb_key": "replace",
+      "label": "Replace",
+      "category": "replacement",
+      "sort_order": 20,
+      "is_active": true
+    },
+    {
+      "verb_key": "repair",
+      "label": "Repair",
+      "category": "repair",
+      "sort_order": 30,
+      "is_active": true
+    },
+    {
+      "verb_key": "test",
+      "label": "Test",
+      "category": "diagnostic",
+      "sort_order": 40,
+      "is_active": true
+    },
+    {
+      "verb_key": "diagnose",
+      "label": "Diagnose",
+      "category": "diagnostic",
+      "sort_order": 50,
+      "is_active": true
+    },
+    {
+      "verb_key": "clean",
+      "label": "Clean",
+      "category": "cleaning",
+      "sort_order": 60,
+      "is_active": true
+    },
+    {
+      "verb_key": "service",
+      "label": "Service",
+      "category": "maintenance",
+      "sort_order": 70,
+      "is_active": true
+    },
+    {
+      "verb_key": "measure",
+      "label": "Measure",
+      "category": "diagnostic",
+      "sort_order": 80,
+      "is_active": true
+    },
+    {
+      "verb_key": "leak_check",
+      "label": "Leak Check",
+      "category": "testing",
+      "sort_order": 90,
+      "is_active": true
+    },
+    {
+      "verb_key": "lubricate",
+      "label": "Lubricate",
+      "category": "maintenance",
+      "sort_order": 100,
+      "is_active": true
+    },
+    {
+      "verb_key": "adjust",
+      "label": "Adjust",
+      "category": "adjustment",
+      "sort_order": 110,
+      "is_active": true
+    },
+    {
+      "verb_key": "pressure_test",
+      "label": "Pressure Test",
+      "category": "testing",
+      "sort_order": 120,
+      "is_active": true
+    },
+    {
+      "verb_key": "grease",
+      "label": "Grease",
+      "category": "maintenance",
+      "sort_order": 130,
+      "is_active": true
+    },
+    {
+      "verb_key": "rebuild",
+      "label": "Rebuild",
+      "category": "repair",
+      "sort_order": 140,
+      "is_active": true
+    },
+    {
+      "verb_key": "modify",
+      "label": "Modify",
+      "category": "fabrication",
+      "sort_order": 150,
+      "is_active": true
+    },
+    {
+      "verb_key": "calibrate",
+      "label": "Calibrate",
+      "category": "adjustment",
+      "sort_order": 160,
+      "is_active": true
+    },
+    {
+      "verb_key": "tighten",
+      "label": "Tighten",
+      "category": "adjustment",
+      "sort_order": 170,
+      "is_active": true
+    },
+    {
+      "verb_key": "machine",
+      "label": "Machine",
+      "category": "fabrication",
+      "sort_order": 180,
+      "is_active": true
+    },
+    {
+      "verb_key": "torque",
+      "label": "Torque",
+      "category": "maintenance",
+      "sort_order": 190,
+      "is_active": true
+    },
+    {
+      "verb_key": "secure",
+      "label": "Secure",
+      "category": "installation",
+      "sort_order": 200,
+      "is_active": true
+    },
+    {
+      "verb_key": "install",
+      "label": "Install",
+      "category": "installation",
+      "sort_order": 210,
+      "is_active": true
+    },
+    {
+      "verb_key": "fabricate",
+      "label": "Fabricate",
+      "category": "fabrication",
+      "sort_order": 220,
+      "is_active": true
+    },
+    {
+      "verb_key": "weld",
+      "label": "Weld",
+      "category": "repair",
+      "sort_order": 230,
+      "is_active": true
+    },
+    {
+      "verb_key": "remove",
+      "label": "Remove",
+      "category": "removal",
+      "sort_order": 240,
+      "is_active": true
+    },
+    {
+      "verb_key": "connect",
+      "label": "Connect",
+      "category": "other",
+      "sort_order": 250,
+      "is_active": true
+    },
+    {
+      "verb_key": "disconnect",
+      "label": "Disconnect",
+      "category": "other",
+      "sort_order": 260,
+      "is_active": true
+    },
+    {
+      "verb_key": "program",
+      "label": "Program",
+      "category": "electrical",
+      "sort_order": 270,
+      "is_active": true
+    },
+    {
+      "verb_key": "reset",
+      "label": "Reset",
+      "category": "adjustment",
+      "sort_order": 280,
+      "is_active": true
+    },
+    {
+      "verb_key": "bleed",
+      "label": "Bleed",
+      "category": "maintenance",
+      "sort_order": 290,
+      "is_active": true
+    },
+    {
+      "verb_key": "fill",
+      "label": "Fill",
+      "category": "other",
+      "sort_order": 300,
+      "is_active": true
+    },
+    {
+      "verb_key": "drain",
+      "label": "Drain",
+      "category": "maintenance",
+      "sort_order": 310,
+      "is_active": true
+    },
+    {
+      "verb_key": "change_fluid",
+      "label": "Change Fluid",
+      "category": "other",
+      "sort_order": 320,
+      "is_active": true
+    },
+    {
+      "verb_key": "document",
+      "label": "Document",
+      "category": "compliance",
+      "sort_order": 330,
+      "is_active": true
+    },
+    {
+      "verb_key": "wire",
+      "label": "Wire",
+      "category": "other",
+      "sort_order": 340,
+      "is_active": true
+    },
+    {
+      "verb_key": "rewire",
+      "label": "Rewire",
+      "category": "electrical",
+      "sort_order": 350,
+      "is_active": true
+    },
+    {
+      "verb_key": "scan",
+      "label": "Scan",
+      "category": "diagnostic",
+      "sort_order": 360,
+      "is_active": true
+    },
+    {
+      "verb_key": "overhaul",
+      "label": "Overhaul",
+      "category": "repair",
+      "sort_order": 370,
+      "is_active": true
+    },
+    {
+      "verb_key": "refurbish",
+      "label": "Refurbish",
+      "category": "repair",
+      "sort_order": 380,
+      "is_active": true
+    },
+    {
+      "verb_key": "trace",
+      "label": "Trace",
+      "category": "other",
+      "sort_order": 390,
+      "is_active": true
+    },
+    {
+      "verb_key": "air_test",
+      "label": "Air Test",
+      "category": "testing",
+      "sort_order": 400,
+      "is_active": true
+    },
+    {
+      "verb_key": "estimate",
+      "label": "Estimate",
+      "category": "other",
+      "sort_order": 410,
+      "is_active": true
+    },
+    {
+      "verb_key": "update_firmware",
+      "label": "Update Firmware",
+      "category": "electrical",
+      "sort_order": 420,
+      "is_active": true
+    },
+    {
+      "verb_key": "vacuum_test",
+      "label": "Vacuum Test",
+      "category": "other",
+      "sort_order": 430,
+      "is_active": true
+    },
+    {
+      "verb_key": "road_test",
+      "label": "Road Test",
+      "category": "other",
+      "sort_order": 440,
+      "is_active": true
+    },
+    {
+      "verb_key": "detail",
+      "label": "Detail",
+      "category": "other",
+      "sort_order": 450,
+      "is_active": true
+    },
+    {
+      "verb_key": "sanitize",
+      "label": "Sanitize",
+      "category": "other",
+      "sort_order": 460,
+      "is_active": true
+    },
+    {
+      "verb_key": "seal",
+      "label": "Seal",
+      "category": "repair",
+      "sort_order": 470,
+      "is_active": true
+    },
+    {
+      "verb_key": "flush",
+      "label": "Flush",
+      "category": "maintenance",
+      "sort_order": 480,
+      "is_active": true
+    },
+    {
+      "verb_key": "recover_refrigerant",
+      "label": "Recover Refrigerant",
+      "category": "hvac",
+      "sort_order": 490,
+      "is_active": true
+    },
+    {
+      "verb_key": "evacuate",
+      "label": "Evacuate",
+      "category": "hvac",
+      "sort_order": 500,
+      "is_active": true
+    },
+    {
+      "verb_key": "recharge",
+      "label": "Recharge",
+      "category": "hvac",
+      "sort_order": 510,
+      "is_active": true
+    },
+    {
+      "verb_key": "align",
+      "label": "Align",
+      "category": "adjustment",
+      "sort_order": 520,
+      "is_active": true
+    },
+    {
+      "verb_key": "top_off",
+      "label": "Top Off",
+      "category": "other",
+      "sort_order": 530,
+      "is_active": true
+    },
+    {
+      "verb_key": "smoke_test",
+      "label": "Smoke Test",
+      "category": "other",
+      "sort_order": 540,
+      "is_active": true
+    },
+    {
+      "verb_key": "photograph",
+      "label": "Photograph",
+      "category": "other",
+      "sort_order": 550,
+      "is_active": true
+    },
+    {
+      "verb_key": "reinspect",
+      "label": "Reinspect",
+      "category": "other",
+      "sort_order": 560,
+      "is_active": true
+    },
+    {
+      "verb_key": "pressure_wash",
+      "label": "Pressure Wash",
+      "category": "other",
+      "sort_order": 570,
+      "is_active": true
+    },
+    {
+      "verb_key": "replace_filter",
+      "label": "Replace Filter",
+      "category": "other",
+      "sort_order": 580,
+      "is_active": true
+    },
+    {
+      "verb_key": "charge",
+      "label": "Charge",
+      "category": "electrical",
+      "sort_order": 590,
+      "is_active": true
+    },
+    {
+      "verb_key": "credit",
+      "label": "Credit",
+      "category": "other",
+      "sort_order": 600,
+      "is_active": true
+    },
+    {
+      "verb_key": "regenerate",
+      "label": "Regenerate",
+      "category": "emissions",
+      "sort_order": 610,
+      "is_active": true
+    },
+    {
+      "verb_key": "reinforce",
+      "label": "Reinforce",
+      "category": "repair",
+      "sort_order": 620,
+      "is_active": true
+    },
+    {
+      "verb_key": "straighten",
+      "label": "Straighten",
+      "category": "repair",
+      "sort_order": 630,
+      "is_active": true
+    },
+    {
+      "verb_key": "paint",
+      "label": "Paint",
+      "category": "finishing",
+      "sort_order": 640,
+      "is_active": true
+    },
+    {
+      "verb_key": "refinish",
+      "label": "Refinish",
+      "category": "finishing",
+      "sort_order": 650,
+      "is_active": true
+    },
+    {
+      "verb_key": "prep",
+      "label": "Prep",
+      "category": "finishing",
+      "sort_order": 660,
+      "is_active": true
+    },
+    {
+      "verb_key": "sand",
+      "label": "Sand",
+      "category": "finishing",
+      "sort_order": 670,
+      "is_active": true
+    },
+    {
+      "verb_key": "prime",
+      "label": "Prime",
+      "category": "finishing",
+      "sort_order": 680,
+      "is_active": true
+    },
+    {
+      "verb_key": "apply_graphics",
+      "label": "Apply Graphics",
+      "category": "finishing",
+      "sort_order": 690,
+      "is_active": true
+    },
+    {
+      "verb_key": "remove_graphics",
+      "label": "Remove Graphics",
+      "category": "finishing",
+      "sort_order": 700,
+      "is_active": true
+    },
+    {
+      "verb_key": "undercoat",
+      "label": "Undercoat",
+      "category": "finishing",
+      "sort_order": 710,
+      "is_active": true
+    },
+    {
+      "verb_key": "spray_liner",
+      "label": "Spray Liner",
+      "category": "finishing",
+      "sort_order": 720,
+      "is_active": true
+    },
+    {
+      "verb_key": "cut",
+      "label": "Cut",
+      "category": "fabrication",
+      "sort_order": 730,
+      "is_active": true
+    },
+    {
+      "verb_key": "grind",
+      "label": "Grind",
+      "category": "fabrication",
+      "sort_order": 740,
+      "is_active": true
+    },
+    {
+      "verb_key": "drill",
+      "label": "Drill",
+      "category": "fabrication",
+      "sort_order": 750,
+      "is_active": true
+    },
+    {
+      "verb_key": "tap",
+      "label": "Tap",
+      "category": "fabrication",
+      "sort_order": 760,
+      "is_active": true
+    },
+    {
+      "verb_key": "coat",
+      "label": "Coat",
+      "category": "finishing",
+      "sort_order": 770,
+      "is_active": true
+    },
+    {
+      "verb_key": "wash",
+      "label": "Wash",
+      "category": "cleaning",
+      "sort_order": 780,
+      "is_active": true
+    },
+    {
+      "verb_key": "vacuum",
+      "label": "Vacuum",
+      "category": "other",
+      "sort_order": 790,
+      "is_active": true
+    },
+    {
+      "verb_key": "deodorize",
+      "label": "Deodorize",
+      "category": "other",
+      "sort_order": 800,
+      "is_active": true
+    },
+    {
+      "verb_key": "polish",
+      "label": "Polish",
+      "category": "finishing",
+      "sort_order": 810,
+      "is_active": true
+    },
+    {
+      "verb_key": "buff",
+      "label": "Buff",
+      "category": "other",
+      "sort_order": 820,
+      "is_active": true
+    },
+    {
+      "verb_key": "mount",
+      "label": "Mount",
+      "category": "installation",
+      "sort_order": 830,
+      "is_active": true
+    },
+    {
+      "verb_key": "dismount",
+      "label": "Dismount",
+      "category": "removal",
+      "sort_order": 840,
+      "is_active": true
+    },
+    {
+      "verb_key": "balance",
+      "label": "Balance",
+      "category": "adjustment",
+      "sort_order": 850,
+      "is_active": true
+    },
+    {
+      "verb_key": "rotate",
+      "label": "Rotate",
+      "category": "maintenance",
+      "sort_order": 860,
+      "is_active": true
+    },
+    {
+      "verb_key": "inflate",
+      "label": "Inflate",
+      "category": "maintenance",
+      "sort_order": 870,
+      "is_active": true
+    },
+    {
+      "verb_key": "patch",
+      "label": "Patch",
+      "category": "repair",
+      "sort_order": 880,
+      "is_active": true
+    }
+  ]
+}

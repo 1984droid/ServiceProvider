@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-02-07",
+  "work_order_line_schema": {
+    "line_type": {
+      "type": "enum",
+      "options": [
+        "labor",
+        "part",
+        "fee",
+        "supply",
+        "inspection",
+        "diagnostic"
+      ],
+      "required": true
+    },
+    "verb_key": {
+      "type": "ref",
+      "ref": "work_order_vocabulary.verbs.verb_key",
+      "required_if": {
+        "line_type": [
+          "labor",
+          "inspection",
+          "diagnostic"
+        ]
+      }
+    },
+    "noun_key": {
+      "type": "ref",
+      "ref": "work_order_vocabulary.nouns.noun_key",
+      "required": true
+    },
+    "location_code": {
+      "type": "ref",
+      "ref": "work_order_vocabulary.service_locations.location_code",
+      "required": false
+    },
+    "qty": {
+      "type": "decimal",
+      "precision": 2,
+      "min": 0,
+      "default": 1
+    },
+    "unit": {
+      "type": "enum",
+      "options": [
+        "ea",
+        "hr",
+        "mi",
+        "day",
+        "job"
+      ],
+      "required": false
+    },
+    "priority": {
+      "type": "enum",
+      "options": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ],
+      "required": false,
+      "default": "normal"
+    },
+    "source": {
+      "type": "enum",
+      "options": [
+        "manual",
+        "inspection",
+        "maintenance_program",
+        "import"
+      ],
+      "required": true,
+      "default": "manual"
+    },
+    "source_ref": {
+      "type": "string",
+      "max_length": 120,
+      "required": false,
+      "description": "Optional pointer to template_key/step_key/defect_id/etc."
+    },
+    "short_note": {
+      "type": "string",
+      "max_length": 140,
+      "required": false,
+      "description": "Optional constrained note (avoid free-text narratives)."
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "package_key": "asset_templates_v2_3_field_mapping",
+  "package_version": "2.3.0",
+  "generated_at": "2026-02-08",
+  "includes": {
+    "asset_subtypes": true,
+    "capability_definitions": true,
+    "capability_packs": true,
+    "inspection_template_pack": "ansi_a92_2_2021",
+    "inspection_programs": true,
+    "maintenance_programs": true,
+    "work_order_vocabulary": true,
+    "work_order_integration_seed_maps": [
+      "ANSI/SAIA A92.2 (2021)"
+    ],
+    "field_registry": true,
+    "field_templates": true,
+    "resolved_subtype_field_maps": true,
+    "vin_profile_policy": true
+  },
+  "counts": {
+    "work_order_noun_categories": 21,
+    "work_order_nouns": 682,
+    "work_order_verbs": 89,
+    "work_order_service_locations": 69,
+    "a92_templates": 17,
+    "a92_auto_defects": 46,
+    "field_registry_fields": 164,
+    "field_templates": 18,
+    "subtype_field_maps": 132
+  },
+  "notes": "This package adds comprehensive per-subtype field mapping templates (repair-focused) on top of v2.2."
+}

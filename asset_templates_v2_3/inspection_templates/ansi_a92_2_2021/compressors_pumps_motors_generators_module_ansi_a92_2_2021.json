@@ -1,0 +1,349 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_cpmg_module",
+    "name": "ANSI A92.2-2021 – Compressors, Pumps, Motors, Generators (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["compressor", "pump", "motor", "generator", "performance", "electrical_connections", "fasteners"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR", "POST_EVENT"],
+    "component_type": ["COMPRESSOR", "PUMP", "MOTOR", "GENERATOR", "OTHER"],
+    "symptom_type": [
+      "LEAK",
+      "LOOSE_FASTENERS",
+      "MISSING_FASTENERS",
+      "CORROSION",
+      "CRACK_DEFORMATION",
+      "OVERHEATING_DISCOLORATION",
+      "DIRT_DEBRIS_MOISTURE",
+      "UNUSUAL_NOISE",
+      "VIBRATION",
+      "LOSS_OF_SPEED",
+      "EXCESSIVE_HEATING",
+      "ERRATIC_OUTPUT",
+      "WIRING_DAMAGE",
+      "TERMINAL_LOOSENESS",
+      "INSULATION_MELT",
+      "FILTER_CONTAMINATION",
+      "OTHER"
+    ],
+    "action_taken": ["NONE", "TIGHTENED", "CLEANED", "REPAIRED", "REPLACED", "REMOVED_FROM_SERVICE", "DEFERRED"]
+  },
+
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "component_performance_measurements",
+        "title": "Component Performance Measurements (Optional, OEM-based)",
+        "fields": [
+          { "field_id": "oem_spec_reference", "label": "OEM spec reference", "type": "TEXT", "required": false },
+          {
+            "field_id": "within_oem_spec",
+            "label": "Measured performance within OEM spec?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "measured_value_1",
+            "label": "Measured value (primary)",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 2
+          },
+          { "field_id": "measured_unit_1", "label": "Unit", "type": "TEXT", "required": false },
+          {
+            "field_id": "measured_value_2",
+            "label": "Measured value (secondary)",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 2
+          },
+          { "field_id": "measured_unit_2", "label": "Unit", "type": "TEXT", "required": false }
+        ]
+      }
+    ],
+
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "component_type", "type": "ENUM", "enum_ref": "component_type", "required": true },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OUTRIGGERS", "CHASSIS", "OTHER"],
+          "required": false
+        },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      { "input_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": true },
+      { "input_id": "asset_capabilities", "type": "ASSET_CAPABILITIES", "required": false }
+    ],
+
+    "steps": [
+      {
+        "step_key": "cpmg_preparation",
+        "type": "SETUP",
+        "title": "Preparation for inspection of compressors, pumps, motors, and generators",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(6)",
+        "required": true,
+        "fields": [
+          { "field_id": "worksite_safe", "type": "BOOLEAN", "required": true },
+          { "field_id": "device_setup_complete", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "cpmg_visual_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Visual inspection of compressors, pumps, motors, and generators",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(6)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Check for leaks/seepage, loose or missing fasteners, cracks/deformation/corrosion of housings, dirt/debris/moisture accumulation.",
+            "Check for signs of overheating (discoloration, burnt components)."
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "no_defects_found",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "If true, you must have zero defects recorded for this step."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "validations": [
+          {
+            "validation_id": "no_defects_true_requires_zero_defects",
+            "type": "CONSISTENCY",
+            "rule": "IF fields.no_defects_found == true THEN defect_count == 0"
+          }
+        ]
+      },
+
+      {
+        "step_key": "cpmg_functional_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Functional testing (run and observe operation)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(6)",
+        "required": true,
+        "fields": [
+          { "field_id": "started_and_ran", "type": "BOOLEAN", "required": true },
+          { "field_id": "smooth_operation", "type": "BOOLEAN", "required": true },
+          {
+            "field_id": "anomalies_observed",
+            "type": "CHOICE_MULTI",
+            "choices": ["UNUSUAL_NOISE", "VIBRATION", "LOSS_OF_SPEED", "EXCESSIVE_HEATING", "ERRATIC_OUTPUT", "OTHER"],
+            "required": false
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.started_and_ran", "equals": false },
+            "defect": {
+              "title": "Component did not start/run during functional test",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(6)"
+            }
+          },
+          {
+            "when": { "path": "fields.smooth_operation", "equals": false },
+            "defect": {
+              "title": "Abnormal operation observed during functional test (noise/vibration/speed/heat/output)",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(6)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cpmg_performance_under_load",
+        "type": "MEASUREMENT",
+        "title": "Performance testing under load (OEM-based)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(6)",
+        "required": false,
+        "measurement_set_ref": "component_performance_measurements",
+        "fields": [
+          {
+            "field_id": "component_type",
+            "type": "ENUM",
+            "enum_ref": "component_type",
+            "required": true
+          },
+          {
+            "field_id": "performance_dimension",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Examples: air pressure, flow, pressure, torque, speed, voltage, frequency."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "measurements.within_oem_spec", "equals": false },
+            "defect": {
+              "title": "Performance under load not within OEM specification",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(6)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cpmg_electrical_connections",
+        "type": "DEFECT_CAPTURE",
+        "title": "Inspect electrical connections (where applicable)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(11)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect wiring/terminals for looseness/damage/corrosion.",
+            "Check for overheating signs (melted insulation/discoloration).",
+            "Check for dirt or moisture accumulation that could compromise performance."
+          ]
+        }
+      },
+
+      {
+        "step_key": "cpmg_fasteners",
+        "type": "VISUAL_CHECK",
+        "title": "Inspect fasteners securing components",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(13)",
+        "required": true,
+        "fields": [
+          { "field_id": "fasteners_condition_ok", "type": "BOOLEAN", "required": true },
+          { "field_id": "fasteners_tightness_ok", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "any": [
+                { "path": "fields.fasteners_condition_ok", "equals": false },
+                { "path": "fields.fasteners_tightness_ok", "equals": false }
+              ]
+            },
+            "defect": {
+              "title": "Fastener condition/tightness issue on compressor/pump/motor/generator",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(13)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "cpmg_filters",
+        "type": "DEFECT_CAPTURE",
+        "title": "Inspect associated filters (where applicable)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(10)",
+        "required": false,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect filters for cleanliness and foreign material; replace if contaminated or excessively worn."
+          ]
+        }
+      },
+
+      {
+        "step_key": "cpmg_post_repair_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair functional verification",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" },
+            { "path": "inspection_context", "equals": "POST_EVENT" }
+          ]
+        },
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "cpmg_hydraulic_requirements_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Hydraulic system requirements (informational)",
+        "standard_reference": "ANSI A92.2-2021 4.6 / 4.6.5 / 4.6.7",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Where these components are part of the hydraulic system, design requirements (bursting factors, cleanliness means, pressure limiting device placement) are governed by Section 4.6 and manufacturer specifications. Field inspection verifies condition, correct installation, and functional compliance."
+          }
+        ]
+      },
+
+      {
+        "step_key": "cpmg_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_entity", "type": "TEXT", "required": true },
+          { "field_id": "components_inspected_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "findings_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "actions_taken_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,282 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module",
+    "name": "ANSI A92.2-2021 – Hydraulic & Pneumatic Valves (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["hydraulic", "pneumatic", "valves", "spools", "leakage", "return_to_neutral"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR", "POST_EVENT"],
+    "valve_system": ["HYDRAULIC", "PNEUMATIC"],
+    "valve_role": ["DIRECTIONAL_CONTROL", "PRESSURE_CONTROL", "FLOW_CONTROL", "CHECK_VALVE", "RELIEF_VALVE", "OTHER"],
+    "symptom_type": [
+      "HOUSING_CRACK",
+      "DEFORMATION",
+      "CORROSION",
+      "LEAK",
+      "LOOSE_CONNECTION",
+      "MISSING_FASTENERS",
+      "SEAL_GASKET_DAMAGE",
+      "DIRT_DEBRIS_MOISTURE",
+      "STICKING_SPOOL",
+      "BINDING",
+      "IMPROPER_RESPONSE",
+      "FAILS_RETURN_TO_NEUTRAL",
+      "UNUSUAL_NOISE",
+      "VIBRATION",
+      "LINE_ABRASION",
+      "LINE_DEFORMATION",
+      "OTHER"
+    ],
+    "action_taken": ["NONE", "CLEANED", "TIGHTENED", "REPAIRED", "REPLACED", "REMOVED_FROM_SERVICE", "DEFERRED"]
+  },
+
+  "schemas": {
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "valve_system", "type": "ENUM", "enum_ref": "valve_system", "required": true },
+        { "field_id": "valve_role", "type": "ENUM", "enum_ref": "valve_role", "required": false },
+        { "field_id": "valve_identifier", "type": "TEXT", "required": false },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OUTRIGGERS", "CHASSIS", "OTHER"],
+          "required": false
+        },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      { "input_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": true },
+      { "input_id": "asset_capabilities", "type": "ASSET_CAPABILITIES", "required": false }
+    ],
+
+    "steps": [
+      {
+        "step_key": "valves_preparation",
+        "type": "SETUP",
+        "title": "Preparation for hydraulic and pneumatic valve inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(7)",
+        "required": true,
+        "fields": [
+          { "field_id": "worksite_safe", "type": "BOOLEAN", "required": true },
+          { "field_id": "device_setup_complete", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "valves_visual_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Visual inspection of valve housings, connections, seals, and external condition",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(7)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect valve housings for cracks, deformation, corrosion.",
+            "Inspect connections/fittings for looseness or damage.",
+            "Inspect seals/gaskets for wear/cracks/leaks.",
+            "Check for dirt/debris/moisture accumulation that could compromise operation."
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "no_defects_found",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "If true, you must have zero defects recorded for this step."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "validations": [
+          {
+            "validation_id": "no_defects_true_requires_zero_defects",
+            "type": "CONSISTENCY",
+            "rule": "IF fields.no_defects_found == true THEN defect_count == 0"
+          }
+        ]
+      },
+
+      {
+        "step_key": "valves_functional_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Functional testing of hydraulic and pneumatic valves (operate and observe)",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(7), 4.6.7",
+        "required": true,
+        "fields": [
+          { "field_id": "activated_each_valve", "type": "BOOLEAN", "required": true },
+          { "field_id": "smooth_operation", "type": "BOOLEAN", "required": true },
+          { "field_id": "returns_to_neutral", "type": "BOOLEAN", "required": true },
+          { "field_id": "sticking_or_binding_observed", "type": "BOOLEAN", "required": true },
+          {
+            "field_id": "anomalies_observed",
+            "type": "CHOICE_MULTI",
+            "choices": ["UNUSUAL_NOISE", "VIBRATION", "ERRATIC_MOVEMENT", "IMPROPER_RESPONSE", "OTHER"],
+            "required": false
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.activated_each_valve", "equals": false },
+            "defect": {
+              "title": "Not all valves were functionally tested",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(7)"
+            }
+          },
+          {
+            "when": {
+              "any": [
+                { "path": "fields.smooth_operation", "equals": false },
+                { "path": "fields.returns_to_neutral", "equals": false },
+                { "path": "fields.sticking_or_binding_observed", "equals": true }
+              ]
+            },
+            "defect": {
+              "title": "Valve functional issue (binding/sticking/return-to-neutral/response)",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(7)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "valves_lines_at_valves",
+        "type": "DEFECT_CAPTURE",
+        "title": "Inspect hydraulic and pneumatic lines connected to valves",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(5), 4.6.1",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect hoses/tubing near valves for leakage, abnormal deformation, and excessive abrasion.",
+            "Confirm appropriate hydraulic fluid level / pneumatic pressure per manufacturer where applicable."
+          ]
+        }
+      },
+
+      {
+        "step_key": "valves_spools_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Inspect valve spools (where accessible) for sticking, wear, damage, alignment",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(7)",
+        "required": false,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect spools for sticking/improper movement, visible wear/damage, and proper alignment.",
+            "Record findings and corrective action."
+          ]
+        }
+      },
+
+      {
+        "step_key": "valves_relief_settings_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Relief valve pressure settings verification handled by separate module",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(3), 4.6.7",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "If relief valve settings verification is required, include the dedicated 'Relief Valve Settings' module. It captures manufacturer setpoint, measured opening pressure, maximum operating pressure, and sealing/tool requirements."
+          }
+        ]
+      },
+
+      {
+        "step_key": "valves_post_repair_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair valve functional verification",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" },
+            { "path": "inspection_context", "equals": "POST_EVENT" }
+          ]
+        },
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "valves_hydraulic_requirements_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Hydraulic design requirements (informational)",
+        "standard_reference": "ANSI A92.2-2021 4.6.1 / 4.6.5 / 4.6.7",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Bursting safety factors, cleanliness means, and pressure limiting device placement are design/manufacturer governed. Field inspection verifies condition, correct installation, and functional compliance."
+          }
+        ]
+      },
+
+      {
+        "step_key": "valves_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Valve inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_person", "type": "TEXT", "required": true },
+          { "field_id": "valves_inspected_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "findings_and_actions_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

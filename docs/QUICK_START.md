@@ -31,9 +31,9 @@ Edit `.env` with your database credentials (or leave defaults for local PostgreS
 
 ```bash
 # Using psql
-psql -U postgres -c "CREATE DATABASE service_provider;"
+psql -U postgres -c "CREATE DATABASE service_provider_new;"
 
-# Or using pgAdmin - create database named: service_provider
+# Or using pgAdmin - create database named: service_provider_new
 ```
 
 ## 5. Run Migrations
@@ -63,12 +63,14 @@ Enter username, email, and password when prompted.
 ## 7. Run Server
 
 ```bash
-python manage.py runserver
+python manage.py runserver 8100
 ```
 
-Visit: http://localhost:8000/admin
+Visit: http://localhost:8100/admin
 
 Login with your superuser credentials.
+
+**Note:** NEW_BUILD_STARTER uses port **8100** to avoid conflicts with the legacy application on port 8000.
 
 ## What You Have Now
 
@@ -133,8 +135,8 @@ python manage.py migrate
 
 **Reset database (development only):**
 ```bash
-psql -U postgres -c "DROP DATABASE service_provider;"
-psql -U postgres -c "CREATE DATABASE service_provider;"
+psql -U postgres -c "DROP DATABASE service_provider_new;"
+psql -U postgres -c "CREATE DATABASE service_provider_new;"
 python manage.py migrate
 python manage.py createsuperuser
 ```
@@ -155,9 +157,11 @@ python manage.py shell
 - Ensure virtual environment is activated
 - Run `pip install -r requirements.txt`
 
-**Port 8000 already in use:**
+**Port already in use:**
 ```bash
-python manage.py runserver 8001
+# NEW_BUILD_STARTER uses port 8100 by default
+# If 8100 is in use, try another port:
+python manage.py runserver 8101
 ```
 
 ---

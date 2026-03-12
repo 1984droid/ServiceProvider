@@ -1,0 +1,288 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_periodic_inspection_documentation_module",
+    "name": "ANSI A92.2-2021 – Periodic Inspection Documentation (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["documentation", "records", "placard", "retention", "qualified_person"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "inspection_context": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR", "POST_EVENT"],
+    "electrical_category": ["A", "B", "C", "D", "E", "UNKNOWN"],
+    "dielectric_test_type": ["NONE", "AC", "DC", "BOTH", "UNKNOWN"],
+    "record_completeness": ["COMPLETE", "INCOMPLETE", "UNKNOWN"],
+    "action_taken": ["NONE", "CORRECTED_RECORD", "ATTACHED_MISSING_DOCS", "DEFERRED"]
+  },
+
+  "schemas": {
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "attachments", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      { "input_id": "inspection_context", "type": "ENUM", "enum_ref": "inspection_context", "required": true },
+      {
+        "input_id": "asset_identity_snapshot",
+        "type": "ASSET_IDENTITY_SNAPSHOT",
+        "required": false,
+        "help_text": "Optional: make/model/serial/year/capacity/height/etc for cross-checking record accuracy."
+      },
+      {
+        "input_id": "requires_dielectric_record",
+        "type": "BOOLEAN",
+        "required": false,
+        "help_text": "If true, dielectric record fields become required (for insulating units or when dielectric test performed)."
+      }
+    ],
+
+    "steps": [
+      {
+        "step_key": "doc_preparation",
+        "type": "SETUP",
+        "title": "Documentation preparation and qualified person confirmation",
+        "standard_reference": "ANSI A92.2-2021 8.3 / 8.2.4 (general) / Section 3 (Qualified Person definition)",
+        "required": true,
+        "fields": [
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          {
+            "field_id": "qualified_person_confirmed",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Confirm inspection performed by a qualified person per standard definition."
+          },
+          {
+            "field_id": "owner_interval_defined",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Confirm owner-defined interval aligns with manufacturer recommendations."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "doc_required_record_fields",
+        "type": "CHECKLIST",
+        "title": "Periodic inspection record fields (required)",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_name", "type": "TEXT", "required": true },
+          {
+            "field_id": "performed_by_entity",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Company/entity performing the inspection (if applicable)."
+          },
+
+          { "field_id": "make", "type": "TEXT", "required": false },
+          { "field_id": "model", "type": "TEXT", "required": false },
+          { "field_id": "serial_number", "type": "TEXT", "required": false },
+          { "field_id": "year_of_manufacture", "type": "TEXT", "required": false },
+
+          {
+            "field_id": "results_summary",
+            "type": "TEXTAREA",
+            "required": true,
+            "help_text": "High-level results of inspection and key findings."
+          },
+          {
+            "field_id": "corrective_actions_summary",
+            "type": "TEXTAREA",
+            "required": false,
+            "help_text": "What was repaired/replaced/adjusted, or what work orders were created."
+          },
+
+          {
+            "field_id": "record_completeness",
+            "type": "ENUM",
+            "enum_ref": "record_completeness",
+            "required": true
+          },
+
+          {
+            "field_id": "signature_attestation",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Electronic signature/attestation by person performing the inspection."
+          },
+
+          {
+            "field_id": "attachments_supporting_docs",
+            "type": "ATTACHMENTS",
+            "required": false,
+            "help_text": "Optional: photos, OEM checklist scans, NDE reports, etc."
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.record_completeness", "equals": "INCOMPLETE" },
+            "defect": {
+              "title": "Periodic inspection documentation marked incomplete",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.3.2",
+              "action_taken": "CORRECTED_RECORD"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "doc_dielectric_record_if_applicable",
+        "type": "CHECKLIST",
+        "title": "Dielectric / electrical test record fields (if applicable)",
+        "standard_reference": "ANSI A92.2-2021 5.6.3 (and related dielectric test procedures)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [{ "path": "requires_dielectric_record", "equals": true }]
+        },
+        "fields": [
+          {
+            "field_id": "electrical_category",
+            "type": "ENUM",
+            "enum_ref": "electrical_category",
+            "required": true
+          },
+          { "field_id": "rated_line_voltage", "type": "TEXT", "required": false },
+          {
+            "field_id": "dielectric_test_type",
+            "type": "ENUM",
+            "enum_ref": "dielectric_test_type",
+            "required": true
+          },
+          { "field_id": "applied_test_voltage", "type": "TEXT", "required": false },
+          { "field_id": "final_leakage_current_value", "type": "TEXT", "required": false },
+          {
+            "field_id": "test_date",
+            "type": "DATE",
+            "required": false
+          },
+          {
+            "field_id": "test_entity_or_person",
+            "type": "TEXT",
+            "required": false
+          },
+          {
+            "field_id": "test_equipment_asset_reference",
+            "type": "ASSET_PICKER",
+            "required": false,
+            "subtype_prefix": "tools.calibrated.dielectric_tester",
+            "validate_calibration": true,
+            "help_text": "Select calibrated dielectric testing equipment. Expired equipment cannot be used.",
+            "picker_help_text": "🔬 Only equipment with valid calibration can be selected"
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "attachments_test_report", "type": "ATTACHMENTS", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "doc_placard_application",
+        "type": "VISUAL_CHECK",
+        "title": "Apply periodic inspection/test completion placard",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true },
+          {
+            "field_id": "placard_legible_and_secure",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "placard_location_visible",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          { "field_id": "photo_of_placard", "type": "ATTACHMENTS", "required": false },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.placard_applied", "equals": false },
+            "defect": {
+              "title": "Periodic inspection placard not applied",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.3.2",
+              "action_taken": "DEFERRED"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "doc_archival_and_retention",
+        "type": "CHECKLIST",
+        "title": "Archive and retention requirements",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "retention_acknowledged",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Records must be retained for minimum five years or as required by regulations."
+          },
+          {
+            "field_id": "archived_electronically",
+            "type": "BOOLEAN",
+            "required": false
+          },
+          {
+            "field_id": "archive_reference",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Optional: storage location identifier, document ID, etc."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "doc_post_repair_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: record modifications and post-repair documentation",
+        "standard_reference": "ANSI A92.2-2021 8.5 / 8.2.4(16)(c)",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Document any modifications affecting capacity/operation/maintenance markings, and ensure post-repair tests are recorded where required."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,938 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-02-07",
+  "standard": {
+    "code": "ANSI/SAIA A92.2",
+    "revision": "2021"
+  },
+  "engine": "AF_INSPECTION_TEMPLATE",
+  "defects": [
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:0",
+      "defect_hash": "95f5ffa3daf12cf0",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_torque_verification",
+      "step_type": "MEASUREMENT",
+      "step_title": "Torque verification of bolts and fasteners",
+      "when": {
+        "path": "measurements.performed",
+        "equals": false
+      },
+      "defect": {
+        "title": "Torque verification not performed",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 6.6.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:1",
+      "defect_hash": "97e8821b350f9275",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_torque_verification",
+      "step_type": "MEASUREMENT",
+      "step_title": "Torque verification of bolts and fasteners",
+      "when": {
+        "path": "measurements.within_oem_spec",
+        "equals": false
+      },
+      "defect": {
+        "title": "Fastener torque outside OEM specification",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 6.6.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_torque_verification:2",
+      "defect_hash": "0aa6502c122ccd7e",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_torque_verification",
+      "step_type": "MEASUREMENT",
+      "step_title": "Torque verification of bolts and fasteners",
+      "when": {
+        "path": "measurements.torque_wrench_calibrated",
+        "equals": false
+      },
+      "defect": {
+        "title": "Torque verification performed with uncalibrated wrench",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 6.6.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_bolts_fasteners_module:fasteners_critical_review:0",
+      "defect_hash": "d8537e12ff71ed6c",
+      "template_key": "ansi_a92_2_2021_bolts_fasteners_module",
+      "step_key": "fasteners_critical_review",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Inspection of structural, load-bearing, and safety-critical fasteners",
+      "when": {
+        "any": [
+          {
+            "path": "fields.critical_fasteners_verified",
+            "equals": false
+          },
+          {
+            "path": "fields.locking_devices_present",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Critical bolt or locking device deficiency",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 4.2 / 6.6.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_boom_movements_module:boom_functional_movements:0",
+      "defect_hash": "f28a5f4e99609e3a",
+      "template_key": "ansi_a92_2_2021_boom_movements_module",
+      "step_key": "boom_functional_movements",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Operate boom through full range of motion",
+      "when": {
+        "any": [
+          {
+            "path": "fields.smooth_controlled_movement",
+            "equals": false
+          },
+          {
+            "path": "fields.excessive_sway_or_instability",
+            "equals": true
+          }
+        ]
+      },
+      "defect": {
+        "title": "Unsafe boom movement or instability observed",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(12)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_boom_movements_module:boom_position_holding:0",
+      "defect_hash": "f275ffaf059564bf",
+      "template_key": "ansi_a92_2_2021_boom_movements_module",
+      "step_key": "boom_position_holding",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Verify boom holds position when controls are released",
+      "when": {
+        "path": "fields.holds_position",
+        "equals": false
+      },
+      "defect": {
+        "title": "Boom fails to hold position when controls released",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 6.6.1"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_boom_movements_module:boom_securing_devices:0",
+      "defect_hash": "be69940b1c8fed94",
+      "template_key": "ansi_a92_2_2021_boom_movements_module",
+      "step_key": "boom_securing_devices",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Inspect boom securing devices (transport/cradle)",
+      "when": {
+        "path": "fields.securing_devices_functional",
+        "equals": false
+      },
+      "defect": {
+        "title": "Boom securing devices not functioning correctly",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 4.4.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_functional_testing:0",
+      "defect_hash": "6cabf368a38c871c",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing (run and observe operation)",
+      "when": {
+        "path": "fields.started_and_ran",
+        "equals": false
+      },
+      "defect": {
+        "title": "Component did not start/run during functional test",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(6)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_functional_testing:1",
+      "defect_hash": "d38799ab26011724",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing (run and observe operation)",
+      "when": {
+        "path": "fields.smooth_operation",
+        "equals": false
+      },
+      "defect": {
+        "title": "Abnormal operation observed during functional test (noise/vibration/speed/heat/output)",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(6)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_performance_under_load:0",
+      "defect_hash": "0520390146e23a81",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_performance_under_load",
+      "step_type": "MEASUREMENT",
+      "step_title": "Performance testing under load (OEM-based)",
+      "when": {
+        "path": "measurements.within_oem_spec",
+        "equals": false
+      },
+      "defect": {
+        "title": "Performance under load not within OEM specification",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(6)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cpmg_module:cpmg_fasteners:0",
+      "defect_hash": "8445d1e5234fa55e",
+      "template_key": "ansi_a92_2_2021_cpmg_module",
+      "step_key": "cpmg_fasteners",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Inspect fasteners securing components",
+      "when": {
+        "any": [
+          {
+            "path": "fields.fasteners_condition_ok",
+            "equals": false
+          },
+          {
+            "path": "fields.fasteners_tightness_ok",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Fastener condition/tightness issue on compressor/pump/motor/generator",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(13)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_functional_testing:0",
+      "defect_hash": "59f9f583f08f36d2",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of cylinders and holding valves",
+      "when": {
+        "path": "fields.activated_each_cylinder",
+        "equals": false
+      },
+      "defect": {
+        "title": "Not all cylinders were functionally tested",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_functional_testing:1",
+      "defect_hash": "7ebfef0698c0851d",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of cylinders and holding valves",
+      "when": {
+        "any": [
+          {
+            "path": "fields.smooth_operation",
+            "equals": false
+          },
+          {
+            "path": "fields.unusual_noise_or_vibration",
+            "equals": true
+          }
+        ]
+      },
+      "defect": {
+        "title": "Cylinder/holding valve functional abnormality observed",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_position_holding_drift_test:0",
+      "defect_hash": "7067524f71a297cf",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_position_holding_drift_test",
+      "step_type": "MEASUREMENT",
+      "step_title": "Position holding verification (drift/creep under load)",
+      "when": {
+        "path": "measurements.test_performed",
+        "equals": false
+      },
+      "defect": {
+        "title": "Drift/creep position holding test not performed",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_position_holding_drift_test:1",
+      "defect_hash": "6fa14b29319cdfbc",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_position_holding_drift_test",
+      "step_type": "MEASUREMENT",
+      "step_title": "Position holding verification (drift/creep under load)",
+      "when": {
+        "path": "measurements.within_oem_spec",
+        "equals": false
+      },
+      "defect": {
+        "title": "Drift/creep exceeds OEM allowable limits or holding failure observed",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(9)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_holding_valve_safety_intent:0",
+      "defect_hash": "df1592bb1496aaa6",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_holding_valve_safety_intent",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Holding valve safety intent verification (prevents motion on power loss/line failure)",
+      "when": {
+        "path": "fields.verified_prevents_motion_on_power_loss",
+        "equals": false
+      },
+      "defect": {
+        "title": "Holding valve safety function not verified / potential uncontrolled motion",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 4.7.3"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_pressure_verification_optional:0",
+      "defect_hash": "b165b9ea4707dc48",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_pressure_verification_optional",
+      "step_type": "MEASUREMENT",
+      "step_title": "Pressure verification of cylinders/holding valves (optional, OEM-based)",
+      "when": {
+        "all": [
+          {
+            "path": "measurements.performed",
+            "equals": true
+          },
+          {
+            "path": "measurements.within_oem_spec",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Pressure verification not within OEM limits or leaks/deformation observed",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 4.7.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_pressure_verification_optional:1",
+      "defect_hash": "6dcbafbd243fc0cb",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_pressure_verification_optional",
+      "step_type": "MEASUREMENT",
+      "step_title": "Pressure verification of cylinders/holding valves (optional, OEM-based)",
+      "when": {
+        "all": [
+          {
+            "path": "measurements.performed",
+            "equals": true
+          },
+          {
+            "path": "measurements.pressure_gauge_calibrated",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Pressure verification performed without calibrated gauge",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 4.7.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_cylinders_holding_valves_module:cylhv_threaded_component_locks:0",
+      "defect_hash": "818f28945d618ea7",
+      "template_key": "ansi_a92_2_2021_cylinders_holding_valves_module",
+      "step_key": "cylhv_threaded_component_locks",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Verify threaded critical components are secured against rotation",
+      "when": {
+        "path": "fields.locking_devices_present",
+        "equals": false
+      },
+      "defect": {
+        "title": "Missing/insufficient locking devices on critical threaded cylinder components",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 4.7.4"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_periodic_dielectric:insulating_visual_inspection:0",
+      "defect_hash": "636df839893af6db",
+      "template_key": "ansi_a92_2_periodic_dielectric",
+      "step_key": "insulating_visual_inspection",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Inspect insulating components & systems",
+      "when": {
+        "any": [
+          {
+            "path": "fields.cleanliness",
+            "in": [
+              "DIRTY",
+              "CONTAMINATED"
+            ]
+          },
+          {
+            "path": "fields.visible_damage_present",
+            "equals": true
+          }
+        ]
+      },
+      "defect": {
+        "title": "Insulating system condition may be compromised (cleanliness/damage)",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_electrical_non_dielectric_module:electrical_functional_testing:0",
+      "defect_hash": "ab69f77fa7d09288",
+      "template_key": "ansi_a92_2_2021_electrical_non_dielectric_module",
+      "step_key": "electrical_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing: switches, relays, control panels, safety devices",
+      "when": {
+        "path": "fields.responds_correctly_to_inputs",
+        "equals": false
+      },
+      "defect": {
+        "title": "Electrical system does not respond correctly to control inputs",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(11) / 4.3"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_electrical_non_dielectric_module:control_systems_requirements:0",
+      "defect_hash": "b69a52f4c863be6e",
+      "template_key": "ansi_a92_2_2021_electrical_non_dielectric_module",
+      "step_key": "control_systems_requirements",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Control systems: identification, protection, return-to-neutral, enabling devices",
+      "when": {
+        "any": [
+          {
+            "path": "fields.controls_clearly_identified",
+            "equals": false
+          },
+          {
+            "path": "fields.controls_protected_from_damage_unintentional_actuation",
+            "equals": false
+          },
+          {
+            "path": "fields.controls_return_to_neutral",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Control system requirement not satisfied (ID/protection/neutral return)",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 4.3"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_electrical_non_dielectric_module:electrical_performance_optional:0",
+      "defect_hash": "7073894890f5085c",
+      "template_key": "ansi_a92_2_2021_electrical_non_dielectric_module",
+      "step_key": "electrical_performance_optional",
+      "step_type": "MEASUREMENT",
+      "step_title": "Electrical performance verification (optional, OEM-based)",
+      "when": {
+        "all": [
+          {
+            "path": "measurements.performed",
+            "equals": true
+          },
+          {
+            "path": "measurements.within_oem_spec",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Electrical performance not within OEM specification",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 6.4 / 8.2.4(11)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module:filters_functional_observation:0",
+      "defect_hash": "c23baf767037b6e9",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module",
+      "step_key": "filters_functional_observation",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional observation of system operation related to filtration",
+      "when": {
+        "path": "fields.operated_system",
+        "equals": false
+      },
+      "defect": {
+        "title": "System not operated; filtration-related function not observed",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(10)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module:filters_cleanliness_verification_optional:0",
+      "defect_hash": "cc4577b531dfd71b",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_filters_module",
+      "step_key": "filters_cleanliness_verification_optional",
+      "step_type": "MEASUREMENT",
+      "step_title": "Cleanliness / filtration effectiveness verification (optional, OEM-based)",
+      "when": {
+        "all": [
+          {
+            "path": "measurements.performed",
+            "equals": true
+          },
+          {
+            "path": "measurements.cleanliness_result",
+            "equals": "FAIL"
+          }
+        ]
+      },
+      "defect": {
+        "title": "Fluid cleanliness/filtration effectiveness not acceptable per OEM criteria",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 4.6.5"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_relief_valve_settings_module:relief_valve_visual_inspection:0",
+      "defect_hash": "c52923c50bbcc260",
+      "template_key": "ansi_a92_2_2021_relief_valve_settings_module",
+      "step_key": "relief_valve_visual_inspection",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Visual inspection of relief valves",
+      "when": {
+        "any": [
+          {
+            "path": "fields.physical_damage_present",
+            "equals": true
+          },
+          {
+            "path": "fields.leakage_present",
+            "equals": true
+          },
+          {
+            "path": "fields.securely_mounted",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Relief valve visual condition issue",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(3)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module:valves_functional_testing:0",
+      "defect_hash": "5c9c41a8897f4038",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module",
+      "step_key": "valves_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of hydraulic and pneumatic valves (operate and observe)",
+      "when": {
+        "path": "fields.activated_each_valve",
+        "equals": false
+      },
+      "defect": {
+        "title": "Not all valves were functionally tested",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(7)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module:valves_functional_testing:1",
+      "defect_hash": "73e5ea12086f0a5f",
+      "template_key": "ansi_a92_2_2021_hydraulic_pneumatic_valves_module",
+      "step_key": "valves_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of hydraulic and pneumatic valves (operate and observe)",
+      "when": {
+        "any": [
+          {
+            "path": "fields.smooth_operation",
+            "equals": false
+          },
+          {
+            "path": "fields.returns_to_neutral",
+            "equals": false
+          },
+          {
+            "path": "fields.sticking_or_binding_observed",
+            "equals": true
+          }
+        ]
+      },
+      "defect": {
+        "title": "Valve functional issue (binding/sticking/return-to-neutral/response)",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(7)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_visual_inspection:0",
+      "defect_hash": "9c6329b71c9faf21",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_visual_inspection",
+      "step_type": "DEFECT_CAPTURE",
+      "step_title": "Visual inspection of hydraulic system components",
+      "when": {
+        "path": "fields.fluid_level_ok",
+        "equals": false
+      },
+      "defect": {
+        "title": "Hydraulic reservoir fluid level not within normal range",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(4) / 4.6.4"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_visual_inspection:1",
+      "defect_hash": "4cf82922505d2591",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_visual_inspection",
+      "step_type": "DEFECT_CAPTURE",
+      "step_title": "Visual inspection of hydraulic system components",
+      "when": {
+        "path": "fields.fluid_condition",
+        "in": [
+          "CONTAMINATED",
+          "BURNT_ODOR"
+        ]
+      },
+      "defect": {
+        "title": "Hydraulic fluid condition indicates contamination or overheating",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(4) / 4.6.5"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_functional_testing:0",
+      "defect_hash": "04504b9a5150a7e5",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of hydraulic system",
+      "when": {
+        "path": "fields.smooth_operation",
+        "equals": false
+      },
+      "defect": {
+        "title": "Hydraulic system functional operation not smooth / abnormal response",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(4)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_pressure_limiting_device_check:0",
+      "defect_hash": "85cbb4bbc8c1944e",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_pressure_limiting_device_check",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Verify pressure limiting device prevents exceeding maximum operating pressure",
+      "when": {
+        "path": "fields.pressure_limit_verified",
+        "equals": false
+      },
+      "defect": {
+        "title": "Pressure limiting device did not verify / may allow overpressure",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 4.6.7"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_hydraulic_system_module:hydraulic_pressure_limiting_device_check:1",
+      "defect_hash": "43e7f90b2f011860",
+      "template_key": "ansi_a92_2_2021_hydraulic_system_module",
+      "step_key": "hydraulic_pressure_limiting_device_check",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Verify pressure limiting device prevents exceeding maximum operating pressure",
+      "when": {
+        "any": [
+          {
+            "path": "fields.adjustment_requires_tools",
+            "equals": false
+          },
+          {
+            "path": "fields.device_can_be_sealed",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Pressure limiting device adjustment/sealing requirements not satisfied",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 4.6.7"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_load_test_module:load_test_execute:0",
+      "defect_hash": "6c08f9e3231b9d34",
+      "template_key": "ansi_a92_2_2021_load_test_module",
+      "step_key": "load_test_execute",
+      "step_type": "MEASUREMENT",
+      "step_title": "Perform load test",
+      "when": {
+        "path": "fields.observed_behavior",
+        "contains_any": [
+          "STRUCTURAL_DISTRESS",
+          "LOSS_OF_STABILITY"
+        ]
+      },
+      "defect": {
+        "title": "Unsafe condition observed during load test",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 8.2.5(1)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_load_test_module:load_test_post_inspection:0",
+      "defect_hash": "52ece364ec11b9d5",
+      "template_key": "ansi_a92_2_2021_load_test_module",
+      "step_key": "load_test_post_inspection",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Post-load-test inspection",
+      "when": {
+        "path": "fields.structural_damage_present",
+        "equals": true
+      },
+      "defect": {
+        "title": "Structural damage observed after load test",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 8.2.5(1)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_markings_module:markings_required_content_checklist:0",
+      "defect_hash": "8f9491d2bcd4c912",
+      "template_key": "ansi_a92_2_2021_markings_module",
+      "step_key": "markings_required_content_checklist",
+      "step_type": "CHECKLIST",
+      "step_title": "Verification of required marking content (high-level)",
+      "when": {
+        "any": [
+          {
+            "path": "fields.identification_markings_present",
+            "equals": false
+          },
+          {
+            "path": "fields.control_function_markings_present",
+            "equals": false
+          },
+          {
+            "path": "fields.warnings_and_instructions_present",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "Required markings content missing (identification / controls / warnings)",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 4.12.1 / 6.5.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_parts_module:parts_walkaround_visual:0",
+      "defect_hash": "4357f3fd764a6742",
+      "template_key": "ansi_a92_2_2021_periodic_parts_module",
+      "step_key": "parts_walkaround_visual",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Walk-around visual inspection of parts",
+      "when": {
+        "path": "fields.performed",
+        "equals": false
+      },
+      "defect": {
+        "title": "Walk-around inspection not performed",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_parts_module:parts_functional_testing:0",
+      "defect_hash": "05da8277158f2d2e",
+      "template_key": "ansi_a92_2_2021_periodic_parts_module",
+      "step_key": "parts_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of device and parts",
+      "when": {
+        "path": "fields.emergency_stop_verified",
+        "equals": false
+      },
+      "defect": {
+        "title": "Emergency stop did not verify during functional testing",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(8)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_inspection_documentation_module:doc_required_record_fields:0",
+      "defect_hash": "c2be9588d53dd487",
+      "template_key": "ansi_a92_2_2021_periodic_inspection_documentation_module",
+      "step_key": "doc_required_record_fields",
+      "step_type": "CHECKLIST",
+      "step_title": "Periodic inspection record fields (required)",
+      "when": {
+        "path": "fields.record_completeness",
+        "equals": "INCOMPLETE"
+      },
+      "defect": {
+        "title": "Periodic inspection documentation marked incomplete",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.3.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_periodic_inspection_documentation_module:doc_placard_application:0",
+      "defect_hash": "d2aa7235e93de00f",
+      "template_key": "ansi_a92_2_2021_periodic_inspection_documentation_module",
+      "step_key": "doc_placard_application",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Apply periodic inspection/test completion placard",
+      "when": {
+        "path": "fields.placard_applied",
+        "equals": false
+      },
+      "defect": {
+        "title": "Periodic inspection placard not applied",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.3.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_functional_testing:0",
+      "defect_hash": "310520e6b16af6d0",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of vacuum limiting system",
+      "when": {
+        "path": "fields.activated_and_observed",
+        "equals": false
+      },
+      "defect": {
+        "title": "Vacuum limiting system functional test not performed",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(8)"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_functional_testing:1",
+      "defect_hash": "7c87dde5556e2303",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_functional_testing",
+      "step_type": "FUNCTIONAL_TEST",
+      "step_title": "Functional testing of vacuum limiting system",
+      "when": {
+        "path": "fields.responds_to_pressure_changes",
+        "equals": false
+      },
+      "defect": {
+        "title": "Vacuum limiting system does not respond properly to pressure changes",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 5.2.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_pressure_testing:0",
+      "defect_hash": "f5afe183ad0963fb",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_pressure_testing",
+      "step_type": "MEASUREMENT",
+      "step_title": "Pressure (vacuum) testing of vacuum limiting system",
+      "when": {
+        "path": "measurements.pressure_gauge_calibrated",
+        "equals": false
+      },
+      "defect": {
+        "title": "Vacuum measurement performed without calibrated gauge",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 5.2.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_vacuum_limiting_systems_module:vacuum_component_installation_alignment:0",
+      "defect_hash": "0af77fc2a35d0015",
+      "template_key": "ansi_a92_2_2021_vacuum_limiting_systems_module",
+      "step_key": "vacuum_component_installation_alignment",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Verify installation, alignment, and service access",
+      "when": {
+        "path": "fields.proper_installation_alignment",
+        "equals": false
+      },
+      "defect": {
+        "title": "Vacuum limiting components not properly installed/aligned",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 5.2.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_welds_module:welds_critical_welds_review:0",
+      "defect_hash": "41e23e85a70603da",
+      "template_key": "ansi_a92_2_2021_welds_module",
+      "step_key": "welds_critical_welds_review",
+      "step_type": "VISUAL_CHECK",
+      "step_title": "Critical welds review (manufacturer-designated)",
+      "when": {
+        "path": "fields.critical_welds_inspected",
+        "equals": false
+      },
+      "defect": {
+        "title": "Critical welds not explicitly inspected (manufacturer-designated)",
+        "severity": "SERVICE_REQUIRED",
+        "standard_reference": "ANSI A92.2-2021 8.4.2"
+      }
+    },
+    {
+      "defect_id": "ansi_a92_2_2021_welds_module:welds_nde_optional:0",
+      "defect_hash": "7a9d9eede96b258c",
+      "template_key": "ansi_a92_2_2021_welds_module",
+      "step_key": "welds_nde_optional",
+      "step_type": "MEASUREMENT",
+      "step_title": "Non-Destructive Examination (NDE) (as required / OEM-directed)",
+      "when": {
+        "all": [
+          {
+            "path": "measurements.performed",
+            "equals": true
+          },
+          {
+            "path": "measurements.result_passed",
+            "equals": false
+          }
+        ]
+      },
+      "defect": {
+        "title": "NDE indicates unacceptable weld condition",
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "standard_reference": "ANSI A92.2-2021 6.9"
+      }
+    }
+  ]
+}

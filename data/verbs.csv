@@ -1,0 +1,11 @@
+key,label,category,sort_order
+replace,Replace,maintenance,10
+inspect,Inspect,inspection,20
+repair,Repair,maintenance,30
+clean,Clean,maintenance,40
+lubricate,Lubricate,maintenance,50
+adjust,Adjust,maintenance,60
+test,Test,inspection,70
+check,Check,inspection,80
+tighten,Tighten,maintenance,90
+replace_filter,Replace Filter,maintenance,100

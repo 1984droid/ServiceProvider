@@ -11,87 +11,154 @@ Single-tenant service provider application for equipment inspection and work ord
 - No premature optimization - add complexity only when needed
 
 **Key Models:**
+- **Organization**: Company info, departments, and employees
 - **Customer**: Business entity only (NO contact info)
 - **Contact**: All communication details (multiple per customer)
-- **Vehicle**: VIN-based assets (trucks, trailers)
-- **Equipment**: Serial number-based assets (aerial devices, cranes)
+- **Vehicle**: VIN-based assets (trucks, trailers) with tag-based routing
+- **Equipment**: Serial number-based assets (aerial devices, cranes) with tag-based routing
+- **Inspections**: Template-driven inspection execution with immutability
+- **Work Orders**: Multi-department work order management with employee assignments
 
 ## Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- PostgreSQL 14+
+- Python 3.14+
+- PostgreSQL 18+
 - pip
 
-### Installation
+### Automated Setup (Recommended)
 
-1. **Clone and setup virtual environment:**
+**One command setup:**
 ```bash
-cd NEW_BUILD_STARTER
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+python setup.py setup
 ```
 
-2. **Install dependencies:**
+Visit: http://localhost:8100/admin
+
+**That's it!** The setup script:
+- Validates Python 3.10+ and PostgreSQL
+- Creates `.env` file from `.env.example`
+- Installs all dependencies from `requirements.txt`
+- Creates PostgreSQL database (`service_provider_new`)
+- Runs all migrations
+- Prompts to create superuser
+- Collects static files
+
+**Other commands:**
 ```bash
-pip install -r requirements.txt
+python setup.py update    # Update after pulling changes
+python setup.py wipe      # Wipe database and migrations (dev only)
+python setup.py reset     # Full reset (wipe + setup)
+python setup.py status    # Check system status
 ```
 
-3. **Configure environment:**
-```bash
-cp .env.example .env
-# Edit .env with your database credentials
-```
+See [SETUP_SCRIPT.md](docs/SETUP_SCRIPT.md) for complete documentation.
 
-4. **Create database:**
-```bash
-# Using psql
-psql -U postgres -c "CREATE DATABASE service_provider;"
-```
+### Manual Setup (Alternative)
 
-5. **Run migrations:**
-```bash
-python manage.py migrate
-```
-
-6. **Create superuser:**
-```bash
-python manage.py createsuperuser
-```
-
-7. **Run development server:**
-```bash
-python manage.py runserver
-```
-
-Visit: http://localhost:8000/admin
+See [QUICK_START.md](docs/QUICK_START.md) for manual setup instructions.
 
 ## Project Structure
 
 ```
-NEW_BUILD_STARTER/
+service-provider/
 ├── manage.py
 ├── requirements.txt
 ├── .env.example
+├── .gitignore
 ├── README.md
+│
 ├── config/                 # Django project settings
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
-└── apps/
-    ├── customers/          # Customer and Contact models
-    │   ├── models.py
-    │   ├── admin.py
-    │   ├── serializers.py
-    │   └── views.py
-    └── assets/             # Vehicle and Equipment models
-        ├── models.py
-        ├── admin.py
-        ├── serializers.py
-        └── views.py
+│
+├── apps/                   # Django applications
+│   ├── organization/       # Company, Department, Employee models
+│   │   ├── models.py
+│   │   ├── admin.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   └── apps.py
+│   ├── customers/          # Customer and Contact models
+│   │   ├── models.py
+│   │   ├── admin.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   └── apps.py
+│   ├── assets/             # Vehicle and Equipment models
+│   │   ├── models.py
+│   │   ├── admin.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   └── apps.py
+│   ├── inspections/        # Inspection models
+│   │   ├── models.py
+│   │   ├── admin.py
+│   │   └── apps.py
+│   └── work_orders/        # Work Order models
+│       ├── models.py
+│       ├── admin.py
+│       └── apps.py
+│
+├── docs/                   # Documentation
+│   ├── README.md           # Documentation index
+│   ├── SETUP_SCRIPT.md     # Automated setup script guide
+│   ├── QUICK_START.md      # Manual setup guide
+│   ├── SCHEMA_QUICK_REFERENCE.md  # Visual data model
+│   ├── DATA_CONTRACT.md    # Complete specification
+│   ├── MODEL_CHANGES_SUMMARY.md   # Change history
+│   ├── INSPECTION_AND_WORK_ORDER_FLOWS.md  # Workflow guide
+│   ├── IMPLEMENTATION_PLAN.md  # 6-phase implementation plan
+│   ├── PHASE_1_COMPLETION.md   # Phase 1 status
+│   └── SCRIPTS_README.md   # Script documentation
+│
+└── scripts/                # Development helper scripts
+    ├── README.md           # Scripts quick reference
+    ├── setup_dev.sh/bat    # Initial environment setup
+    ├── run_dev.sh/bat      # Start development server
+    ├── shell.sh/bat        # Django shell
+    ├── make_migrations.sh/bat  # Create migrations
+    ├── reset_dev.sh/bat    # Reset database
+    └── generate_env.sh/bat # Generate .env
 ```
 
 ## Models Overview
+
+### Company
+Single-tenant company information. Contains:
+- Company name and DBA name
+- Contact information (phone, email, fax)
+- Physical address
+- Business details (tax ID, business type)
+- Status
+
+**Only one company record allowed** - single-tenant enforcement.
+
+### Department
+Organizational departments. Contains:
+- Department name and code (unique)
+- Description and manager
+- Active status and floating employee flag
+- Employee count tracking
+
+Supports base and floating employee assignments.
+
+### Employee
+Staff members with department assignments. Contains:
+- Employee number (unique)
+- Personal information (name, email, phone)
+- Base department (required)
+- Floating departments (optional M2M)
+- Hire/termination dates
+- Active status
+- Certifications and skills (JSON)
+- Optional link to User account
+
+Employees can work in their base department plus any floating departments.
 
 ### Customer
 Business entity we service. Contains:
@@ -130,6 +197,41 @@ Serial number-based asset. Contains:
 ## Database Schema
 
 ```
+company
+├── id (UUID, PK)
+├── name
+├── dba_name
+├── contact fields (phone, email, fax)
+├── address fields
+├── business details (tax_id, business_type)
+├── is_active
+└── timestamps
+
+departments
+├── id (UUID, PK)
+├── name (unique)
+├── code (unique)
+├── description
+├── manager_id (FK to Employee)
+├── is_active
+├── allows_floating
+└── timestamps
+
+employees
+├── id (UUID, PK)
+├── employee_number (unique)
+├── first_name, last_name
+├── email, phone, mobile
+├── base_department_id (FK)
+├── floating_departments (M2M)
+├── hire_date, termination_date
+├── is_active
+├── title
+├── certifications (JSON)
+├── skills (JSON)
+├── user_id (FK to auth.User)
+└── timestamps
+
 customers
 ├── id (UUID, PK)
 ├── name
@@ -170,24 +272,33 @@ equipment
 └── timestamps
 ```
 
-## Next Steps
+## Current Status
 
-### Phase 2: API Development
-- REST API endpoints for CRUD operations
-- JWT authentication
-- API documentation
+### ✅ Phase 1: Database Foundation - COMPLETE
+- Organization models (Company, Department, Employee)
+- InspectionRun, InspectionDefect models
+- WorkOrder, WorkOrderDefect models with department/employee assignments
+- Admin interfaces
+- REST API endpoints
+- Test configuration (no-hardcode rule)
+- 166 tests passing (100%)
+- Migrations ready
+- See [PHASE_1_COMPLETION.md](docs/PHASE_1_COMPLETION.md)
 
-### Phase 3: Inspections
-- Port inspection engine from previous build
-- InspectionTemplate, InspectionRun, InspectionDefect models
-- Link to Vehicle/Equipment
-
-### Phase 4: Work Orders
-- WorkOrder model
-- Inspection → Work Order flow
-- Defect → Work Order conversion
+### 🔄 Phase 2: Template System - Next
+- Inspection template system (JSON-based)
+- Template registry and validation
+- Module and step definitions
+- Rule definitions for defect generation
+- See [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)
 
 ## Development Notes
+
+**Why Organization module?**
+- Company represents our organization (single-tenant)
+- Department enables multi-department work order tracking
+- Employee supports base + floating department assignments
+- Enables proper work assignment and capacity planning
 
 **Why separate Customer and Contact?**
 - Customer represents the business entity
@@ -242,8 +353,11 @@ python manage.py shell
 python manage.py test
 
 # Run specific app tests
+python manage.py test apps.organization
 python manage.py test apps.customers
 python manage.py test apps.assets
+python manage.py test apps.inspections
+python manage.py test apps.work_orders
 
 # Verbose output
 python manage.py test -v 2

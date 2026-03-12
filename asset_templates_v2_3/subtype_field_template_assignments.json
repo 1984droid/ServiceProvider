@@ -1,0 +1,1341 @@
+{
+  "schema_version": "2.3.0",
+  "generated_at": "2026-02-08",
+  "notes": "Subtype -> field template assignment. Templates are applied in order. The UI/validator should merge sections and required fields.",
+  "assignments": [
+    {
+      "subtype_key": "fleet",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "tools",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.tools.core"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "real_estate",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.real_estate"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "containers",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.containers"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.tractor",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.tractor.day_cab",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.tractor.sleeper",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.straight_truck",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.straight_truck.box",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.straight_truck.flatbed",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.straight_truck.service",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.pickup",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.van",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.van.cargo",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.van.passenger",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.car",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.car.sedan",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.car.suv",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.dry_van",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.dry_van.53ft",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.dry_van.48ft",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.dry_van.28ft",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.reefer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.reefer.53ft",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.flatbed",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.step_deck",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.lowboy",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.tanker",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.dump",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.trailer.chassis",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.trailer"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "fleet.dolly",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.fleet.vehicle_repair_vin_profile"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.mewp",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.mewp"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.mewp.scissor_lift",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.mewp"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.mewp.boom_lift",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.mewp"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.mewp.aerial_device",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.mewp",
+        "ft.equipment.aerial_device_compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.forklift",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.forklift"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.forklift.telehandler",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.forklift"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.forklift.pallet_jack",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.forklift"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.generator",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.generator"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.generator.towable",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized",
+        "ft.equipment.generator"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.compressor",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.light_tower",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "equipment.pump",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.equipment.serialized"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.lift",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.lift.two_post",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.lift.four_post",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.lift.in_ground",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.lift.mobile_column",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.air_system",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.air_system.compressor",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.air_system.dryer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.air_system.receiver_tank",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.welding",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.welding.mig",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.welding.tig",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.welding.stick",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.welding.plasma",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.tire",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.tire.changer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.tire.balancer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.press",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.crane",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.crane.gantry",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.crane.overhead",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.crane.jib",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.diagnostics",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.diagnostics.scan_tool",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "shop_equipment.diagnostics.calibration_tool",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.shop_equipment.powered"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.wash_system",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.wash_system.pressure_washer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.wash_system.water_reclaim",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.wash_system.chemical_dispense",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.body_shop",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.body_shop.paint_booth",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.graphics_shop",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.graphics_shop.printer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.graphics_shop.laminator",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.graphics_shop.cutter_plotter",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "tools.hand",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.tools.core"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "tools.power",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.tools.core"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "tools.calibrated",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.tools.core",
+        "ft.tools.calibration"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "tools.calibrated.torque_wrench",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.tools.core",
+        "ft.tools.calibration"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "tools.calibrated.pressure_gauge",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.tools.core",
+        "ft.tools.calibration"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "tools.calibrated.multimeter",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.tools.core",
+        "ft.tools.calibration"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.ppe",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.ppe.harness",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.ppe.lanyard",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.ppe.respirator",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.gas_monitor",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.first_aid",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.spill_kit",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "safety.lockout_tagout",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.safety.ppe"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.fire_safety",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.fire_safety.extinguisher",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.fire_safety.alarm_panel",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.fire_safety.suppression_system",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.hvac",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.hvac.furnace",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.hvac.boiler",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.hvac.chiller",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.hvac.air_handler",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.fuel_storage",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.fuel_storage.tank",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.fuel_storage.pump",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.security",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.security.camera",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "facilities.security.access_control",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.facilities.compliance"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "real_estate.parcel",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.real_estate"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "real_estate.building",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.real_estate"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "real_estate.suite",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.real_estate"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "real_estate.yard",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.real_estate"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.computer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.computer.laptop",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.computer.desktop",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.tablet",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.printer",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.network",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.network.router",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.network.switch",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "it.network.firewall",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.it.device"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "containers.tank",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.containers"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "containers.tank.fuel",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.containers"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "containers.tank.water",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.containers"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "containers.tote",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.containers"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "containers.drum",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.containers"
+      ],
+      "required_overrides": []
+    },
+    {
+      "subtype_key": "containers.dumpster",
+      "templates": [
+        "ft.core",
+        "ft.financial_value",
+        "ft.schedules",
+        "ft.containers"
+      ],
+      "required_overrides": []
+    }
+  ]
+}

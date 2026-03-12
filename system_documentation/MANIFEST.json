@@ -1,0 +1,144 @@
+{
+  "system_documentation_version": "v1",
+  "generated_date": "2026-02-08",
+  "includes": [
+    {
+      "name": "asset_templates_v2_3_field_mapping_package.zip",
+      "category": "package",
+      "size_bytes": 167343,
+      "sha256": "090e2e50c53c01ffec735fb19dddb4f1c72ecb73fe7ef17ff91581828a601098"
+    },
+    {
+      "name": "asset_templates_v2_2_with_work_order_vocab.zip",
+      "category": "package",
+      "size_bytes": 138117,
+      "sha256": "48fbf51e8a88c8351521dbe3207811713bb7a8ecbfc47281657339539fe284cb"
+    },
+    {
+      "name": "asset_templates_v2_1_with_ansi_a92_2_2021.zip",
+      "category": "package",
+      "size_bytes": 75338,
+      "sha256": "d871942fd823bad71b93395fc9d17ac9fbbfb7a50444b58c569860e0b664173c"
+    },
+    {
+      "name": "asset_templates_v2_complete_package.zip",
+      "category": "package",
+      "size_bytes": 18899,
+      "sha256": "880342fa0a41d772bfa40a69b3296c16705e4ba413aca57d7ccc9c778429dfc5"
+    },
+    {
+      "name": "work_orders_gold_standard_package_v1.zip",
+      "category": "package",
+      "size_bytes": 19257,
+      "sha256": "a3e20713438a84c8dd21ce70f0107a9cb60476db4294bda07794a408dc7f384c"
+    },
+    {
+      "name": "leasing_compliance_mvp_package_v1.zip",
+      "category": "package",
+      "size_bytes": 12193,
+      "sha256": "38522d8bf8b650fb8452dfdadb5bbaaa48c0d4d1c70cf2c808c73302cf2bba53"
+    },
+    {
+      "name": "financial_system_qbo_ready_package_v1.zip",
+      "category": "package",
+      "size_bytes": 20615,
+      "sha256": "473b1d9ed51ebae42a1aee9289b25d0520e68e897cbec61a8c50cae1368af745"
+    },
+    {
+      "name": "inspection_work_order_gold_enhancements_package_v1.zip",
+      "category": "package",
+      "size_bytes": 11698,
+      "sha256": "2d3dbb34a56de5bc25e115cbc7b420f560173ad3e85039d1e11453ac1515e356"
+    },
+    {
+      "name": "inventory_management_gold_standard_package_v1.zip",
+      "category": "package",
+      "size_bytes": 20723,
+      "sha256": "3d38e9cced895579d6ab3a2af6bfd2f6fc3abb35edab3b7dfbbd5e9bbce26c58"
+    },
+    {
+      "name": "inventory_qbo_mapping_appendix_package_v1.zip",
+      "category": "package",
+      "size_bytes": 7443,
+      "sha256": "f75d44a51378258b634dab2de2f38cdcbb9f64d4b2e5408a2efc74654b4cb6ff"
+    },
+    {
+      "name": "gold_standard_tests_package_v1.zip",
+      "category": "package",
+      "size_bytes": 16198,
+      "sha256": "5fa27a0718fcd30e730aa9e2402ccbbcec7d787beba3937f95a16fe6cc63d4c8"
+    },
+    {
+      "name": "seed_data_gold_standard_package_v1.zip",
+      "category": "package",
+      "size_bytes": 11693,
+      "sha256": "aed0ca961fb401010a92a90bf1dc13dc7b150920a933bc27ced84b526a99037b"
+    },
+    {
+      "name": "a92_2_2021.zip",
+      "category": "package",
+      "size_bytes": 53018,
+      "sha256": "eb8eff2a84264db7d76903c912f537fbe0f546a8866f658d91b52eb3bf433cc1"
+    },
+    {
+      "name": "noun_categories.csv",
+      "category": "data",
+      "size_bytes": 1246,
+      "sha256": "8288c47ef63a5fdd11daeae221922eb6d54c70aa7698b822cb1bd1b00f8effe5"
+    },
+    {
+      "name": "noun_items.csv",
+      "category": "data",
+      "size_bytes": 436015,
+      "sha256": "693146071268143943c60f76a624c501038652e131d1720c56cb20b07aa73f31"
+    },
+    {
+      "name": "service_locations.csv",
+      "category": "data",
+      "size_bytes": 11743,
+      "sha256": "51f3aebab8fae421c425be8a5431ea724520b797bab5c02c851bc3093fbf47c7"
+    },
+    {
+      "name": "verbs.csv",
+      "category": "data",
+      "size_bytes": 3218,
+      "sha256": "17187baf94154f1d3c924a938062ff6a01dc4b2b72f276f3130dcdd7c2b1aa0b"
+    },
+    {
+      "name": "WORK_ORDER_SYSTEM_ASSESSMENT.md",
+      "category": "reference",
+      "size_bytes": 29730,
+      "sha256": "c520b7eb6793dd69a9ffa6f9a67ee230350cc6ba93266cd9750d4406243168e5"
+    },
+    {
+      "name": "LEASING_COMPLIANCE_ASSESSMENT.md",
+      "category": "reference",
+      "size_bytes": 25997,
+      "sha256": "c079553be38f0de4c9f82689f14af6d3714a6584caf3431f2f226587cc62dcf3"
+    },
+    {
+      "name": "INSPECTION_WORK_ORDER_INTEGRATION_ASSESSMENT.md",
+      "category": "reference",
+      "size_bytes": 26784,
+      "sha256": "f52f795ae2417dca3562c9c9ab8196ff8e9662aa9020ed3f08baaa6885c60aa8"
+    },
+    {
+      "name": "ASSET_TEMPLATES.md",
+      "category": "reference",
+      "size_bytes": 21735,
+      "sha256": "b25591aeb0251f77fe761200131fa1ca2b8cd435bf9e29bcc23f9b5b75407659"
+    },
+    {
+      "name": "ASSET_FIELD_STRATEGY.md",
+      "category": "reference",
+      "size_bytes": 5404,
+      "sha256": "0ed0b6b5cb27f75437b4f297543beca5447c3a3bbeea81d53280e149f81f850e"
+    },
+    {
+      "name": "ASSET_CONFIG_FILES_GUIDE.md",
+      "category": "reference",
+      "size_bytes": 9232,
+      "sha256": "ab951774f7c720f9a5fee2562f660ca33a96da62aee37ed3bfb8f11cbfa34861"
+    }
+  ]
+}

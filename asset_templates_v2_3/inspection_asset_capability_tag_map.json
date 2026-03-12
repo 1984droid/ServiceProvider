@@ -1,0 +1,34 @@
+{
+  "notes": "Map internal typed capabilities/flags to AF template 'asset.capabilities' tags.",
+  "generated_at": "2026-02-07",
+  "mappings": [
+    {
+      "if_capability_key": "insulated",
+      "equals": true,
+      "add_tags": [
+        "INSULATING_SYSTEM"
+      ]
+    },
+    {
+      "if_capability_key": "barehand_capable",
+      "equals": true,
+      "add_tags": [
+        "BARE_HAND_WORK_UNIT"
+      ]
+    },
+    {
+      "if_capability_key": "dc_barehand_capable",
+      "equals": true,
+      "add_tags": [
+        "DC_BARE_HAND_WORK_UNIT"
+      ]
+    },
+    {
+      "if_capability_key": "high_resistance_upper_controls",
+      "equals": true,
+      "add_tags": [
+        "HIGH_RESISTANCE_UPPER_CONTROLS"
+      ]
+    }
+  ]
+}

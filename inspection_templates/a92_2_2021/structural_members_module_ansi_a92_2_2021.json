@@ -1,0 +1,268 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_structural_members_module",
+    "name": "ANSI A92.2-2021 – Structural Members (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["structural", "booms", "platform", "outriggers", "welds", "nde"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "inspection_method": ["VISUAL", "MEASURED", "NDE_VT", "NDE_MT", "NDE_PT", "NDE_UT", "NDE_AE", "OEM_SPEC_REFERENCE"],
+    "structural_area": ["BOOMS", "PLATFORM", "PEDESTAL", "OUTRIGGERS_STABILIZERS", "FRAMES", "WELDS", "OTHER"],
+    "symptom_type": [
+      "CRACK",
+      "FRACTURE",
+      "CORROSION",
+      "DEFORMATION",
+      "BENDING_WARPING",
+      "LOOSE_HARDWARE",
+      "MISSING_HARDWARE",
+      "DAMAGED_FASTENERS_LOCKS",
+      "WELD_DEFECT",
+      "MISALIGNMENT",
+      "OTHER"
+    ],
+    "nde_method": ["VT", "MT", "PT", "UT", "AE"],
+    "action_taken": ["NONE", "REPAIRED", "REPLACED", "REMOVED_FROM_SERVICE", "DEFERRED"]
+  },
+
+  "schemas": {
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "structural_area", "type": "ENUM", "enum_ref": "structural_area", "required": true },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        { "field_id": "inspection_method", "type": "ENUM", "enum_ref": "inspection_method", "required": true },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OUTRIGGERS", "CHASSIS", "OTHER"],
+          "required": false
+        },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "oem_spec_reference", "type": "TEXT", "required": false },
+        { "field_id": "measured_value", "type": "NUMBER", "required": false },
+        { "field_id": "measured_unit", "type": "TEXT", "required": false },
+        { "field_id": "within_oem_spec", "type": "BOOLEAN", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    },
+
+    "nde_record_schema": {
+      "fields": [
+        { "field_id": "performed", "type": "BOOLEAN", "required": true },
+        { "field_id": "nde_method", "type": "ENUM", "enum_ref": "nde_method", "required": false },
+        { "field_id": "area_examined", "type": "ENUM", "enum_ref": "structural_area", "required": false },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "findings_summary", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos_or_reports", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      {
+        "input_id": "inspection_context",
+        "type": "ENUM",
+        "values": ["PERIODIC", "POST_REPAIR", "MAJOR_REPAIR"],
+        "required": true
+      },
+      {
+        "input_id": "asset_capabilities",
+        "type": "ASSET_CAPABILITIES",
+        "required": false
+      }
+    ],
+
+    "steps": [
+      {
+        "step_key": "structural_preparation",
+        "type": "SETUP",
+        "title": "Preparation for structural member inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(1)",
+        "required": true,
+        "fields": [
+          { "field_id": "worksite_safe", "type": "BOOLEAN", "required": true },
+          { "field_id": "device_setup_complete", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "structural_visual_inspection",
+        "type": "DEFECT_CAPTURE",
+        "title": "Visual inspection of structural members",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(1)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect booms, platforms, pedestals, outriggers/stabilizers, and frames.",
+            "Look for cracks/fractures, corrosion, deformation/bending/warping, loose/missing hardware, and weld defects.",
+            "Use manufacturer tolerances where specified; record measured values when applicable."
+          ],
+          "suggested_area_checklist": [
+            { "area": "BOOMS", "prompts": ["cracks", "deformation", "corrosion", "damage"] },
+            { "area": "PLATFORM", "prompts": ["loose/missing fasteners", "weld defects", "damage"] },
+            { "area": "PEDESTAL", "prompts": ["cracks", "wear", "corrosion"] },
+            { "area": "OUTRIGGERS_STABILIZERS", "prompts": ["deformation", "cracks", "corrosion"] },
+            { "area": "FRAMES", "prompts": ["bending/warping", "damage", "integrity"] }
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "no_defects_found",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "If true, you must have zero defects recorded for this step."
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "validations": [
+          {
+            "validation_id": "no_defects_true_requires_zero_defects",
+            "type": "CONSISTENCY",
+            "rule": "IF fields.no_defects_found == true THEN defect_count == 0"
+          }
+        ]
+      },
+
+      {
+        "step_key": "structural_nde_guidance",
+        "type": "INSTRUCTION",
+        "title": "Supplemental Non-Destructive Examination (NDE) guidance",
+        "standard_reference": "ANSI A92.2-2021 Section 3 (NDE definition), 8.2.6",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Use supplemental NDE as needed to detect hidden damage/defects. Methods may include VT, MT (ferromagnetic), PT (non-porous surfaces), UT (internal flaws), and AE (monitoring during load testing). Follow manufacturer procedures and qualified personnel requirements."
+          }
+        ]
+      },
+
+      {
+        "step_key": "structural_nde_record",
+        "type": "RECORD",
+        "title": "Record NDE performed (if applicable)",
+        "standard_reference": "ANSI A92.2-2021 8.2.6",
+        "required": false,
+        "schema_ref": "nde_record_schema"
+      },
+
+      {
+        "step_key": "structural_welds_critical",
+        "type": "DEFECT_CAPTURE",
+        "title": "Inspect critical welds (as designated by manufacturer)",
+        "standard_reference": "ANSI A92.2-2021 8.4.2",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect manufacturer-designated critical welds for cracks, deformation, and defects.",
+            "Welding repairs must meet AWS D1.1-2020 or AWS D1.2-2016 as applicable.",
+            "NDE methods should comply with AWS B1.10-2018."
+          ]
+        }
+      },
+
+      {
+        "step_key": "structural_post_repair_functional_test",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair functional test for structural members",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" }
+          ]
+        },
+        "fields": [
+          { "field_id": "performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "structural_load_test_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Load testing is covered by separate module",
+        "standard_reference": "ANSI A92.2-2021 8.2.5(1), 4.5.1, 4.5.3",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "If load testing is required by manufacturer/policy, include the Load Test module. Structural members must sustain 1.5× rated load without permanent deformation or failure and must meet stability requirements."
+          }
+        ]
+      },
+
+      {
+        "step_key": "structural_design_stress_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Design stress limits (informational)",
+        "standard_reference": "ANSI A92.2-2021 4.2",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Section 4.2 describes design stress requirements (not typically field-verifiable during periodic inspection). Use manufacturer criteria and qualified engineering assessment where applicable."
+          }
+        ]
+      },
+
+      {
+        "step_key": "structural_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Structural member inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_entity", "type": "TEXT", "required": true },
+          { "field_id": "members_inspected_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "findings_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "actions_taken_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

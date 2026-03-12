@@ -57,12 +57,14 @@ class Customer(BaseModel):
     usdot_number = models.CharField(
         max_length=20,
         blank=True,
+        default='',
         db_index=True,
         help_text="US DOT Number"
     )
     mc_number = models.CharField(
         max_length=20,
         blank=True,
+        default='',
         db_index=True,
         help_text="Motor Carrier Number"
     )
@@ -79,6 +81,43 @@ class Customer(BaseModel):
             models.Index(fields=['mc_number']),
             models.Index(fields=['primary_contact']),
         ]
+
+    def clean(self):
+        """Validate model fields."""
+        from django.core.exceptions import ValidationError
+        errors = {}
+
+        # Name is required and has max length
+        if not self.name:
+            errors['name'] = 'This field is required'
+        elif len(self.name) > 255:
+            errors['name'] = 'Ensure this value has at most 255 characters'
+
+        # State must be valid if provided
+        if self.state:
+            from tests.config import CONSTRAINTS
+            valid_states = CONSTRAINTS.get('customer', {}).get('state', {}).get('valid_choices', [])
+            if valid_states and self.state not in valid_states:
+                errors['state'] = f'Invalid state: {self.state}'
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Override save to call full_clean() first."""
+        from django.core.exceptions import ValidationError
+
+        # Skip validation if explicitly disabled
+        if not kwargs.pop('skip_validation', False):
+            try:
+                self.full_clean()
+            except ValidationError as e:
+                # If it's a uniqueness error, let database handle it
+                if any('already exists' in str(v) for v in e.message_dict.values()):
+                    pass
+                else:
+                    raise
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -124,15 +163,15 @@ class USDOTProfile(BaseModel):
     entity_type = models.CharField(max_length=100, blank=True, help_text="LLC, Corporation, etc.")
 
     # Address (from FMCSA)
-    physical_address = models.CharField(max_length=500, blank=True)
-    physical_city = models.CharField(max_length=100, blank=True)
-    physical_state = models.CharField(max_length=2, blank=True)
-    physical_zip = models.CharField(max_length=20, blank=True)
+    physical_address = models.CharField(max_length=500, blank=True, default='')
+    physical_city = models.CharField(max_length=100, blank=True, default='')
+    physical_state = models.CharField(max_length=2, blank=True, default='')
+    physical_zip = models.CharField(max_length=20, blank=True, default='')
 
-    mailing_address = models.CharField(max_length=500, blank=True)
-    mailing_city = models.CharField(max_length=100, blank=True)
-    mailing_state = models.CharField(max_length=2, blank=True)
-    mailing_zip = models.CharField(max_length=20, blank=True)
+    mailing_address = models.CharField(max_length=500, blank=True, default='')
+    mailing_city = models.CharField(max_length=100, blank=True, default='')
+    mailing_state = models.CharField(max_length=2, blank=True, default='')
+    mailing_zip = models.CharField(max_length=20, blank=True, default='')
 
     # Contact from FMCSA
     phone = models.CharField(max_length=50, blank=True)
@@ -237,6 +276,34 @@ class Contact(BaseModel):
             models.Index(fields=['email']),
             models.Index(fields=['is_automated']),
         ]
+
+    def clean(self):
+        """Validate model fields."""
+        from django.core.exceptions import ValidationError
+        errors = {}
+
+        # Email required for automated contacts
+        if self.is_automated and not self.email:
+            errors['email'] = 'Automated contacts must have an email address'
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Override save to call full_clean() first."""
+        from django.core.exceptions import ValidationError
+
+        # Skip validation if explicitly disabled
+        if not kwargs.pop('skip_validation', False):
+            try:
+                self.full_clean()
+            except ValidationError as e:
+                # If it's a uniqueness error, let database handle it
+                if any('already exists' in str(v) for v in e.message_dict.values()):
+                    pass
+                else:
+                    raise
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.full_name} ({self.customer.name})"

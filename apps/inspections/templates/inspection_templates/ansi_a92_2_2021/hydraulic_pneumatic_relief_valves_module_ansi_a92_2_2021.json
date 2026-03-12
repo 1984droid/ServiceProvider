@@ -1,0 +1,218 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_relief_valve_settings_module",
+    "name": "ANSI A92.2-2021 – Hydraulic & Pneumatic Relief Valve Settings (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["hydraulic", "pneumatic", "relief_valves", "pressure"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "valve_type": ["HYDRAULIC", "PNEUMATIC"],
+    "inspection_method": ["VISUAL", "FUNCTIONAL", "PRESSURE_TEST"],
+    "action_taken": ["NONE", "ADJUSTED", "REPAIRED", "REPLACED", "REMOVED_FROM_SERVICE"]
+  },
+
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "relief_valve_pressure_measurements",
+        "title": "Relief Valve Pressure Measurements",
+        "fields": [
+          {
+            "field_id": "manufacturer_set_pressure",
+            "label": "Manufacturer specified set pressure",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 1
+          },
+          {
+            "field_id": "measured_opening_pressure",
+            "label": "Measured opening pressure",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 1
+          },
+          {
+            "field_id": "max_system_operating_pressure",
+            "label": "Maximum operating pressure",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 1
+          }
+        ]
+      }
+    ],
+
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "valve_type", "type": "ENUM", "enum_ref": "valve_type", "required": false },
+        { "field_id": "inspection_method", "type": "ENUM", "enum_ref": "inspection_method", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "rules": [
+    {
+      "rule_id": "relief_valve_must_not_exceed_max_pressure",
+      "title": "Relief valve must prevent system from exceeding maximum operating pressure",
+      "standard_reference": "ANSI A92.2-2021 4.6.7",
+      "when": { "step_key": "relief_valve_pressure_test" },
+      "assert": {
+        "type": "NUMERIC_LTE",
+        "left": { "path": "measurements.measured_opening_pressure" },
+        "right": { "path": "measurements.max_system_operating_pressure" }
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Relief valve allows system pressure to exceed maximum operating pressure"
+      }
+    }
+  ],
+
+  "procedure": {
+    "steps": [
+      {
+        "step_key": "relief_valve_preparation",
+        "type": "SETUP",
+        "title": "Prepare system for relief valve inspection",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(3)",
+        "required": true,
+        "fields": [
+          { "field_id": "system_clean", "type": "BOOLEAN", "required": true },
+          { "field_id": "manufacturer_manual_reviewed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "blocking_fail": true
+      },
+
+      {
+        "step_key": "relief_valve_visual_inspection",
+        "type": "VISUAL_CHECK",
+        "title": "Visual inspection of relief valves",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1), 8.2.4(3)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "fields": [
+          { "field_id": "physical_damage_present", "type": "BOOLEAN", "required": true },
+          { "field_id": "leakage_present", "type": "BOOLEAN", "required": true },
+          { "field_id": "securely_mounted", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "any": [
+                { "path": "fields.physical_damage_present", "equals": true },
+                { "path": "fields.leakage_present", "equals": true },
+                { "path": "fields.securely_mounted", "equals": false }
+              ]
+            },
+            "defect": {
+              "title": "Relief valve visual condition issue",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.4(3)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "relief_valve_pressure_test",
+        "type": "MEASUREMENT",
+        "title": "Functional pressure testing of relief valves",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(3)",
+        "required": true,
+        "measurement_set_ref": "relief_valve_pressure_measurements",
+        "fields": [
+          { "field_id": "valve_identifier", "type": "TEXT", "required": false },
+          { "field_id": "pressure_gauge_verified", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ],
+        "evaluations": [
+          { "apply_rule_ids": ["relief_valve_must_not_exceed_max_pressure"] }
+        ]
+      },
+
+      {
+        "step_key": "relief_valve_associated_components",
+        "type": "DEFECT_CAPTURE",
+        "title": "Inspect associated hydraulic and pneumatic components",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(3)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect hoses, fittings, tubing for leaks, deformation, or abrasion.",
+            "Inspect compressors, pumps, motors, generators for loose fasteners, leaks, abnormal noise or vibration.",
+            "Inspect hydraulic and pneumatic valves for cracks, leaks, or sticking spools."
+          ]
+        }
+      },
+
+      {
+        "step_key": "relief_valve_post_repair_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Post-repair relief valve testing",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(16)(c)",
+        "required": false,
+        "visibility_conditions": {
+          "any": [
+            { "path": "inspection_context", "equals": "POST_REPAIR" },
+            { "path": "inspection_context", "equals": "MAJOR_REPAIR" }
+          ]
+        },
+        "fields": [
+          { "field_id": "post_repair_test_performed", "type": "BOOLEAN", "required": true },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false }
+        ]
+      },
+
+      {
+        "step_key": "relief_valve_documentation",
+        "type": "DOCUMENTATION",
+        "title": "Relief valve inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "inspection_date", "type": "DATE", "required": true },
+          { "field_id": "performed_by_entity", "type": "TEXT", "required": true },
+          { "field_id": "valves_inspected_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "actions_taken_summary", "type": "TEXTAREA", "required": false },
+          { "field_id": "placard_applied", "type": "BOOLEAN", "required": true }
+        ]
+      }
+    ]
+  }
+}

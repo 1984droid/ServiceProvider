@@ -1,0 +1,88 @@
+{
+  "schema_version": "2.0.0",
+  "generated_at": "2026-02-07",
+  "asset_field_definitions": [
+    {
+      "key": "display_name",
+      "type": "string",
+      "name": "Display Name",
+      "description": "Human-friendly name for the asset.",
+      "max_length": 80,
+      "required": true,
+      "searchable": true,
+      "filterable": false
+    },
+    {
+      "key": "identifier",
+      "type": "string",
+      "name": "Asset Tag / Identifier",
+      "description": "Internal asset identifier (tag/number).",
+      "max_length": 40,
+      "required": true,
+      "unique_scope": "owner_company",
+      "searchable": true,
+      "filterable": true
+    },
+    {
+      "key": "serial_number",
+      "type": "string",
+      "name": "Serial Number",
+      "description": "Manufacturer serial number (when applicable).",
+      "max_length": 60,
+      "required": false,
+      "searchable": true,
+      "filterable": true
+    },
+    {
+      "key": "vin",
+      "type": "string",
+      "name": "VIN",
+      "description": "Vehicle Identification Number (17 chars, when applicable).",
+      "pattern": "^[A-HJ-NPR-Z0-9]{17}$",
+      "max_length": 17,
+      "required": false,
+      "searchable": true,
+      "filterable": true
+    },
+    {
+      "key": "manufacturer",
+      "type": "ref",
+      "name": "Manufacturer",
+      "description": "Controlled manufacturer list (preferred) or constrained string fallback.",
+      "ref_table": "manufacturer",
+      "required": false,
+      "searchable": true,
+      "filterable": true
+    },
+    {
+      "key": "model",
+      "type": "string",
+      "name": "Model",
+      "description": "Model name/number. Prefer controlled lists if available.",
+      "max_length": 80,
+      "required": false,
+      "searchable": true,
+      "filterable": true
+    },
+    {
+      "key": "model_year",
+      "type": "int",
+      "name": "Model Year",
+      "description": "Model year (when applicable).",
+      "min": 1900,
+      "max": 2100,
+      "required": false,
+      "searchable": false,
+      "filterable": true
+    },
+    {
+      "key": "is_active",
+      "type": "bool",
+      "name": "Active",
+      "description": "Whether asset is active in the system.",
+      "required": true,
+      "searchable": false,
+      "filterable": true
+    }
+  ]
+}

@@ -1,0 +1,294 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_2021_periodic_parts_module",
+    "name": "ANSI A92.2-2021 Periodic - Parts Inspection (Module)",
+    "status": "DRAFT",
+    "standard": { "code": "ANSI/SAIA A92.2", "revision": "2021" },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": ["parts", "wear", "hardware", "functional_test"]
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+
+  "enums": {
+    "severity": ["SAFE", "MINOR", "SERVICE_REQUIRED", "UNSAFE_OUT_OF_SERVICE"],
+    "step_status": ["PASS", "FAIL", "NOT_PERFORMED", "NOT_APPLICABLE"],
+    "inspection_method": ["VISUAL", "FUNCTIONAL", "MEASURED", "OEM_SPEC_REFERENCE"],
+    "part_type": [
+      "PINS",
+      "BEARINGS",
+      "SHAFTS",
+      "GEARS",
+      "ROLLERS",
+      "LOCKING_DEVICES",
+      "CHAINS",
+      "CHAIN_SPROCKETS",
+      "WIRE_ROPES",
+      "SYNTHETIC_ROPES",
+      "SHEAVES",
+      "OTHER"
+    ],
+    "symptom_type": [
+      "WEAR",
+      "CRACK",
+      "DEFORMATION",
+      "CORROSION",
+      "MISSING_HARDWARE",
+      "LOOSE",
+      "MISALIGNMENT",
+      "BINDING",
+      "OVERHEATING_DISCOLORATION",
+      "BROKEN_LINKS",
+      "FRAYING_BROKEN_STRANDS",
+      "MISSING_TEETH",
+      "NOISE",
+      "EXCESSIVE_PLAY",
+      "LACK_OF_LUBRICATION",
+      "CONTAMINATION",
+      "OTHER"
+    ],
+    "action_taken": ["NONE", "REPAIRED", "REPLACED", "LUBRICATED", "ADJUSTED", "REMOVED_FROM_SERVICE", "DEFERRED"]
+  },
+
+  "schemas": {
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        { "field_id": "title", "type": "TEXT", "required": true },
+        { "field_id": "severity", "type": "ENUM", "enum_ref": "severity", "required": true },
+        { "field_id": "standard_reference", "type": "TEXT", "required": false },
+        { "field_id": "part_type", "type": "ENUM", "enum_ref": "part_type", "required": true },
+        { "field_id": "symptoms", "type": "CHOICE_MULTI", "enum_ref": "symptom_type", "required": true },
+        { "field_id": "inspection_method", "type": "ENUM", "enum_ref": "inspection_method", "required": true },
+        {
+          "field_id": "location_zone",
+          "type": "ENUM",
+          "values": ["BASE", "TURRET", "LOWER_BOOM", "UPPER_BOOM", "JIB", "PLATFORM", "OUTRIGGERS", "CHASSIS", "OTHER"],
+          "required": false
+        },
+        { "field_id": "location_detail", "type": "TEXT", "required": false },
+        { "field_id": "oem_spec_reference", "type": "TEXT", "required": false },
+        { "field_id": "measured_value", "type": "NUMBER", "required": false },
+        { "field_id": "measured_unit", "type": "TEXT", "required": false },
+        { "field_id": "within_oem_spec", "type": "BOOLEAN", "required": false },
+        { "field_id": "action_taken", "type": "ENUM", "enum_ref": "action_taken", "required": true },
+        { "field_id": "notes", "type": "TEXTAREA", "required": false },
+        { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+      ]
+    }
+  },
+
+  "procedure": {
+    "inputs": [
+      {
+        "input_id": "asset_capabilities",
+        "type": "ASSET_CAPABILITIES",
+        "required": false,
+        "notes": "Provided by backend asset_context helper; used for conditional step visibility."
+      }
+    ],
+
+    "steps": [
+      {
+        "step_key": "parts_walkaround_visual",
+        "type": "VISUAL_CHECK",
+        "title": "Walk-around visual inspection of parts",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(1)",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "performed",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "general_observations",
+            "type": "TEXTAREA",
+            "required": false
+          },
+          {
+            "field_id": "issues_observed",
+            "type": "CHOICE_MULTI",
+            "choices": [
+              "DAMAGED_COMPONENTS",
+              "CRACKS",
+              "CORROSION",
+              "EXCESSIVE_WEAR",
+              "LOOSE_HARDWARE",
+              "DEFORMED_HARDWARE",
+              "MISSING_HARDWARE",
+              "MISSING_COVERS",
+              "OTHER"
+            ],
+            "required": false
+          },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.performed", "equals": false },
+            "defect": {
+              "title": "Walk-around inspection not performed",
+              "severity": "SERVICE_REQUIRED",
+              "standard_reference": "ANSI A92.2-2021 8.2.3(1)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "parts_functional_testing",
+        "type": "FUNCTIONAL_TEST",
+        "title": "Functional testing of device and parts",
+        "standard_reference": "ANSI A92.2-2021 8.2.3(8)",
+        "required": true,
+        "fields": [
+          { "field_id": "setup_includes_stabilizers", "type": "BOOLEAN", "required": true },
+          { "field_id": "cycled_full_range_lower_controls", "type": "BOOLEAN", "required": true },
+          { "field_id": "emergency_stop_verified", "type": "BOOLEAN", "required": true },
+          {
+            "field_id": "anomalies_observed",
+            "type": "CHOICE_MULTI",
+            "choices": ["NOISE", "VIBRATION", "BINDING", "SLOW_RESPONSE", "JERKY_MOVEMENT", "OTHER"],
+            "required": false
+          },
+          { "field_id": "notes", "type": "TEXTAREA", "required": false },
+          { "field_id": "photos", "type": "ATTACHMENTS", "required": false }
+        ],
+        "auto_defect_on": [
+          {
+            "when": { "path": "fields.emergency_stop_verified", "equals": false },
+            "defect": {
+              "title": "Emergency stop did not verify during functional testing",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "standard_reference": "ANSI A92.2-2021 8.2.3(8)"
+            }
+          }
+        ]
+      },
+
+      {
+        "step_key": "parts_component_checks",
+        "type": "DEFECT_CAPTURE",
+        "title": "Inspect parts for wear, damage, and proper functionality",
+        "standard_reference": "ANSI A92.2-2021 8.2.4(2)",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Inspect pins, bearings, shafts, gears, rollers, locking devices, chains, sprockets, ropes, and sheaves.",
+            "Look for wear, cracks, deformation, corrosion, looseness, missing hardware, misalignment, binding, overheating/discoloration, broken links/strands, and missing teeth.",
+            "Follow manufacturer recommendations for intervals and procedures."
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "no_defects_found",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "If true, you must have zero defects recorded for this step."
+          },
+          {
+            "field_id": "manufacturer_procedure_followed",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Confirm manufacturer procedures/intervals were followed where applicable (ANSI 8.2.3/8.2.4)."
+          },
+          {
+            "field_id": "notes",
+            "type": "TEXTAREA",
+            "required": false
+          }
+        ],
+        "validations": [
+          {
+            "validation_id": "no_defects_true_requires_zero_defects",
+            "type": "CONSISTENCY",
+            "rule": "IF fields.no_defects_found == true THEN defect_count == 0"
+          }
+        ],
+        "default_defect_templates": [
+          {
+            "title": "Pin condition issue",
+            "part_type": "PINS",
+            "symptoms": ["WEAR", "CRACK", "DEFORMATION", "CORROSION", "LOOSE", "MISSING_HARDWARE"],
+            "inspection_method": "VISUAL",
+            "standard_reference": "ANSI A92.2-2021 8.2.4(2)"
+          },
+          {
+            "title": "Bearing condition issue",
+            "part_type": "BEARINGS",
+            "symptoms": ["WEAR", "CRACK", "EXCESSIVE_PLAY", "NOISE", "BINDING", "OVERHEATING_DISCOLORATION", "LACK_OF_LUBRICATION"],
+            "inspection_method": "VISUAL",
+            "standard_reference": "ANSI A92.2-2021 8.2.4(2)"
+          },
+          {
+            "title": "Chain / sprocket condition issue",
+            "part_type": "CHAINS",
+            "symptoms": ["WEAR", "CRACK", "DISTORTION", "CORROSION", "BROKEN_LINKS", "MISALIGNMENT"],
+            "inspection_method": "VISUAL",
+            "standard_reference": "ANSI A92.2-2021 8.2.4(2)"
+          },
+          {
+            "title": "Rope / sheave condition issue",
+            "part_type": "WIRE_ROPES",
+            "symptoms": ["WEAR", "FRAYING_BROKEN_STRANDS", "CORROSION", "MISALIGNMENT", "BINDING"],
+            "inspection_method": "VISUAL",
+            "standard_reference": "ANSI A92.2-2021 8.2.4(2)"
+          }
+        ]
+      },
+
+      {
+        "step_key": "parts_documentation_retention",
+        "type": "DOCUMENTATION",
+        "title": "Periodic inspection documentation",
+        "standard_reference": "ANSI A92.2-2021 8.3.2",
+        "required": true,
+        "fields": [
+          { "field_id": "date_of_inspection", "type": "DATE", "required": true },
+          { "field_id": "performed_by_entity", "type": "TEXT", "required": true },
+          { "field_id": "parts_inspected_summary", "type": "TEXTAREA", "required": true },
+          { "field_id": "actions_taken_summary", "type": "TEXTAREA", "required": false },
+          {
+            "field_id": "record_retention_acknowledged",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Records must be retained at least five years or as required by regulation."
+          }
+        ]
+      },
+
+      {
+        "step_key": "parts_design_stress_reference",
+        "type": "INSTRUCTION",
+        "title": "Reference: Design stress limits (informational)",
+        "standard_reference": "ANSI A92.2-2021 4.2",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "note",
+            "type": "RICH_TEXT",
+            "required": false,
+            "default": "Section 4.2 describes design stress requirements (not typically field-verifiable during periodic inspection). Use manufacturer criteria and qualified engineering assessment where applicable."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "2.3.0",
+  "generated_at": "2026-02-08",
+  "notes": "VIN profile field policy: repair-relevant fields to display, and fields to explicitly suppress in UI.",
+  "show_fields": [
+    "vin_profile.manufacturer",
+    "vin_profile.model",
+    "vin_profile.model_year",
+    "vin_profile.trim",
+    "vin_profile.engine_model",
+    "vin_profile.engine_manufacturer",
+    "vin_profile.engine_cylinders",
+    "vin_profile.displacement_l",
+    "vin_profile.engine_hp",
+    "vin_profile.fuel_type_primary",
+    "vin_profile.fuel_type_secondary",
+    "vin_profile.drive_type",
+    "vin_profile.transmission_style",
+    "vin_profile.transmission_speeds",
+    "vin_profile.vehicle_type",
+    "vin_profile.body_class",
+    "vin_profile.gvwr",
+    "vin_profile.axles",
+    "vin_profile.axle_configuration"
+  ],
+  "do_not_show_fields": [
+    "vin_profile.plant_city",
+    "vin_profile.plant_state",
+    "vin_profile.plant_country",
+    "vin_profile.airbag_locations",
+    "vin_profile.wheel_base",
+    "vin_profile.track_width",
+    "vin_profile.bed_length",
+    "vin_profile.doors",
+    "vin_profile.seats"
+  ]
+}
