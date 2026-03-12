@@ -470,12 +470,167 @@ Work Order Assignments:
 
 ---
 
+## Frontend Architecture
+
+### Technology Stack
+
+**Framework:**
+- React 19.2.4 (latest stable)
+- Vite 8.0.0 (build tool + dev server)
+- TypeScript 5.9.3 (strict mode)
+
+**State Management:**
+- TanStack Query v5.90+ (server state)
+- Zustand (client state)
+
+**UI & Styling:**
+- Tailwind CSS v4.2.1 (utility-first CSS)
+- CSS Variables (runtime theming)
+- Atomic Design Pattern (component structure)
+
+**Data Fetching:**
+- Axios (HTTP client with interceptors)
+- JWT token auto-refresh
+- Request/response interceptors
+
+**Testing:**
+- Playwright (E2E testing)
+- Page Object Model pattern
+
+**Forms & Validation:**
+- TanStack Form v0.2+
+- React Hook Form
+- Zod (schema validation)
+
+**Routing:**
+- TanStack Router v1.166+ (type-safe routing)
+
+**Tables:**
+- TanStack Table v8.21+ (data grids)
+
+### Project Structure
+
+```
+frontend/
+├── src/
+│   ├── api/              # API client layer
+│   ├── components/
+│   │   ├── ui/           # Atoms (Button, Input, Badge, Card)
+│   │   ├── layout/       # Layout components
+│   │   ├── forms/        # Reusable form components
+│   │   └── domain/       # Business-specific components
+│   ├── features/         # Feature modules
+│   │   ├── auth/
+│   │   ├── inspections/
+│   │   ├── customers/
+│   │   ├── assets/
+│   │   ├── work-orders/
+│   │   └── organization/
+│   ├── hooks/            # Custom React hooks
+│   ├── store/            # Zustand stores
+│   ├── lib/              # Utilities (axios, queryClient)
+│   ├── config/           # Configuration (API, theme)
+│   └── styles/           # Global styles + themes
+└── e2e/                  # Playwright tests
+```
+
+### Authentication Flow
+
+1. User submits credentials to `POST /api/auth/login/`
+2. Backend returns JWT tokens (access + refresh)
+3. Tokens stored in localStorage
+4. Axios interceptor injects access token in all requests
+5. On 401 response, interceptor auto-refreshes using refresh token
+6. New tokens stored, original request retried
+7. On refresh failure, user redirected to login
+
+### API Integration
+
+**Base Configuration:**
+- Base URL: `/api` (proxied in dev, direct in production)
+- Timeout: 30 seconds
+- Headers: `Content-Type: application/json`, `Authorization: Bearer <token>`
+
+**Endpoints Configuration:** `frontend/src/config/api.ts`
+- Centralized endpoint definitions
+- Type-safe endpoint builders
+- Environment variable support
+
+**API Clients:** `frontend/src/api/*.api.ts`
+- One file per domain (auth, customers, inspections, etc.)
+- TypeScript interfaces for requests/responses
+- Reusable CRUD operations
+
+### Theme System
+
+**CSS Variables:** `frontend/src/styles/themes/`
+- `default.css` - Light theme
+- `dark.css` - Dark theme
+- Custom themes easily added
+
+**Runtime Switching:**
+```typescript
+import { loadTheme } from '@/config/theme';
+loadTheme('dark');
+```
+
+**Customization:**
+All theme variables use RGB triplets for Tailwind compatibility:
+```css
+--color-primary: 59 130 246;  /* Used as rgb(var(--color-primary)) */
+```
+
+### Component Patterns
+
+**Atomic Design:**
+- **Atoms:** Basic elements (Button, Input, Label)
+- **Molecules:** Simple combinations (FormField)
+- **Organisms:** Complex components (LoginForm, DataTable)
+- **Templates:** Page layouts (DashboardLayout)
+- **Pages:** Complete views (LoginPage, InspectionListPage)
+
+**Reusability Principle:**
+- Create new components only when existing ones can't be reused
+- Extend base components with props/variants
+- Maintain consistent look and feel
+
+### Data Management
+
+**No Hardcoded Data:**
+- All data fetched from Django API
+- Use `python manage.py seed_data` for test data
+- Mock data only in Playwright tests
+
+**Seed Data Includes:**
+- 1 Company, 4 Departments, 6 Employees
+- 6 Users (admin, inspector1/2, service1/2, support1)
+- 3 Customers with contacts
+- Multiple Vehicles, Trailers, Equipment
+
+### Testing Strategy
+
+**E2E Tests (Playwright):**
+- Located in `frontend/e2e/`
+- Page Object Model pattern
+- Test fixtures for auth state
+- Run with: `npm run test:e2e`
+
+**Test Coverage:**
+- Authentication flows (login, logout, token refresh)
+- Protected route access
+- User permission validation
+- CRUD operations per feature
+
+---
+
 ## Version History
 
 - **v1.0** - Initial models: Customers, Assets, Inspections, Work Orders
 - **v1.1** - Added Organization module: Company, Departments, Employees
 - **v1.2** - Added multi-department/employee support to Work Orders
 - **v1.3** - Simplified capabilities, added body_type to Vehicle, VIN-driven classification
+- **v2.0** - Added Authentication module with JWT and RBAC
+- **v2.1** - Added Frontend architecture with React 19, TanStack suite, theme system
 
 ---
 

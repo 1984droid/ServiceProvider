@@ -395,8 +395,10 @@ python manage.py shell
 
 ## Testing
 
+### Backend Tests
+
 ```bash
-# Run all tests
+# Run all Django tests
 python manage.py test
 
 # Run specific app tests
@@ -405,16 +407,113 @@ python manage.py test apps.customers
 python manage.py test apps.assets
 python manage.py test apps.inspections
 python manage.py test apps.work_orders
+python manage.py test apps.authentication
 
 # Verbose output
 python manage.py test -v 2
+
+# Test authentication system
+python scripts/test_auth.py
 ```
+
+### Frontend Tests
+
+```bash
+# Navigate to frontend
+cd frontend
+
+# Run E2E tests (headless)
+npm run test:e2e
+
+# Run E2E tests (UI mode for debugging)
+npm run test:ui
+
+# Run specific test file
+npx playwright test e2e/auth.spec.ts
+
+# Show test report
+npx playwright show-report
+```
+
+### Seed Test Data
+
+```bash
+# Create realistic test data
+python manage.py seed_data
+
+# Clear and reseed
+python manage.py seed_data --clear
+```
+
+**Creates:**
+- 1 Company, 4 Departments, 6 Employees
+- 6 Users (all password: `admin`)
+  - admin (ADMIN)
+  - inspector1, inspector2 (INSPECTOR)
+  - service1, service2 (SERVICE_TECH)
+  - support1 (CUSTOMER_SERVICE)
+- 3 Customers with contacts
+- Multiple Vehicles, Trailers, Equipment
+
+## Frontend Development
+
+### Quick Start
+
+```bash
+# Install dependencies
+cd frontend
+npm install
+
+# Start dev server (with HMR)
+npm run dev
+# Frontend: http://localhost:5173
+# API proxy: http://localhost:8000/api
+```
+
+### Frontend Structure
+
+```
+frontend/
+├── src/
+│   ├── api/              # API clients (auth, customers, etc.)
+│   ├── components/       # Reusable components (atomic design)
+│   ├── features/         # Feature modules
+│   ├── hooks/            # Custom React hooks (useAuth, etc.)
+│   ├── store/            # Zustand stores (auth state)
+│   ├── lib/              # Utilities (axios, queryClient)
+│   ├── config/           # Config (API endpoints, theme)
+│   └── styles/           # Global styles + themes
+└── e2e/                  # Playwright tests
+```
+
+### Tech Stack
+
+- **React 19.2.4** - Latest stable with new features
+- **Vite 8.0.0** - Ultra-fast build tool
+- **TypeScript 5.9.3** - Full type safety
+- **Tailwind CSS v4.2.1** - Utility-first CSS with theming
+- **TanStack Query v5.90+** - Server state management
+- **TanStack Router v1.166+** - Type-safe routing
+- **Axios** - HTTP client with JWT interceptors
+- **Zustand** - Client state management
+- **Playwright** - E2E testing
+
+### Key Features
+
+✅ JWT authentication with auto-refresh
+✅ Runtime theme switching (default/dark)
+✅ Component reusability (atomic design)
+✅ Type-safe API layer
+✅ No hardcoded data (all from API)
+✅ E2E testing with Playwright
+
+**See `frontend/README.md` for complete frontend documentation.**
 
 ## Production Deployment
 
-See `DEPLOYMENT.md` (to be created) for production deployment instructions.
+See `DEPLOYMENT.md` for production deployment instructions.
 
-Key considerations:
+**Backend considerations:**
 - Set DEBUG=False
 - Use strong SECRET_KEY
 - Configure ALLOWED_HOSTS
@@ -423,6 +522,14 @@ Key considerations:
 - Configure static file serving
 - Use gunicorn/uwsgi
 - Set up nginx reverse proxy
+
+**Frontend considerations:**
+- Build for production: `npm run build`
+- Serve from `frontend/dist/`
+- Configure environment variables
+- Set up CDN for static assets
+- Enable compression (gzip/brotli)
+- Configure caching headers
 
 ---
 

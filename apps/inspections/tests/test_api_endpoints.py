@@ -5,6 +5,7 @@ Tests /evaluate_rules and /defects endpoints.
 """
 
 from django.test import TestCase
+from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
 from apps.inspections.models import InspectionRun, InspectionDefect
@@ -19,6 +20,10 @@ class InspectionAPIRuleEvaluationTests(TestCase):
     def setUp(self):
         """Create test data."""
         self.client = APIClient()
+
+        # Create user and authenticate
+        self.user = User.objects.create_user(username='testuser', password='testpass', is_staff=True)
+        self.client.force_authenticate(user=self.user)
 
         # Create customer
         self.customer = Customer.objects.create(

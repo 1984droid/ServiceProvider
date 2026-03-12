@@ -384,19 +384,165 @@ curl -X POST http://localhost:8100/api/equipment/{id}/update_data/ \
 
 ---
 
-## Next Steps
+## Frontend Integration
 
-1. **Authentication** - Add JWT authentication
-2. **Permissions** - Implement role-based access
-3. **Rate Limiting** - Protect API endpoints
-4. **NHTSA Integration** - Implement VIN decode
-5. **Inspection System** - Add inspection models and endpoints
-6. **Webhooks** - Event notifications
+### Quick Start
+
+**Install dependencies:**
+```bash
+cd frontend
+npm install
+```
+
+**Start dev server:**
+```bash
+npm run dev
+# Frontend: http://localhost:5173
+# Backend: http://localhost:8000
+```
+
+**Seed test data:**
+```bash
+python manage.py seed_data
+```
+
+### API Client Setup
+
+The frontend uses Axios with automatic JWT token management:
+
+**Configuration:** `frontend/src/config/api.ts`
+```typescript
+export const API_CONFIG = {
+  baseURL: '/api',  // Proxied to http://localhost:8000/api in dev
+  timeout: 30000,
+  tokenKeys: {
+    access: 'access_token',
+    refresh: 'refresh_token',
+  },
+};
+```
+
+**Usage Example:**
+```typescript
+import { authApi } from '@/api/auth.api';
+
+// Login
+const response = await authApi.login({
+  username: 'admin',
+  password: 'admin'
+});
+// Tokens automatically stored in localStorage
+
+// Make authenticated request
+const user = await authApi.getCurrentUser();
+// Access token automatically injected via interceptor
+
+// Token refresh happens automatically on 401 response
+```
+
+### Authentication Flow
+
+1. **Login:** User submits credentials to `/api/auth/login/`
+2. **Store Tokens:** Access + refresh tokens stored in localStorage
+3. **Auto-Inject:** Axios interceptor adds `Authorization: Bearer <token>` to all requests
+4. **Auto-Refresh:** On 401, interceptor uses refresh token to get new access token
+5. **Retry:** Original request automatically retried with new token
+6. **Logout:** Refresh token blacklisted via `/api/auth/logout/`
+
+### Test Users (from seed_data)
+
+| Username   | Password | Role             | Use Case                |
+|------------|----------|------------------|-------------------------|
+| admin      | admin    | ADMIN            | Full admin access       |
+| inspector1 | admin    | INSPECTOR        | Create/view inspections |
+| inspector2 | admin    | INSPECTOR        | Create/view inspections |
+| service1   | admin    | SERVICE_TECH     | Manage work orders      |
+| service2   | admin    | SERVICE_TECH     | Manage work orders      |
+| support1   | admin    | CUSTOMER_SERVICE | Manage customers        |
+
+### CORS Configuration
+
+Django is configured to allow frontend requests:
+
+```python
+# config/settings.py
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev server
+]
+CORS_ALLOW_CREDENTIALS = True
+```
+
+### API Response Format
+
+**Success (200/201):**
+```json
+{
+  "id": "uuid",
+  "field": "value",
+  ...
+}
+```
+
+**List (200):**
+```json
+[
+  { "id": "uuid", ... },
+  { "id": "uuid", ... }
+]
+```
+
+**Error (400):**
+```json
+{
+  "field_name": ["Error message"],
+  "non_field_errors": ["General error"]
+}
+```
+
+**Error (401):**
+```json
+{
+  "detail": "Authentication credentials were not provided."
+}
+```
+
+**Error (403):**
+```json
+{
+  "detail": "You do not have permission to perform this action."
+}
+```
+
+### Frontend Tech Stack
+
+- **React 19.2.4** - Latest stable
+- **Vite 8.0.0** - Build tool
+- **TypeScript 5.9.3** - Type safety
+- **Tailwind CSS v4.2.1** - Styling with CSS variables
+- **TanStack Query v5.90+** - Server state management
+- **TanStack Router v1.166+** - Type-safe routing
+- **Axios** - HTTP client with interceptors
+- **Zustand** - Client state management
+- **Playwright** - E2E testing
+
+**See `frontend/README.md` for complete frontend documentation.**
 
 ---
 
-**See [API_REFERENCE.md](docs/API_REFERENCE.md) for complete documentation with detailed examples.**
+## Response Codes
 
-**Version:** 1.0
-**Base URL:** http://localhost:8100/api/
-**Port:** 8100 (avoids conflict with legacy app on 8000)
+- `200 OK` - Success
+- `201 Created` - Resource created
+- `204 No Content` - Success (no body)
+- `400 Bad Request` - Validation error
+- `401 Unauthorized` - Authentication required
+- `403 Forbidden` - Permission denied
+- `404 Not Found` - Resource not found
+- `500 Internal Server Error` - Server error
+
+---
+
+**Version:** 2.1
+**Base URL:** http://localhost:8000/api/
+**Frontend:** http://localhost:5173/
+**Last Updated:** March 12, 2026

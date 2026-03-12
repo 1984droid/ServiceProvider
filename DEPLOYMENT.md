@@ -453,34 +453,238 @@ docker compose up -d
 
 ---
 
+## Frontend Deployment
+
+### Build Frontend for Production
+
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Build for production (output to dist/)
+npm run build
+
+# Preview production build locally (optional)
+npm run preview
+```
+
+### Option 1: Serve with Nginx
+
+```nginx
+# /etc/nginx/sites-available/serviceprovider
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # Frontend static files
+    location / {
+        root /var/www/serviceprovider/frontend/dist;
+        try_files $uri $uri/ /index.html;
+
+        # Cache static assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+
+    # Backend API
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Backend admin
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Backend static files
+    location /static/ {
+        alias /var/www/serviceprovider/staticfiles/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+```bash
+# Enable site
+sudo ln -s /etc/nginx/sites-available/serviceprovider /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### Option 2: Serve with Docker
+
+Update `docker-compose.yml` to include frontend:
+
+```yaml
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+```
+
+**Frontend Dockerfile:**
+
+```dockerfile
+# Build stage
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### Environment Variables (Frontend)
+
+Create `.env.production` in `frontend/`:
+
+```env
+VITE_API_URL=https://yourdomain.com/api
+```
+
+**Build with production env:**
+```bash
+npm run build --mode production
+```
+
+### CDN Deployment (Optional)
+
+For high-traffic sites, serve static assets from CDN:
+
+1. **Upload `dist/assets/*` to CDN**
+2. **Update `vite.config.ts`:**
+
+```typescript
+export default defineConfig({
+  base: 'https://cdn.yourdomain.com/',
+  build: {
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+      },
+    },
+  },
+});
+```
+
+3. **Rebuild:** `npm run build`
+
+---
+
 ## Quick Reference
 
 ### Commands
 
 ```bash
-# Development
+# Development - Backend
 python setup.py setup          # Initial setup
 python setup.py update         # Update installation
-python manage.py runserver     # Dev server
+python manage.py runserver     # Dev server (backend)
 
-# Production
+# Development - Frontend
+cd frontend
+npm install                    # Install dependencies
+npm run dev                    # Dev server (frontend)
+
+# Production - Backend
 python deploy.py setup         # Production setup
 python deploy.py update        # Update production
 python deploy.py check         # Check production readiness
 python deploy.py backup        # Backup database
+
+# Production - Frontend
+cd frontend
+npm run build                  # Build for production
+npm run preview                # Preview build
 
 # Docker
 docker compose up -d           # Start
 docker compose down            # Stop
 docker compose logs -f         # View logs
 docker compose build           # Rebuild
+
+# Testing
+python manage.py test          # Backend tests
+cd frontend && npm run test:e2e  # Frontend E2E tests
+
+# Seed Data
+python manage.py seed_data     # Create test data
+python manage.py seed_data --clear  # Clear and reseed
 ```
 
 ### URLs
 
+- **Frontend**: http://yourdomain.com/
 - **Admin**: http://yourdomain.com/admin/
 - **API**: http://yourdomain.com/api/
-- **Docs**: http://yourdomain.com/api/docs/ (if enabled)
+- **API Docs**: http://yourdomain.com/api/docs/ (if enabled)
+
+**Development:**
+- Frontend Dev: http://localhost:5173
+- Backend Dev: http://localhost:8000
+- Backend Admin: http://localhost:8000/admin
+
+---
+
+## Frontend Performance Optimization
+
+### 1. Enable Compression
+
+```nginx
+# In nginx.conf
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_types text/plain text/css text/xml text/javascript
+           application/json application/javascript application/xml+rss;
+```
+
+### 2. Add Security Headers
+
+```nginx
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "no-referrer-when-downgrade" always;
+add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+```
+
+### 3. Enable HTTP/2
+
+```nginx
+listen 443 ssl http2;
+```
 
 ---
 
@@ -494,5 +698,5 @@ For issues or questions:
 
 ---
 
-**Version**: 1.0
-**Last Updated**: 2026-03-11
+**Version**: 2.1
+**Last Updated**: 2026-03-12
