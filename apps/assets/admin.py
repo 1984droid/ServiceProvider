@@ -30,8 +30,8 @@ class EquipmentInline(admin.TabularInline):
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ['unit_or_vin', 'customer', 'year', 'make', 'model', 'license_plate', 'equipment_count', 'tag_display', 'is_active', 'created_at']
-    list_filter = ['is_active', 'make', 'year', 'created_at']
+    list_display = ['unit_or_vin', 'customer', 'year', 'make', 'model', 'body_type', 'license_plate', 'equipment_count', 'capability_display', 'is_active', 'created_at']
+    list_filter = ['is_active', 'body_type', 'make', 'year', 'created_at']
     search_fields = ['vin', 'unit_number', 'make', 'model', 'license_plate', 'customer__name']
     readonly_fields = ['id', 'created_at', 'updated_at', 'equipment_count_display', 'vin_decode_status']
     autocomplete_fields = ['customer']
@@ -42,14 +42,14 @@ class VehicleAdmin(admin.ModelAdmin):
             'fields': ('customer', 'vin', 'unit_number', 'is_active')
         }),
         ('Vehicle Info', {
-            'fields': ('year', 'make', 'model', 'license_plate')
+            'fields': ('year', 'make', 'model', 'body_type', 'license_plate')
         }),
         ('Meters', {
             'fields': ('odometer_miles', 'engine_hours')
         }),
-        ('Tags', {
-            'fields': ('tags',),
-            'description': 'Tags determine which inspection forms apply to this vehicle'
+        ('Capabilities', {
+            'fields': ('capabilities',),
+            'description': 'Vehicle capabilities (usually from VIN decode) - only set if affects inspection/maintenance'
         }),
         ('VIN Decode', {
             'fields': ('vin_decode_status',),
@@ -87,12 +87,12 @@ class VehicleAdmin(admin.ModelAdmin):
         return "Save vehicle first to add equipment"
     equipment_count_display.short_description = 'Equipment Count'
 
-    def tag_display(self, obj):
-        """Display tags as comma-separated list"""
-        if obj.tags:
-            return ', '.join(obj.tags[:3]) + ('...' if len(obj.tags) > 3 else '')
+    def capability_display(self, obj):
+        """Display capabilities as comma-separated list"""
+        if obj.capabilities:
+            return ', '.join(obj.capabilities[:3]) + ('...' if len(obj.capabilities) > 3 else '')
         return '-'
-    tag_display.short_description = 'Tags'
+    capability_display.short_description = 'Capabilities'
 
     def vin_decode_status(self, obj):
         """Display VIN decode status"""
@@ -180,7 +180,7 @@ class VINDecodeDataAdmin(admin.ModelAdmin):
 
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ['asset_or_serial', 'customer', 'equipment_type', 'manufacturer', 'model', 'mounted_on_link', 'tag_display', 'is_active', 'created_at']
+    list_display = ['asset_or_serial', 'customer', 'equipment_type', 'manufacturer', 'model', 'mounted_on_link', 'capability_display', 'is_active', 'created_at']
     list_filter = ['is_active', 'equipment_type', 'manufacturer', 'created_at']
     search_fields = ['serial_number', 'asset_number', 'equipment_type', 'manufacturer', 'model', 'customer__name']
     readonly_fields = ['id', 'created_at', 'updated_at', 'required_data_display']
@@ -197,9 +197,9 @@ class EquipmentAdmin(admin.ModelAdmin):
             'fields': ('mounted_on_vehicle',),
             'description': 'For equipment mounted on vehicles (aerial devices, cranes, etc.)'
         }),
-        ('Tags & Data', {
-            'fields': ('tags', 'equipment_data', 'required_data_display'),
-            'description': 'Tags determine which data fields are required during inspection setup'
+        ('Capabilities & Data', {
+            'fields': ('capabilities', 'equipment_data', 'required_data_display'),
+            'description': 'Capabilities determine which inspections/tests are required and what data needs to be collected'
         }),
         ('Notes', {
             'fields': ('notes',)
@@ -227,25 +227,27 @@ class EquipmentAdmin(admin.ModelAdmin):
         return '-'
     mounted_on_link.short_description = 'Mounted On'
 
-    def tag_display(self, obj):
-        """Display tags as comma-separated list"""
-        if obj.tags:
-            return ', '.join(obj.tags[:3]) + ('...' if len(obj.tags) > 3 else '')
+    def capability_display(self, obj):
+        """Display capabilities as comma-separated list"""
+        if obj.capabilities:
+            return ', '.join(obj.capabilities[:3]) + ('...' if len(obj.capabilities) > 3 else '')
         return '-'
-    tag_display.short_description = 'Tags'
+    capability_display.short_description = 'Capabilities'
 
     def required_data_display(self, obj):
-        """Display what data fields are required based on tags"""
-        if not obj.tags:
-            return "No tags set - no additional data required"
+        """Display what data fields are required based on capabilities"""
+        if not obj.capabilities:
+            return "No capabilities set - no additional data required"
 
         required = []
-        if 'AERIAL_DEVICE' in obj.tags:
-            required.append("Placard data (heights, capacity, wind)")
-        if 'INSULATED_BOOM' in obj.tags or 'DIELECTRIC' in obj.tags:
-            required.append("Dielectric test data")
+        if 'DIELECTRIC' in obj.capabilities:
+            required.append("Dielectric test data (rating, test dates, certificate)")
+        if 'HYDRAULIC' in obj.capabilities:
+            required.append("Hydraulic data (fluid type, reservoir capacity, service dates)")
+        if 'PNEUMATIC' in obj.capabilities:
+            required.append("Pneumatic data (max pressure, compressor type)")
 
         if required:
             return format_html('<br>'.join(required))
-        return "No additional data required for current tags"
+        return "No additional data required for current capabilities"
     required_data_display.short_description = 'Required Data Fields'

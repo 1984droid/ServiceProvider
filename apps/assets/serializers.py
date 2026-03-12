@@ -25,8 +25,9 @@ class VehicleListSerializer(serializers.ModelSerializer):
             'year',
             'make',
             'model',
+            'body_type',
             'is_active',
-            'tags',
+            'capabilities',
             'created_at',
         ]
         read_only_fields = ['id', 'customer_name', 'created_at']
@@ -48,12 +49,13 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
             'year',
             'make',
             'model',
+            'body_type',
             'license_plate',
             'odometer_miles',
             'engine_hours',
             'is_active',
             'notes',
-            'tags',
+            'capabilities',
             'vin_decode_data',
             'equipment_count',
             'created_at',
@@ -127,48 +129,39 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
 
         return value
 
-    def validate_tags(self, value):
+    def validate_capabilities(self, value):
         """
-        Validate tags format and allowed values
-        Tags should be uppercase strings
+        Validate capabilities format and allowed values.
+        Vehicle capabilities - only for inspection/maintenance impact.
+        Most capabilities should come from VIN decode, not manual entry.
         """
         if not isinstance(value, list):
-            raise serializers.ValidationError('Tags must be a list')
+            raise serializers.ValidationError('Capabilities must be a list')
 
-        # Define allowed tags (can be extended)
-        ALLOWED_TAGS = {
-            'AERIAL_DEVICE',
-            'INSULATED_BOOM',
-            'DIELECTRIC',
-            'CRANE',
-            'BUCKET_TRUCK',
-            'DIGGER_DERRICK',
-            'HYBRID',
-            'ELECTRIC',
-            'DIESEL',
-            'GASOLINE',
-            'CNG',
-            'HEAVY_DUTY',
-            'MEDIUM_DUTY',
-            'LIGHT_DUTY',
+        # Define allowed vehicle capabilities
+        # These are only used when VIN decode doesn't provide the info
+        ALLOWED_CAPABILITIES = {
+            'AIR_BRAKES',      # From VIN decode abs field
+            'HYDRAULIC_BRAKES', # From VIN decode abs field
+            'FOUR_WHEEL_DRIVE', # From VIN decode if available
         }
 
-        cleaned_tags = []
-        for tag in value:
-            if not isinstance(tag, str):
-                raise serializers.ValidationError('Each tag must be a string')
+        cleaned_capabilities = []
+        for capability in value:
+            if not isinstance(capability, str):
+                raise serializers.ValidationError('Each capability must be a string')
 
-            clean_tag = tag.upper().strip()
+            clean_capability = capability.upper().strip()
 
-            if clean_tag not in ALLOWED_TAGS:
+            if clean_capability not in ALLOWED_CAPABILITIES:
                 raise serializers.ValidationError(
-                    f'Invalid tag: {tag}. Allowed tags: {", ".join(sorted(ALLOWED_TAGS))}'
+                    f'Invalid capability: {capability}. Allowed capabilities: {", ".join(sorted(ALLOWED_CAPABILITIES))}'
                 )
 
-            if clean_tag not in cleaned_tags:
-                cleaned_tags.append(clean_tag)
+            if clean_capability not in cleaned_capabilities:
+                cleaned_capabilities.append(clean_capability)
 
-        return cleaned_tags
+        return cleaned_capabilities
 
     def validate(self, data):
         """
@@ -208,7 +201,7 @@ class EquipmentListSerializer(serializers.ModelSerializer):
             'mounted_on_vehicle',
             'mounted_on_unit',
             'is_active',
-            'tags',
+            'capabilities',
             'created_at',
         ]
         read_only_fields = ['id', 'customer_name', 'mounted_on_unit', 'created_at']
@@ -237,7 +230,7 @@ class EquipmentDetailSerializer(serializers.ModelSerializer):
             'mounted_on_vin',
             'is_active',
             'notes',
-            'tags',
+            'capabilities',
             'equipment_data',
             'created_at',
             'updated_at',
@@ -292,57 +285,53 @@ class EquipmentDetailSerializer(serializers.ModelSerializer):
 
         return value
 
-    def validate_tags(self, value):
+    def validate_capabilities(self, value):
         """
-        Validate tags format and allowed values
-        Tags drive what additional data needs to be collected
+        Validate capabilities format and allowed values.
+        Equipment capabilities - only for inspection/maintenance impact.
+        Capabilities determine what inspections and tests are required.
         """
         if not isinstance(value, list):
-            raise serializers.ValidationError('Tags must be a list')
+            raise serializers.ValidationError('Capabilities must be a list')
 
-        # Define allowed equipment tags
-        ALLOWED_TAGS = {
-            'AERIAL_DEVICE',
-            'INSULATED_BOOM',
-            'DIELECTRIC',
-            'CRANE',
-            'DIGGER_DERRICK',
-            'HYDRAULIC_LIFT',
-            'PNEUMATIC',
-            'ELECTRIC_POWERED',
-            'ARTICULATING',
-            'TELESCOPIC',
-            'PLATFORM',
-            'BUCKET',
+        # Define allowed equipment capabilities
+        # Only include capabilities that affect inspections/maintenance
+        ALLOWED_CAPABILITIES = {
+            'DIELECTRIC',      # Requires annual dielectric testing (ANSI/ASTM standards)
+            'HYDRAULIC',       # Requires hydraulic system inspection
+            'PNEUMATIC',       # Requires air system inspection
+            'ELECTRIC',        # Requires electrical system inspection
+            'PTO_DRIVEN',      # Requires PTO system inspection
+            'ENGINE_DRIVEN',   # Requires engine maintenance (oil, filters, etc.)
         }
 
-        cleaned_tags = []
-        for tag in value:
-            if not isinstance(tag, str):
-                raise serializers.ValidationError('Each tag must be a string')
+        cleaned_capabilities = []
+        for capability in value:
+            if not isinstance(capability, str):
+                raise serializers.ValidationError('Each capability must be a string')
 
-            clean_tag = tag.upper().strip()
+            clean_capability = capability.upper().strip()
 
-            if clean_tag not in ALLOWED_TAGS:
+            if clean_capability not in ALLOWED_CAPABILITIES:
                 raise serializers.ValidationError(
-                    f'Invalid tag: {tag}. Allowed tags: {", ".join(sorted(ALLOWED_TAGS))}'
+                    f'Invalid capability: {capability}. Allowed capabilities: {", ".join(sorted(ALLOWED_CAPABILITIES))}'
                 )
 
-            if clean_tag not in cleaned_tags:
-                cleaned_tags.append(clean_tag)
+            if clean_capability not in cleaned_capabilities:
+                cleaned_capabilities.append(clean_capability)
 
-        return cleaned_tags
+        return cleaned_capabilities
 
     def validate_equipment_data(self, value):
         """
-        Validate equipment_data structure based on tags
-        This is flexible but should follow expected patterns
+        Validate equipment_data structure based on capabilities.
+        This is flexible but should follow expected patterns.
         """
         if not isinstance(value, dict):
             raise serializers.ValidationError('equipment_data must be a dictionary')
 
         # Optional: Add specific validation based on common data patterns
-        # For example, if AERIAL_DEVICE tag exists, validate placard data structure
+        # For example, if DIELECTRIC capability exists, validate dielectric test data
 
         return value
 
@@ -368,8 +357,8 @@ class EquipmentDetailSerializer(serializers.ModelSerializer):
 
 class EquipmentDataUpdateSerializer(serializers.Serializer):
     """
-    Specialized serializer for updating equipment_data field
-    Used during inspection setup to collect tag-specific data
+    Specialized serializer for updating equipment_data field.
+    Used during inspection setup to collect capability-specific data.
     """
     data_type = serializers.ChoiceField(
         choices=['placard', 'dielectric', 'hydraulic', 'capabilities', 'other'],

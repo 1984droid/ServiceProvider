@@ -136,6 +136,27 @@ class Vehicle(BaseModel):
     make = models.CharField(max_length=100, blank=True, db_index=True)
     model = models.CharField(max_length=100, blank=True)
 
+    # Body Type (for incomplete vehicles with special bodies)
+    BODY_TYPE_CHOICES = [
+        ('', 'Standard (No Special Body)'),
+        ('AERIAL', 'Aerial Device (Bucket Truck)'),
+        # Add more as we create inspection templates for them:
+        # ('REFUSE', 'Refuse/Garbage Body'),
+        # ('SWEEPER', 'Street Sweeper'),
+        # ('SCHOOL_BUS', 'School Bus'),
+        # ('DUMP', 'Dump Body'),
+        # ('TANK', 'Tank Body'),
+        # ('TOW', 'Tow/Wrecker Body'),
+    ]
+    body_type = models.CharField(
+        max_length=20,
+        choices=BODY_TYPE_CHOICES,
+        blank=True,
+        default='',
+        db_index=True,
+        help_text="Special body type if vehicle is incomplete/upfitted (only add types we have inspection templates for)"
+    )
+
     # Status
     is_active = models.BooleanField(default=True, db_index=True)
 

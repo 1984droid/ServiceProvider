@@ -5,12 +5,8 @@ Complete data model specification for the ServiceProvider application.
 ## Architecture Overview
 
 **Single-Tenant Django 6.0 Application**
-- UUID primary keys across all models
-- PostgreSQL 18+ database
-- Python 3.14+
+- UUID primary keys, PostgreSQL 18+, Python 3.14+
 - RESTful API via Django REST Framework
-
----
 
 ## Core Principles
 
@@ -18,123 +14,60 @@ Complete data model specification for the ServiceProvider application.
 2. **UUID Keys** - All models use UUID primary keys
 3. **Audit Trail** - All models include created_at/updated_at timestamps
 4. **Capability-Based Operations** - Assets use JSON capabilities array for inspection/maintenance routing
-5. **Polymorphic Asset References** - Work orders and inspections reference either Vehicle or Equipment via asset_type/asset_id
-6. **Template-Driven Inspections** - Inspections use JSON templates with automated validation and defect generation
+5. **Polymorphic Asset References** - Work orders/inspections reference Vehicle or Equipment via asset_type/asset_id
+6. **Template-Driven Inspections** - JSON templates with automated validation and defect generation
 
 ---
 
 ## Module 1: Organization (`apps/organization`)
 
 ### Company (Single-Tenant)
-**Purpose:** Store company information - only one record allowed
+**Purpose:** Company information - only one record allowed
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| name | CharField(255) | Required | Legal company name |
-| dba_name | CharField(255) | Optional | Doing Business As name |
-| phone | CharField(20) | Optional | Phone number |
-| email | EmailField | Optional | Email address |
-| website | URLField | Optional | Company website |
-| address_line1 | CharField(255) | Optional | Street address |
-| address_line2 | CharField(255) | Optional | Suite/unit/etc |
-| city | CharField(100) | Optional | City |
-| state | CharField(2) | Optional | State code |
-| zip_code | CharField(20) | Optional | ZIP/postal code |
-| tax_id | CharField(20) | Optional | EIN or Tax ID |
-| usdot_number | CharField(20) | Optional | USDOT number |
-| logo | ImageField | Optional | Company logo |
-| settings | JSONField | Default: {} | Company-wide settings |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `name` (required), `dba_name`, `phone`, `email`, `website`
+- Address: `address_line1`, `address_line2`, `city`, `state`, `zip_code`
+- Tax/DOT: `tax_id`, `usdot_number`
+- `logo` (ImageField), `settings` (JSONField)
 
-**Validation:**
-- Only one company record can exist (enforced in save())
-- String representation: `dba_name` or falls back to `name`
-
-**API Endpoints:**
-- `GET /api/company/` - List companies
-- `GET /api/company/current/` - Get current company
-- `POST /api/company/` - Create company (only if none exists)
-- `PUT /api/company/{id}/` - Update company
+**Constraints:** Only one company record can exist (enforced in save())
 
 ---
 
 ### Department
 **Purpose:** Organizational departments for employee grouping
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| name | CharField(100) | Required, Unique | Department name |
-| code | CharField(20) | Required, Unique | Short code (e.g., "SRV", "INSP") |
-| description | TextField | Optional | Department description |
-| manager | FK(Employee) | Optional | Department manager/supervisor |
-| is_active | Boolean | Default: True | Whether department is active |
-| allows_floating | Boolean | Default: True | Allow floating employees |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `name` (required, unique), `code` (required, unique, e.g., "SRV")
+- `description`, `manager` FK(Employee)
+- `is_active`, `allows_floating` (default: True)
 
 **Relationships:**
-- `base_employees` - Employees with this as base department (reverse FK)
-- `floating_employees` - Employees who can float here (reverse M2M)
-- `work_orders` - Work orders assigned to this department (reverse M2M)
+- `base_employees` - Employees with this as base department
+- `floating_employees` - Employees who can float here (M2M)
+- `work_orders` - Work orders assigned to this department (M2M)
 
-**Properties:**
-- `employee_count` - Count of active base employees
-- `total_employee_count` - Count of base + floating active employees
-
-**API Endpoints:**
-- `GET /api/departments/` - List departments
-- `GET /api/departments/{id}/employees/` - Get all employees in department
-- `POST /api/departments/` - Create department
+**Properties:** `employee_count`, `total_employee_count`
 
 ---
 
 ### Employee
 **Purpose:** Staff members with department assignments
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| user | FK(User) | Optional | Django user for system access |
-| employee_number | CharField(20) | Required, Unique | Employee ID/number |
-| first_name | CharField(100) | Required | First name |
-| last_name | CharField(100) | Required | Last name |
-| email | EmailField | Optional | Email address |
-| phone | CharField(20) | Optional | Phone number |
-| base_department | FK(Department) | Required | Primary/home department |
-| floating_departments | M2M(Department) | Optional | Additional departments |
-| title | CharField(100) | Optional | Job title |
-| hire_date | DateField | Optional | Date of hire |
-| termination_date | DateField | Optional | Termination date |
-| is_active | Boolean | Default: True | Active status |
-| certifications | JSONField | Default: [] | List of certifications |
-| skills | JSONField | Default: [] | List of skills |
-| settings | JSONField | Default: {} | Employee settings |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `user` FK(User), `employee_number` (required, unique)
+- `first_name`, `last_name`, `email`, `phone`
+- `base_department` FK(Department, required)
+- `floating_departments` M2M(Department)
+- `title`, `hire_date`, `termination_date`, `is_active`
+- `certifications` (JSONField), `skills` (JSONField), `settings` (JSONField)
 
 **Validation:**
 - `termination_date` cannot be before `hire_date`
 - Terminated employees must be `is_active=False`
 
-**Properties:**
-- `full_name` - Returns `{first_name} {last_name}`
-- `all_departments` - List of base + floating departments
-
-**Methods:**
-- `can_work_in_department(department)` - Check if employee can work in department
-
-**Relationships:**
-- `managed_departments` - Departments where this employee is manager (reverse FK)
-- `assigned_work_orders` - Work orders assigned to this employee (reverse M2M)
-
-**API Endpoints:**
-- `GET /api/employees/` - List employees
-- `GET /api/employees/active/` - Get active employees only
-- `GET /api/employees/{id}/can_work_in/?department_id={id}` - Check department access
-- `POST /api/employees/` - Create employee
+**Properties:** `full_name`, `all_departments`
+**Methods:** `can_work_in_department(department)`
 
 ---
 
@@ -143,189 +76,114 @@ Complete data model specification for the ServiceProvider application.
 ### Customer
 **Purpose:** Service customers - fleet owners/operators
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| name | CharField(255) | Required | Customer name |
-| account_number | CharField(50) | Optional | Account number |
-| email | EmailField | Optional | Email address |
-| phone | CharField(20) | Optional | Phone number |
-| address | CharField(255) | Optional | Street address |
-| city | CharField(100) | Optional | City |
-| state | CharField(2) | Optional | State code |
-| zip_code | CharField(20) | Optional | ZIP code |
-| usdot_number | CharField(20) | Optional, Indexed | USDOT number |
-| mc_number | CharField(20) | Optional | MC number |
-| is_active | Boolean | Default: True | Active status |
-| primary_contact | FK(Contact) | Optional | Primary contact person |
-| tags | JSONField | Default: {} | Customer tags/metadata |
-| settings | JSONField | Default: {} | Customer settings |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `name` (required), `account_number`, `email`, `phone`
+- Address: `address`, `city`, `state`, `zip_code`
+- DOT: `usdot_number` (indexed), `mc_number`
+- `is_active`, `primary_contact` FK(Contact)
+- `tags` (JSONField), `settings` (JSONField)
 
-**Relationships:**
-- `contacts` - Contact persons (reverse FK)
-- `vehicles` - Customer vehicles (reverse FK)
-- `equipment` - Customer equipment (reverse FK)
+**Relationships:** `contacts`, `vehicles`, `equipment`
 
 ---
 
 ### Contact
 **Purpose:** Contact persons for customers
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| customer | FK(Customer) | Required | Parent customer |
-| first_name | CharField(100) | Required | First name |
-| last_name | CharField(100) | Required | Last name |
-| email | EmailField | Optional | Email address |
-| phone | CharField(20) | Optional | Phone number |
-| title | CharField(100) | Optional | Job title |
-| is_primary | Boolean | Default: False | Is primary contact |
-| receive_invoices | Boolean | Default: False | Receive invoices |
-| receive_reports | Boolean | Default: False | Receive reports |
-| receive_alerts | Boolean | Default: False | Receive alerts |
-| notes | TextField | Optional | Additional notes |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `customer` FK(Customer, required)
+- `first_name`, `last_name`, `email`, `phone`, `title`
+- `is_primary`, `receive_invoices`, `receive_reports`, `receive_alerts`
+- `notes`
 
-**Properties:**
-- `full_name` - Returns `{first_name} {last_name}`
-- `is_primary` - Matches customer.primary_contact
+**Properties:** `full_name`, `is_primary`
 
 ---
 
 ### USDOTProfile
-**Purpose:** USDOT/FMCSA data cache for customers
+**Purpose:** USDOT/FMCSA data cache for customers (OneToOne)
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| customer | OneToOne(Customer) | Required | Parent customer |
-| usdot_number | CharField(20) | Required | USDOT number |
-| mc_number | CharField(20) | Optional | MC number |
-| legal_name | CharField(255) | Optional | Legal business name |
-| dba_name | CharField(255) | Optional | DBA name |
-| physical_address | CharField(500) | Optional | Physical address |
-| physical_city | CharField(100) | Optional | City |
-| physical_state | CharField(2) | Optional | State |
-| physical_zip | CharField(20) | Optional | ZIP code |
-| mailing_address | CharField(500) | Optional | Mailing address |
-| mailing_city | CharField(100) | Optional | Mailing city |
-| mailing_state | CharField(2) | Optional | Mailing state |
-| mailing_zip | CharField(20) | Optional | Mailing ZIP |
-| phone | CharField(20) | Optional | Phone number |
-| email | EmailField | Optional | Email address |
-| safety_rating | CharField(50) | Optional | Safety rating |
-| total_power_units | Integer | Optional | Total power units |
-| total_drivers | Integer | Optional | Total drivers |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `customer` OneToOne(Customer), `usdot_number`, `mc_number`
+- `legal_name`, `dba_name`
+- Physical: `physical_address`, `physical_city`, `physical_state`, `physical_zip`
+- Mailing: `mailing_address`, `mailing_city`, `mailing_state`, `mailing_zip`
+- `phone`, `email`, `safety_rating`
+- `total_power_units`, `total_drivers`
 
 ---
 
 ## Module 3: Assets (`apps/assets`)
 
 ### Vehicle
-**Purpose:** Customer vehicles (trucks, vans, etc.)
+**Purpose:** Customer vehicles (trucks, vans, trailers)
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| customer | FK(Customer) | Required | Owner |
-| vin | CharField(17) | Required, Unique, 17 chars | Vehicle VIN |
-| unit_number | CharField(50) | Optional | Fleet unit number |
-| year | Integer | Optional | Model year (1900-2100) |
-| make | CharField(100) | Optional | Manufacturer |
-| model | CharField(100) | Optional | Model name |
-| license_plate | CharField(20) | Optional | License plate |
-| license_state | CharField(2) | Optional | License state |
-| odometer_miles | Decimal | Optional, ≥0 | Odometer reading |
-| engine_hours | Decimal | Optional, ≥0 | Engine hours |
-| is_active | Boolean | Default: True | Active status |
-| capabilities | JSONField | Default: [] | **Capabilities for template routing** |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `customer` FK(Customer, required)
+- `vin` (17 chars, required, unique), `unit_number`
+- `year` (1900-2100), `make`, `model`
+- `body_type` - CharField with choices: `AERIAL`, etc. (only types we have inspection templates for)
+- `license_plate`, `license_state`
+- `odometer_miles` (≥0), `engine_hours` (≥0)
+- `is_active`
+- `capabilities` (JSONField) - **For inspection/maintenance impact only**
+- `notes`
 
-**Validation:**
-- VIN must be exactly 17 characters
-- `odometer_miles` and `engine_hours` must be ≥ 0
-- `year` must be between 1900 and 2100
+**Capabilities (VIN-Driven):**
+Minimal set - only if affects inspection/maintenance:
+- `AIR_BRAKES` - From VIN decode abs field
+- `HYDRAULIC_BRAKES` - From VIN decode abs field
+- `FOUR_WHEEL_DRIVE` - From VIN decode if available
 
-**Capability-Based Template Routing:**
-The `capabilities` JSON array dictates what inspection templates apply:
-```json
-["UTILITY_TRUCK", "INSULATED_BOOM", "DIELECTRIC"]
-```
+**Body Type:**
+- Controlled choices, only added when we have inspection templates
+- Currently: `AERIAL` (for ANSI A92.2 aerial devices)
+- Future: REFUSE, SWEEPER, SCHOOL_BUS, DUMP, TANK, TOW
 
-**Examples:**
-- `["AERIAL_DEVICE"]` - Basic aerial lift requiring ANSI A92.2 periodic inspection
-- `["AERIAL_DEVICE", "INSULATING_SYSTEM"]` - Insulated aerial device requiring dielectric testing
-- `["CRANE", "MOBILE"]` - Mobile crane requiring ASME B30.5 inspection
-
-**Equipment Data:**
-The `equipment_data` field stores detailed specifications populated during inspection setup:
-```json
-{
-  "placard": {
-    "rated_capacity": 500,
-    "max_working_height": 45,
-    "max_horizontal_reach": 35
-  },
-  "dielectric": {
-    "insulation_class": "Class A",
-    "rated_voltage": 46000,
-    "test_voltage": 69000
-  }
-}
-```
+**Relationships:** OneToOne `vin_decode`, OneToMany `equipment` (mounted)
 
 ---
 
 ### Equipment
-**Purpose:** Customer equipment (aerial lifts, trailers, etc.)
+**Purpose:** Work equipment mounted on vehicles (aerial devices, cranes, etc.)
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| customer | FK(Customer) | Required | Owner |
-| serial_number | CharField(100) | Required, Unique | Serial number |
-| asset_number | CharField(50) | Optional | Asset/fleet number |
-| manufacturer | CharField(100) | Optional | Manufacturer |
-| model | CharField(100) | Optional | Model name |
-| year | Integer | Optional | Model year |
-| equipment_type | CharField(100) | Optional | Equipment type |
-| is_active | Boolean | Default: True | Active status |
-| capabilities | JSONField | Default: [] | **Capabilities for template routing** |
-| equipment_data | JSONField | Default: {} | **Detailed specs/placard data** |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `customer` FK(Customer, required)
+- `serial_number` (required, unique), `asset_number`
+- `manufacturer`, `model`, `year`, `equipment_type`
+- `mounted_on_vehicle` FK(Vehicle, optional, SET_NULL)
+- `is_active`
+- `capabilities` (JSONField) - **For inspection/maintenance impact only**
+- `equipment_data` (JSONField) - **Detailed specs populated during inspection setup**
+- `notes`
 
-**Capability-Based Template Routing:**
-The `capabilities` JSON array dictates what inspection templates apply:
-```json
-["AERIAL_DEVICE", "INSULATING_SYSTEM", "BARE_HAND_WORK_UNIT"]
-```
+**Capabilities (Inspection-Driven):**
+Only capabilities that affect inspections/maintenance:
+- `DIELECTRIC` - Requires annual dielectric testing (ANSI/ASTM)
+- `HYDRAULIC` - Requires hydraulic system inspection
+- `PNEUMATIC` - Requires air system inspection
+- `ELECTRIC` - Requires electrical system inspection
+- `PTO_DRIVEN` - Requires PTO system inspection
+- `ENGINE_DRIVEN` - Requires engine maintenance (oil, filters)
 
-**Examples:**
-- `["AERIAL_DEVICE"]` - Basic aerial lift requiring ANSI A92.2 periodic inspection
-- `["AERIAL_DEVICE", "INSULATING_SYSTEM"]` - Insulated aerial device requiring dielectric testing
-- `["CRANE", "MOBILE"]` - Mobile crane requiring ASME B30.5 inspection
-
-**Equipment Data:**
-The `equipment_data` field stores detailed specifications populated during inspection setup:
+**Equipment Data Example:**
 ```json
 {
   "placard": {
-    "rated_capacity": 500,
-    "max_working_height": 45,
-    "max_horizontal_reach": 35
+    "max_platform_height": 45,
+    "max_working_height": 50,
+    "platform_capacity": 500
   },
   "dielectric": {
-    "insulation_class": "Class A",
-    "rated_voltage": 46000,
-    "test_voltage": 69000
+    "insulation_rating_kv": 46,
+    "last_test_date": "2024-01-15",
+    "next_test_due": "2025-01-15",
+    "test_certificate_number": "DT-2024-001"
+  },
+  "hydraulic": {
+    "hydraulic_fluid_type": "AW-32",
+    "reservoir_capacity_gallons": 15,
+    "last_service_date": "2024-06-01"
   }
 }
 ```
@@ -333,30 +191,24 @@ The `equipment_data` field stores detailed specifications populated during inspe
 ---
 
 ### VINDecodeData
-**Purpose:** Cached VIN decode results from NHTSA
+**Purpose:** Cached VIN decode results from NHTSA vPIC API (OneToOne with Vehicle)
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| vehicle | OneToOne(Vehicle) | Required | Parent vehicle |
-| vin | CharField(17) | Required | VIN |
-| model_year | Integer | Optional | Decoded year |
-| make | CharField(100) | Optional | Decoded make |
-| model | CharField(100) | Optional | Decoded model |
-| manufacturer | CharField(255) | Optional | Manufacturer |
-| vehicle_type | CharField(100) | Optional | Vehicle type |
-| body_class | CharField(100) | Optional | Body class |
-| engine_model | CharField(100) | Optional | Engine model |
-| engine_cylinders | Integer | Optional | Cylinder count |
-| displacement_liters | Decimal | Optional | Engine displacement |
-| fuel_type_primary | CharField(50) | Optional | Fuel type |
-| gvwr | CharField(50) | Optional | GVWR class |
-| gvwr_min_lbs | Integer | Optional | Min GVWR (lbs) |
-| gvwr_max_lbs | Integer | Optional | Max GVWR (lbs) |
-| error_code | CharField(10) | Optional | Error code if decode failed |
-| raw_response | JSONField | Optional | Full NHTSA response |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `vehicle` OneToOne(Vehicle), `vin` (17 chars)
+- Decoded: `model_year`, `make`, `model`, `manufacturer`
+- Classification: `vehicle_type`, `body_class`
+- Engine: `engine_model`, `engine_configuration`, `engine_cylinders`, `displacement_liters`
+- Fuel: `fuel_type_primary`, `fuel_type_secondary`
+- Weight: `gvwr` (class), `gvwr_min_lbs`, `gvwr_max_lbs`
+- Safety: `abs` (brake system type), `airbag_locations`
+- Plant: `plant_city`, `plant_state`, `plant_country`
+- Status: `error_code`, `error_text`, `decoded_at`
+- `raw_response` (JSONField) - Full NHTSA response
+
+**Key Uses:**
+- Automatic vehicle classification (Class 2-8 trucks, trailers, buses)
+- Brake system type → `AIR_BRAKES` or `HYDRAULIC_BRAKES` capability
+- "Incomplete Vehicle" flag → indicates aftermarket body (garbage truck, sweeper, etc.)
 
 ---
 
@@ -365,76 +217,46 @@ The `equipment_data` field stores detailed specifications populated during inspe
 ### InspectionRun
 **Purpose:** Execution of an inspection template on an asset
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| customer | FK(Customer) | Required | Customer |
-| asset_type | CharField(20) | Required | 'VEHICLE' or 'EQUIPMENT' |
-| asset_id | UUID | Required | Vehicle or Equipment ID |
-| template_key | CharField(100) | Required | Template identifier |
-| program_key | CharField(100) | Optional | Program identifier |
-| status | CharField(20) | Required | DRAFT/IN_PROGRESS/COMPLETED |
-| started_at | DateTime | Required | Start timestamp |
-| finalized_at | DateTime | Optional | Finalization timestamp |
-| inspector_name | CharField(200) | Optional | Inspector name |
-| inspector_signature | JSONField | Optional | Digital signature data |
-| template_snapshot | JSONField | Required | **Immutable template copy** |
-| step_data | JSONField | Default: {} | Collected inspection data |
-| notes | TextField | Optional | Inspector notes |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `customer` FK(Customer, required)
+- `asset_type` ('VEHICLE' or 'EQUIPMENT'), `asset_id` (UUID)
+- `template_key` (required), `program_key`
+- `status` (DRAFT/IN_PROGRESS/COMPLETED)
+- `started_at` (required), `finalized_at`
+- `inspector_name`, `inspector_signature` (JSONField)
+- `template_snapshot` (JSONField, required) - **Immutable template copy**
+- `step_data` (JSONField) - Collected inspection data
+- `notes`
 
 **Validation:**
 - Asset customer must match inspection customer
 - Status cannot go backwards (COMPLETED → DRAFT)
-- `template_snapshot` must be a dict with 'modules' key
 - After finalization, `step_data`, `template_snapshot`, and `status` are immutable
 
-**Properties:**
-- `asset` - Returns actual Vehicle or Equipment instance
-- `is_finalized` - True if finalized_at is set
-- `defect_count` - Count of associated defects
-- `critical_defect_count` - Count of CRITICAL defects
+**Properties:** `asset`, `is_finalized`, `defect_count`, `critical_defect_count`
 
 ---
 
 ### InspectionDefect
-**Purpose:** Defect/finding from inspection - generated automatically from rule evaluation
+**Purpose:** Defect/finding - automatically generated from rule evaluation
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| inspection_run | FK(InspectionRun) | Required | Parent inspection |
-| module_key | CharField(100) | Optional (blank=True) | Template module (legacy) |
-| step_key | CharField(100) | Required | Template step where defect found |
-| rule_id | CharField(100) | Optional | Rule ID that generated this defect |
-| defect_identity | CharField(64) | Required, Unique | SHA256 hash for idempotency |
-| severity | CharField(20) | Required | CRITICAL/MAJOR/MINOR/ADVISORY |
-| status | CharField(20) | Required | OPEN/WORK_ORDER_CREATED/RESOLVED |
-| title | CharField(255) | Required | Defect title |
-| description | TextField | Optional | Detailed description |
-| defect_details | JSONField | Optional | Structured defect data (actual/expected values) |
-| evaluation_trace | JSONField | Default: {} | Complete rule evaluation audit trail |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
-
-**Validation:**
-- `defect_identity` must be exactly 64 characters (SHA256 hex)
-- `defect_details` must be a dict if provided
+**Core Fields:**
+- `inspection_run` FK(InspectionRun, required)
+- `module_key` (optional, legacy), `step_key` (required), `rule_id`
+- `defect_identity` (64 chars, unique) - SHA256 hash for idempotency
+- `severity` (CRITICAL/MAJOR/MINOR/ADVISORY)
+- `status` (OPEN/WORK_ORDER_CREATED/RESOLVED)
+- `title` (required), `description`
+- `defect_details` (JSONField) - Structured data (actual/expected values)
+- `evaluation_trace` (JSONField) - Complete rule evaluation audit trail
 
 **Idempotency:**
 ```python
 defect_identity = SHA256(run_id + module_key + step_key + rule_id)
 ```
-Re-running rule evaluation updates existing defects rather than creating duplicates.
+Re-running evaluation updates existing defects rather than creating duplicates.
 
-**Automated Generation (Phase 4):**
-Defects are automatically generated by the RuleEvaluator service when:
-1. InspectionRun is finalized with `evaluate_rules=True`
-2. Manual evaluation via `POST /api/inspections/{id}/evaluate_rules/`
-
-**Rule Evaluation:**
-Templates define rules with 14 assertion types:
+**Rule Assertions (14 types):**
 - **Numeric:** EQUALS, GT, LT, GTE, LTE, IN_RANGE
 - **String:** EQUALS, CONTAINS
 - **Boolean:** TRUE, FALSE
@@ -442,15 +264,10 @@ Templates define rules with 14 assertion types:
 - **Existence:** EXISTS, NOT_EXISTS
 
 **Severity Mapping:**
-Template severities are mapped to model severities:
 - `UNSAFE_OUT_OF_SERVICE` → `CRITICAL`
 - `DEGRADED_PERFORMANCE` → `MAJOR`
 - `MINOR_ISSUE` → `MINOR`
 - `ADVISORY_NOTICE` → `ADVISORY`
-
-**API Endpoints:**
-- `GET /api/inspections/{id}/defects/` - List defects with summary
-- `POST /api/inspections/{id}/evaluate_rules/` - Evaluate rules and generate defects
 
 ---
 
@@ -459,66 +276,37 @@ Template severities are mapped to model severities:
 ### WorkOrder
 **Purpose:** Maintenance/repair work orders
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| work_order_number | CharField(50) | Unique, Auto | Format: WO-YYYY-##### |
-| customer | FK(Customer) | Required | Customer |
-| asset_type | CharField(20) | Required | 'VEHICLE' or 'EQUIPMENT' |
-| asset_id | UUID | Required | Vehicle or Equipment ID |
-| departments | M2M(Department) | Optional | **Departments involved** |
-| assigned_employees | M2M(Employee) | Optional | **Assigned employees** |
-| status | CharField(20) | Required | DRAFT/OPEN/IN_PROGRESS/COMPLETED/CANCELLED |
-| priority | CharField(20) | Required | LOW/MEDIUM/HIGH/URGENT |
-| source | CharField(30) | Required | INSPECTION/CUSTOMER_REQUEST/PM_SCHEDULE/BREAKDOWN |
-| source_inspection_run | FK(InspectionRun) | Optional | Source inspection if applicable |
-| description | TextField | Required | Work description |
-| scheduled_date | DateField | Optional | Scheduled date |
-| assigned_to | CharField(200) | Optional | **Legacy field** (use assigned_employees) |
-| started_at | DateTime | Optional | Work start time |
-| completed_at | DateTime | Optional | Work completion time |
-| total_cost | Decimal | Optional | Total cost |
-| labor_hours | Decimal | Optional | Labor hours |
-| notes | TextField | Optional | Additional notes |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `work_order_number` (unique, auto: WO-YYYY-#####)
+- `customer` FK(Customer, required)
+- `asset_type` ('VEHICLE' or 'EQUIPMENT'), `asset_id` (UUID)
+- `departments` M2M(Department), `assigned_employees` M2M(Employee)
+- `status` (DRAFT/OPEN/IN_PROGRESS/COMPLETED/CANCELLED)
+- `priority` (LOW/MEDIUM/HIGH/URGENT)
+- `source` (INSPECTION/CUSTOMER_REQUEST/PM_SCHEDULE/BREAKDOWN)
+- `source_inspection_run` FK(InspectionRun, optional)
+- `description` (required), `scheduled_date`
+- `started_at`, `completed_at`
+- `total_cost`, `labor_hours`
+- `notes`
 
 **Validation:**
 - Asset customer must match work order customer
 - If source is INSPECTION, source_inspection_run must be for same asset
 - Cannot reopen COMPLETED or CANCELLED work orders
 - `completed_at` cannot be before `started_at`
-- `scheduled_date` cannot be in past for DRAFT status
 
-**Auto-Generation:**
-- `work_order_number` is auto-generated: `WO-2025-00123`
-
-**Multi-Department Support:**
-Work orders can involve multiple departments (e.g., Service + Parts):
-```python
-work_order.departments.add(service_dept, parts_dept)
-work_order.assigned_employees.add(tech1, tech2)
-```
-
-**Properties:**
-- `asset` - Returns actual Vehicle or Equipment
-- `defect_count` - Count of linked defects
-- `is_completed` - True if status is COMPLETED
-- `is_cancelled` - True if status is CANCELLED
+**Properties:** `asset`, `defect_count`, `is_completed`, `is_cancelled`
 
 ---
 
 ### WorkOrderDefect
-**Purpose:** Junction table linking work orders to inspection defects
+**Purpose:** Junction table linking work orders to inspection defects (M2M)
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| id | UUID | PK | Primary key |
-| work_order | FK(WorkOrder) | Required | Work order |
-| defect | FK(InspectionDefect) | Required | Inspection defect |
-| linked_at | DateTime | Auto | When linked |
-| created_at | DateTime | Auto | Creation timestamp |
-| updated_at | DateTime | Auto | Last update timestamp |
+**Core Fields:**
+- `work_order` FK(WorkOrder, required)
+- `defect` FK(InspectionDefect, required)
+- `linked_at` (auto)
 
 **Validation:**
 - Work order and defect must belong to same customer
@@ -535,82 +323,31 @@ work_order.assigned_employees.add(tech1, tech2)
 
 ```
 Organization:
-Company (1)
-  └─> Departments (*)
-       ├─> Employees (*) [base_department]
-       └─> Employees (*) [floating via M2M]
+  Company (1)
+    └─> Departments (*)
+         ├─> Employees (*) [base_department]
+         └─> Employees (*) [floating via M2M]
 
 Customers:
-Customer (*)
-  ├─> Contacts (*)
-  ├─> Vehicles (*)
-  ├─> Equipment (*)
-  └─> USDOTProfile (1)
+  Customer (*)
+    ├─> Contacts (*)
+    ├─> Vehicles (*)
+    │    ├─> VINDecodeData (1)
+    │    └─> Equipment (*) [mounted_on_vehicle]
+    ├─> Equipment (*)
+    └─> USDOTProfile (1)
 
 Assets → Inspections → Work Orders:
-Vehicle/Equipment
-  ├─> InspectionRuns (*)
-  │    └─> InspectionDefects (*)
-  │         └─> WorkOrderDefects (*) ─> WorkOrders (*)
-  └─> WorkOrders (*) [direct]
+  Vehicle/Equipment
+    ├─> InspectionRuns (*)
+    │    └─> InspectionDefects (*)
+    │         └─> WorkOrderDefects (*) ─> WorkOrders (*)
+    └─> WorkOrders (*) [direct]
 
 Work Order Assignments:
-WorkOrder
-  ├─> Departments (*) [M2M]
-  └─> Employees (*) [M2M]
-```
-
----
-
-## Tag-Based Routing System
-
-### Concept
-Assets (Vehicles and Equipment) use JSON `tags` fields to dictate which inspection programs and maintenance schedules apply. This provides flexible, dynamic routing without hardcoded business logic.
-
-### Example: Aerial Lift
-```json
-{
-  "equipment_category": "AERIAL_LIFT",
-  "inspection_programs": ["ANSI_A92_2", "OSHA_1910"],
-  "insulation_class": "CLASS_A",
-  "maintenance_schedule": "PM_QUARTERLY",
-  "capacity": "60ft",
-  "manufacturer_program": "GENIE_CERTIFIED"
-}
-```
-
-### Example: Service Van
-```json
-{
-  "vehicle_class": "LIGHT_DUTY_TRUCK",
-  "inspection_programs": ["DOT_ANNUAL"],
-  "maintenance_schedule": "PM_5000_MILES",
-  "gvwr_class": "CLASS_2"
-}
-```
-
-### Usage in Code
-```python
-# Get all equipment requiring ANSI A92.2 inspections
-equipment = Equipment.objects.filter(
-    tags__inspection_programs__contains='ANSI_A92_2',
-    is_active=True
-)
-
-# Check if specific vehicle needs DOT annual
-if 'DOT_ANNUAL' in vehicle.tags.get('inspection_programs', []):
-    schedule_dot_inspection(vehicle)
-```
-
----
-
-## API Authentication
-
-All API endpoints require authentication. Use Django REST Framework token authentication or session authentication.
-
-**Headers:**
-```
-Authorization: Token <your-token>
+  WorkOrder
+    ├─> Departments (*) [M2M]
+    └─> Employees (*) [M2M]
 ```
 
 ---
@@ -621,7 +358,6 @@ Authorization: Token <your-token>
 - Company: Only one record (enforced in model)
 - Department: name, code
 - Employee: employee_number
-- Customer: (none - duplicates allowed)
 - Vehicle: vin
 - Equipment: serial_number
 - InspectionDefect: defect_identity
@@ -629,17 +365,13 @@ Authorization: Token <your-token>
 - WorkOrderDefect: (work_order, defect)
 
 ### Foreign Key Cascades
-- ON DELETE CASCADE: Contacts, Assets, InspectionRuns, InspectionDefects
-- ON DELETE SET_NULL: Department.manager, WorkOrder.source_inspection_run
-- ON DELETE PROTECT: Employee.base_department
-
----
-
-## Indexes
+- **CASCADE:** Contacts, Assets, InspectionRuns, InspectionDefects, WorkOrderDefects
+- **SET_NULL:** Department.manager, Equipment.mounted_on_vehicle, WorkOrder.source_inspection_run
+- **PROTECT:** Employee.base_department
 
 ### Performance Indexes
 - Customer: usdot_number, is_active
-- Vehicle: customer + is_active, vin
+- Vehicle: customer + is_active, vin, body_type
 - Equipment: customer + is_active, serial_number
 - Employee: base_department + is_active, employee_number
 - InspectionRun: customer + status, asset_type + asset_id
@@ -652,7 +384,8 @@ Authorization: Token <your-token>
 - **v1.0** - Initial models: Customers, Assets, Inspections, Work Orders
 - **v1.1** - Added Organization module: Company, Departments, Employees
 - **v1.2** - Added multi-department/employee support to Work Orders
+- **v1.3** - Simplified capabilities, added body_type to Vehicle, VIN-driven classification
 
 ---
 
-**Last Updated:** March 11, 2025
+**Last Updated:** March 12, 2026

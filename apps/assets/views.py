@@ -3,7 +3,7 @@ DRF ViewSets for Asset Management
 
 Provides REST API endpoints for:
 - Vehicle CRUD with VIN lookup and filtering
-- Equipment CRUD with tag-based filtering and data management
+- Equipment CRUD with capability-based filtering and data management
 """
 
 from rest_framework import viewsets, filters, status
@@ -64,7 +64,8 @@ class VehicleViewSet(viewsets.ModelViewSet):
         """
         Optionally filter by:
         - has_equipment: vehicles with/without mounted equipment
-        - tags: filter by specific tags
+        - capabilities: filter by specific capabilities
+        - body_type: filter by body type
         - year_min/year_max: filter by year range
         """
         queryset = super().get_queryset()
@@ -78,13 +79,18 @@ class VehicleViewSet(viewsets.ModelViewSet):
             else:
                 queryset = queryset.filter(equipment_count=0)
 
-        # Filter by tags (any match)
-        tags = self.request.query_params.get('tags')
-        if tags:
-            tag_list = [t.strip().upper() for t in tags.split(',')]
+        # Filter by capabilities (any match)
+        capabilities = self.request.query_params.get('capabilities')
+        if capabilities:
+            capability_list = [c.strip().upper() for c in capabilities.split(',')]
             # PostgreSQL JSONField contains query
-            for tag in tag_list:
-                queryset = queryset.filter(tags__contains=[tag])
+            for capability in capability_list:
+                queryset = queryset.filter(capabilities__contains=[capability])
+
+        # Filter by body type
+        body_type = self.request.query_params.get('body_type')
+        if body_type:
+            queryset = queryset.filter(body_type=body_type.upper())
 
         # Filter by year range
         year_min = self.request.query_params.get('year_min')
@@ -275,19 +281,19 @@ class EquipmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Optionally filter by:
-        - tags: filter by specific tags
+        - capabilities: filter by specific capabilities
         - mounted: filter mounted/unmounted equipment
         - has_data: filter equipment with/without equipment_data
         """
         queryset = super().get_queryset()
 
-        # Filter by tags (any match)
-        tags = self.request.query_params.get('tags')
-        if tags:
-            tag_list = [t.strip().upper() for t in tags.split(',')]
+        # Filter by capabilities (any match)
+        capabilities = self.request.query_params.get('capabilities')
+        if capabilities:
+            capability_list = [c.strip().upper() for c in capabilities.split(',')]
             # PostgreSQL JSONField contains query
-            for tag in tag_list:
-                queryset = queryset.filter(tags__contains=[tag])
+            for capability in capability_list:
+                queryset = queryset.filter(capabilities__contains=[capability])
 
         # Filter by mounted status
         mounted = self.request.query_params.get('mounted')
@@ -433,35 +439,19 @@ class EquipmentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def required_data_fields(self, request, pk=None):
         """
-        Get list of required data fields based on equipment tags
+        Get list of required data fields based on equipment capabilities.
         GET /api/equipment/{id}/required_data_fields/
 
         Returns structure describing what data needs to be collected
-        based on the equipment's tags
+        based on the equipment's capabilities.
         """
         equipment = self.get_object()
-        tags = equipment.tags or []
+        capabilities = equipment.capabilities or []
 
         required_fields = {}
 
-        # Define required fields per tag
-        TAG_DATA_REQUIREMENTS = {
-            'AERIAL_DEVICE': {
-                'placard': {
-                    'max_platform_height': 'number',
-                    'max_working_height': 'number',
-                    'platform_capacity': 'number',
-                    'max_wind_speed': 'number',
-                }
-            },
-            'INSULATED_BOOM': {
-                'dielectric': {
-                    'insulation_rating_kv': 'number',
-                    'last_test_date': 'date',
-                    'next_test_due': 'date',
-                    'test_certificate_number': 'string',
-                }
-            },
+        # Define required fields per capability
+        CAPABILITY_DATA_REQUIREMENTS = {
             'DIELECTRIC': {
                 'dielectric': {
                     'insulation_rating_kv': 'number',
@@ -470,19 +460,32 @@ class EquipmentViewSet(viewsets.ModelViewSet):
                     'test_certificate_number': 'string',
                 }
             },
+            'HYDRAULIC': {
+                'hydraulic': {
+                    'hydraulic_fluid_type': 'string',
+                    'reservoir_capacity_gallons': 'number',
+                    'last_service_date': 'date',
+                }
+            },
+            'PNEUMATIC': {
+                'pneumatic': {
+                    'max_air_pressure_psi': 'number',
+                    'compressor_type': 'string',
+                }
+            },
         }
 
-        # Build required fields based on tags
-        for tag in tags:
-            if tag in TAG_DATA_REQUIREMENTS:
-                for data_type, fields in TAG_DATA_REQUIREMENTS[tag].items():
+        # Build required fields based on capabilities
+        for capability in capabilities:
+            if capability in CAPABILITY_DATA_REQUIREMENTS:
+                for data_type, fields in CAPABILITY_DATA_REQUIREMENTS[capability].items():
                     if data_type not in required_fields:
                         required_fields[data_type] = {}
                     required_fields[data_type].update(fields)
 
         return Response({
             'equipment_id': equipment.id,
-            'tags': tags,
+            'capabilities': capabilities,
             'required_fields': required_fields,
             'current_data': equipment.equipment_data or {}
         })
