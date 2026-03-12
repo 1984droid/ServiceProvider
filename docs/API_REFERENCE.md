@@ -18,7 +18,10 @@ Complete REST API documentation for NEW_BUILD_STARTER.
 6. [Vehicle Management](#vehicle-management)
 7. [Equipment Management](#equipment-management)
 8. [VIN Decode Data Management](#vin-decode-data-management)
-9. [Error Responses](#error-responses)
+9. [Inspection Management](#inspection-management)
+10. [Defect Management](#defect-management)
+11. [Work Order Management](#work-order-management)
+12. [Error Responses](#error-responses)
 
 ---
 
@@ -973,6 +976,610 @@ POST /api/vin-decode-data/decode_vin/
 
 ---
 
+## Inspection Management
+
+### List Inspections
+
+```http
+GET /api/inspections/
+```
+
+**Query Parameters:**
+- `customer` (uuid) - Filter by customer
+- `asset_type` (string) - Filter by VEHICLE or EQUIPMENT
+- `asset_id` (uuid) - Filter by specific asset
+- `status` (string) - Filter by DRAFT, IN_PROGRESS, COMPLETED
+- `template_key` (string) - Filter by inspection template
+- `search` (string) - Search template key, inspector name
+- `ordering` (string) - Order by: started_at, finalized_at, status, template_key
+
+**Response:** `200 OK`
+```json
+{
+  "results": [
+    {
+      "id": "uuid",
+      "customer": "uuid",
+      "customer_name": "ABC Trucking",
+      "asset_type": "VEHICLE",
+      "asset_id": "uuid",
+      "asset_display": "T-101 - 2020 Ford F-350",
+      "template_key": "ansi_a92_2_2021_annual_aerial_vehicle",
+      "program_key": "ANSI_A92_2",
+      "status": "COMPLETED",
+      "started_at": "2025-01-15T08:00:00Z",
+      "finalized_at": "2025-01-15T10:30:00Z",
+      "inspector_name": "John Smith",
+      "defect_count": 3,
+      "critical_defect_count": 1,
+      "created_at": "2025-01-15T08:00:00Z"
+    }
+  ]
+}
+```
+
+### Create Inspection
+
+```http
+POST /api/inspections/
+```
+
+**Body:**
+```json
+{
+  "customer": "uuid",
+  "asset_type": "VEHICLE",
+  "asset_id": "uuid",
+  "template_key": "ansi_a92_2_2021_annual_aerial_vehicle",
+  "program_key": "ANSI_A92_2",
+  "started_at": "2025-01-15T08:00:00Z",
+  "inspector_name": "John Smith",
+  "template_snapshot": {
+    "procedure": {
+      "metadata": {
+        "title": "ANSI A92.2 Annual Inspection",
+        "version": "1.0"
+      },
+      "modules": []
+    }
+  }
+}
+```
+
+**Response:** `201 Created`
+
+### Get Inspection Detail
+
+```http
+GET /api/inspections/{id}/
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": "uuid",
+  "customer": "uuid",
+  "customer_name": "ABC Trucking",
+  "asset_type": "VEHICLE",
+  "asset_id": "uuid",
+  "asset_display": "T-101 - 2020 Ford F-350",
+  "template_key": "ansi_a92_2_2021_annual_aerial_vehicle",
+  "program_key": "ANSI_A92_2",
+  "status": "COMPLETED",
+  "started_at": "2025-01-15T08:00:00Z",
+  "finalized_at": "2025-01-15T10:30:00Z",
+  "inspector_name": "John Smith",
+  "inspector_signature": {
+    "signature_data": "base64_encoded_image",
+    "signed_at": "2025-01-15T10:30:00Z",
+    "signed_by": "John Smith",
+    "ip_address": "192.168.1.100"
+  },
+  "template_snapshot": { ... },
+  "step_data": {
+    "visual_inspection.hydraulic_leaks": {
+      "response": "FAIL",
+      "notes": "Hydraulic leak at cylinder",
+      "photos": ["photo_uuid_1"]
+    }
+  },
+  "notes": "Customer present during inspection",
+  "defect_count": 3,
+  "critical_defect_count": 1,
+  "created_at": "2025-01-15T08:00:00Z",
+  "updated_at": "2025-01-15T10:30:00Z"
+}
+```
+
+### Update Inspection
+
+```http
+PATCH /api/inspections/{id}/
+```
+
+**Body:**
+```json
+{
+  "status": "IN_PROGRESS",
+  "step_data": {
+    "visual_inspection.hydraulic_leaks": {
+      "response": "PASS",
+      "notes": "No leaks detected"
+    }
+  },
+  "notes": "Updated inspection data"
+}
+```
+
+**Response:** `200 OK`
+
+**Note:** Once `finalized_at` is set, `step_data`, `template_snapshot`, and `status` become immutable for audit compliance.
+
+### Delete Inspection
+
+```http
+DELETE /api/inspections/{id}/
+```
+
+**Response:** `204 No Content`
+
+### Get Inspection Defects
+
+```http
+GET /api/inspections/{id}/defects/
+```
+
+**Query Parameters:**
+- `severity` (string) - Filter by CRITICAL, MAJOR, MINOR, ADVISORY
+- `status` (string) - Filter by OPEN, WORK_ORDER_CREATED, RESOLVED
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": "uuid",
+    "defect_identity": "sha256_hash",
+    "module_key": "visual_inspection",
+    "step_key": "hydraulic_leaks",
+    "rule_id": "leak_check_001",
+    "severity": "MAJOR",
+    "status": "WORK_ORDER_CREATED",
+    "title": "Hydraulic Leak Detected",
+    "description": "Hydraulic fluid leak at boom cylinder connection",
+    "defect_details": {
+      "location": "Boom cylinder connection",
+      "photos": ["photo_uuid_1"]
+    },
+    "created_at": "2025-01-15T09:30:00Z"
+  }
+]
+```
+
+### Evaluate Rules
+
+```http
+POST /api/inspections/{id}/evaluate_rules/
+```
+
+Evaluates inspection response data against defect detection rules and creates/updates InspectionDefect records.
+
+**Body (optional):**
+```json
+{
+  "force_reevaluate": true
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "defects_created": 3,
+  "defects_updated": 1,
+  "rules_evaluated": 25
+}
+```
+
+---
+
+## Defect Management
+
+### List Defects
+
+```http
+GET /api/defects/
+```
+
+**Query Parameters:**
+- `inspection_run` (uuid) - Filter by inspection
+- `severity` (string) - Filter by CRITICAL, MAJOR, MINOR, ADVISORY
+- `status` (string) - Filter by OPEN, WORK_ORDER_CREATED, RESOLVED
+- `module_key` (string) - Filter by module
+- `step_key` (string) - Filter by step
+- `search` (string) - Search title, description
+- `ordering` (string) - Order by: severity, created_at, status
+
+**Response:** `200 OK`
+```json
+{
+  "results": [
+    {
+      "id": "uuid",
+      "inspection_run": "uuid",
+      "inspection_display": "ANSI A92.2 - T-101 - 2025-01-15",
+      "defect_identity": "sha256_hash",
+      "module_key": "visual_inspection",
+      "step_key": "hydraulic_leaks",
+      "rule_id": "leak_check_001",
+      "severity": "MAJOR",
+      "status": "WORK_ORDER_CREATED",
+      "title": "Hydraulic Leak Detected",
+      "description": "Hydraulic fluid leak at boom cylinder connection",
+      "defect_details": {
+        "location": "Boom cylinder connection",
+        "photos": ["photo_uuid_1"],
+        "measurements": {
+          "leak_rate": "2 drops per minute"
+        }
+      },
+      "evaluation_trace": {
+        "rule_id": "leak_check_001",
+        "condition": "response == 'FAIL'",
+        "evaluated_at": "2025-01-15T09:30:00Z",
+        "response_data": {
+          "response": "FAIL",
+          "notes": "Hydraulic leak at cylinder"
+        }
+      },
+      "created_at": "2025-01-15T09:30:00Z",
+      "updated_at": "2025-01-15T09:45:00Z"
+    }
+  ]
+}
+```
+
+### Create Defect (Manual)
+
+```http
+POST /api/defects/
+```
+
+**Body:**
+```json
+{
+  "inspection_run": "uuid",
+  "defect_identity": "manually_generated_sha256",
+  "module_key": "visual_inspection",
+  "step_key": "hydraulic_leaks",
+  "severity": "MAJOR",
+  "title": "Hydraulic Leak Detected",
+  "description": "Hydraulic fluid leak at boom cylinder connection",
+  "defect_details": {
+    "location": "Boom cylinder connection",
+    "photos": []
+  }
+}
+```
+
+**Response:** `201 Created`
+
+**Note:** The system automatically generates defects via rule evaluation (POST /api/inspections/{id}/evaluate_rules/). Manual creation is for edge cases.
+
+### Get Defect Detail
+
+```http
+GET /api/defects/{id}/
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": "uuid",
+  "inspection_run": "uuid",
+  "inspection_display": "ANSI A92.2 - T-101 - 2025-01-15",
+  "defect_identity": "sha256_hash",
+  "module_key": "visual_inspection",
+  "step_key": "hydraulic_leaks",
+  "rule_id": "leak_check_001",
+  "severity": "MAJOR",
+  "status": "WORK_ORDER_CREATED",
+  "title": "Hydraulic Leak Detected",
+  "description": "Hydraulic fluid leak at boom cylinder connection",
+  "defect_details": { ... },
+  "evaluation_trace": { ... },
+  "work_orders": [
+    {
+      "id": "uuid",
+      "title": "Repair Hydraulic Leak",
+      "status": "PENDING"
+    }
+  ],
+  "created_at": "2025-01-15T09:30:00Z",
+  "updated_at": "2025-01-15T09:45:00Z"
+}
+```
+
+### Update Defect
+
+```http
+PATCH /api/defects/{id}/
+```
+
+**Body:**
+```json
+{
+  "status": "RESOLVED",
+  "defect_details": {
+    "resolution": "Leak repaired, new seals installed"
+  }
+}
+```
+
+**Response:** `200 OK`
+
+### Delete Defect
+
+```http
+DELETE /api/defects/{id}/
+```
+
+**Response:** `204 No Content`
+
+---
+
+## Work Order Management
+
+### List Work Orders
+
+```http
+GET /api/work-orders/
+```
+
+**Query Parameters:**
+- `customer` (uuid) - Filter by customer
+- `asset_type` (string) - Filter by VEHICLE or EQUIPMENT
+- `asset_id` (uuid) - Filter by specific asset
+- `status` (string) - Filter by DRAFT, PENDING, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED
+- `priority` (string) - Filter by LOW, NORMAL, HIGH, URGENT, EMERGENCY
+- `approval_status` (string) - Filter by DRAFT, PENDING_APPROVAL, APPROVED, REJECTED
+- `source_type` (string) - Filter by INSPECTION_DEFECT, MANUAL, PM_SCHEDULE
+- `assigned_to` (uuid) - Filter by assigned employee
+- `department` (uuid) - Filter by department
+- `search` (string) - Search title, description, work order number
+- `ordering` (string) - Order by: created_at, due_date, priority, status
+
+**Response:** `200 OK`
+```json
+{
+  "results": [
+    {
+      "id": "uuid",
+      "work_order_number": "WO-2025-00123",
+      "customer": "uuid",
+      "customer_name": "ABC Trucking",
+      "asset_type": "VEHICLE",
+      "asset_id": "uuid",
+      "asset_display": "T-101 - 2020 Ford F-350",
+      "title": "Repair Hydraulic Leak",
+      "description": "Hydraulic fluid leak at boom cylinder connection - Severity: MAJOR",
+      "status": "IN_PROGRESS",
+      "priority": "HIGH",
+      "approval_status": "APPROVED",
+      "source_type": "INSPECTION_DEFECT",
+      "source_id": "uuid",
+      "assigned_to": "uuid",
+      "assigned_to_name": "Mike Johnson",
+      "department": "uuid",
+      "department_name": "Hydraulics",
+      "due_date": "2025-01-20",
+      "is_active": true,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T11:30:00Z"
+    }
+  ]
+}
+```
+
+### Create Work Order (Manual)
+
+```http
+POST /api/work-orders/
+```
+
+**Body:**
+```json
+{
+  "customer": "uuid",
+  "asset_type": "VEHICLE",
+  "asset_id": "uuid",
+  "title": "Replace Engine Oil",
+  "description": "Routine oil change - 5W-40 synthetic",
+  "priority": "NORMAL",
+  "due_date": "2025-01-25",
+  "assigned_to": "uuid",
+  "department": "uuid",
+  "approval_status": "APPROVED",
+  "verb": "Replace",
+  "noun": "Engine Oil",
+  "service_location": "Engine"
+}
+```
+
+**Response:** `201 Created`
+
+**Note:** Work orders are typically auto-generated from inspection defects. Manual creation is for scheduled maintenance or ad-hoc work.
+
+### Get Work Order Detail
+
+```http
+GET /api/work-orders/{id}/
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": "uuid",
+  "work_order_number": "WO-2025-00123",
+  "customer": "uuid",
+  "customer_name": "ABC Trucking",
+  "asset_type": "VEHICLE",
+  "asset_id": "uuid",
+  "asset_display": "T-101 - 2020 Ford F-350",
+  "title": "Repair Hydraulic Leak",
+  "description": "Hydraulic fluid leak at boom cylinder connection - Severity: MAJOR",
+  "status": "COMPLETED",
+  "priority": "HIGH",
+  "approval_status": "APPROVED",
+  "source_type": "INSPECTION_DEFECT",
+  "source_id": "uuid",
+  "assigned_to": "uuid",
+  "assigned_to_name": "Mike Johnson",
+  "department": "uuid",
+  "department_name": "Hydraulics",
+  "due_date": "2025-01-20",
+  "completed_at": "2025-01-18T14:30:00Z",
+  "is_active": true,
+  "verb": "Repair",
+  "noun": "Hydraulic Leak",
+  "service_location": "Boom Cylinder",
+  "odometer_at_service": 46500,
+  "engine_hours_at_service": 2150,
+  "labor_hours": 3.5,
+  "parts_cost": 285.50,
+  "labor_cost": 350.00,
+  "notes": "Replaced cylinder seals, tested under pressure",
+  "defects": [
+    {
+      "id": "uuid",
+      "title": "Hydraulic Leak Detected",
+      "severity": "MAJOR",
+      "status": "RESOLVED"
+    }
+  ],
+  "created_at": "2025-01-15T10:00:00Z",
+  "updated_at": "2025-01-18T14:30:00Z"
+}
+```
+
+### Update Work Order
+
+```http
+PATCH /api/work-orders/{id}/
+```
+
+**Body:**
+```json
+{
+  "status": "COMPLETED",
+  "completed_at": "2025-01-18T14:30:00Z",
+  "odometer_at_service": 46500,
+  "engine_hours_at_service": 2150,
+  "labor_hours": 3.5,
+  "parts_cost": 285.50,
+  "labor_cost": 350.00,
+  "notes": "Replaced cylinder seals, tested under pressure"
+}
+```
+
+**Response:** `200 OK`
+
+**Note:** When status changes to COMPLETED:
+1. Linked defects automatically update to RESOLVED status
+2. Asset meters (odometer_miles, engine_hours) automatically update if provided and values are higher than current
+
+### Delete Work Order
+
+```http
+DELETE /api/work-orders/{id}/
+```
+
+**Response:** `204 No Content`
+
+### Generate Work Orders from Defects
+
+```http
+POST /api/work-orders/generate_from_defects/
+```
+
+Generates work orders from inspection defects using severity-based grouping and vocabulary-based task structure.
+
+**Body:**
+```json
+{
+  "inspection_run_id": "uuid",
+  "min_severity": "MAJOR",
+  "group_by_location": true,
+  "auto_approve": false
+}
+```
+
+**Parameters:**
+- `inspection_run_id` (required) - Inspection to process
+- `min_severity` (optional) - Minimum defect severity (CRITICAL, MAJOR, MINOR, ADVISORY). Default: MAJOR
+- `group_by_location` (optional) - Group defects by service location. Default: true
+- `auto_approve` (optional) - Auto-approve work orders. Default: false
+
+**Response:** `200 OK`
+```json
+{
+  "work_orders_created": 3,
+  "defects_processed": 5,
+  "defects_skipped": 2,
+  "work_orders": [
+    {
+      "id": "uuid",
+      "work_order_number": "WO-2025-00123",
+      "title": "Repair Hydraulic System",
+      "defect_count": 2,
+      "priority": "HIGH"
+    }
+  ]
+}
+```
+
+**Business Logic:**
+- Only processes defects with status OPEN
+- Uses defect-to-work-order mapping from data/work_order_catalogs/defect_to_work_order_mapping.json
+- Groups defects by service location if enabled
+- Maps severity to priority: CRITICAL→EMERGENCY, MAJOR→HIGH, MINOR→NORMAL, ADVISORY→LOW
+- Prevents duplicate work orders using defect_identity hash
+- Sets approval_status to PENDING_APPROVAL by default (unless auto_approve=true)
+
+### Approve Work Order
+
+```http
+POST /api/work-orders/{id}/approve/
+```
+
+**Body (optional):**
+```json
+{
+  "notes": "Approved for immediate service"
+}
+```
+
+**Response:** `200 OK`
+
+Changes `approval_status` from PENDING_APPROVAL to APPROVED.
+
+### Reject Work Order
+
+```http
+POST /api/work-orders/{id}/reject/
+```
+
+**Body:**
+```json
+{
+  "reason": "Customer declined repair - monitoring only"
+}
+```
+
+**Response:** `200 OK`
+
+Changes `approval_status` from PENDING_APPROVAL to REJECTED.
+
+---
+
 ## Error Responses
 
 ### 400 Bad Request
@@ -1047,11 +1654,12 @@ or
 2. **Add Permissions** - Role-based access control
 3. **Add Rate Limiting** - Protect against abuse
 4. **Implement NHTSA VIN Decode** - Real VIN decoding
-5. **Add Inspection Models** - InspectionRun, InspectionDefect, WorkOrder
-6. **Add Webhook Support** - Event notifications
+5. **Add Webhook Support** - Event notifications for inspection completion, work order updates
+6. **Add File Upload** - Photo attachments for defects
+7. **Add Reporting** - Work order history, inspection trends, defect analytics
 
 ---
 
-**Version:** 1.0
-**Last Updated:** 2025-01-XX
+**Version:** 2.0 (Phase 5 Complete)
+**Last Updated:** 2026-03-12
 **Base URL:** http://localhost:8100/api/

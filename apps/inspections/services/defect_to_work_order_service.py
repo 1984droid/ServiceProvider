@@ -25,11 +25,11 @@ class DefectToWorkOrderService:
     3. Fallback to generic vocabulary
 
     Data Source:
-    - inspection_defect_to_work_order_seed_map_ansi_a92_2_2021.json
+    - data/work_order_catalogs/inspection_defect_to_work_order_seed_map_ansi_a92_2_2021.json
     """
 
     _mapping_cache = None
-    _base_path = os.path.join(settings.BASE_DIR, 'asset_templates_v2_3', 'work_order_vocabulary')
+    _base_path = os.path.join(settings.BASE_DIR, 'data', 'work_order_catalogs')
 
     @classmethod
     def load_defect_mapping(cls, force_reload: bool = False) -> Dict[str, Dict]:

@@ -301,6 +301,45 @@ class WorkOrder(BaseModel):
         else:
             raise ValueError(f"Invalid asset_type: {self.asset_type}")
 
+    def update_asset_meters(self):
+        """
+        Update asset meters from work order completion.
+
+        Called when work order is completed to update:
+        - Vehicle: odometer_miles, engine_hours
+        - Equipment: engine_hours
+
+        Only updates if meters were recorded during service.
+        """
+        if self.status != 'COMPLETED':
+            return
+
+        try:
+            asset = self.asset
+
+            if self.asset_type == 'VEHICLE':
+                if self.odometer_at_service is not None:
+                    # Only update if new reading is higher (prevent rollback)
+                    if asset.odometer_miles is None or self.odometer_at_service > asset.odometer_miles:
+                        asset.odometer_miles = self.odometer_at_service
+
+                if self.engine_hours_at_service is not None:
+                    if asset.engine_hours is None or self.engine_hours_at_service > asset.engine_hours:
+                        asset.engine_hours = self.engine_hours_at_service
+
+                asset.save()
+
+            elif self.asset_type == 'EQUIPMENT':
+                if self.engine_hours_at_service is not None:
+                    if asset.engine_hours is None or self.engine_hours_at_service > asset.engine_hours:
+                        asset.engine_hours = self.engine_hours_at_service
+
+                asset.save()
+
+        except Exception:
+            # Asset not found or error updating - log but don't fail
+            pass
+
     @property
     def defect_count(self):
         """Get count of defects linked to this work order."""

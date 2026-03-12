@@ -22,11 +22,11 @@ class VocabularyService:
     - Location Categories: Groupings for locations
 
     Data Source:
-    - asset_templates_v2_3/work_order_vocabulary/*.json
+    - data/work_order_catalogs/*.json
     """
 
     _vocabulary_cache = None
-    _base_path = os.path.join(settings.BASE_DIR, 'asset_templates_v2_3', 'work_order_vocabulary')
+    _base_path = os.path.join(settings.BASE_DIR, 'data', 'work_order_catalogs')
 
     @classmethod
     def load_vocabulary(cls, force_reload: bool = False) -> Dict[str, Any]:

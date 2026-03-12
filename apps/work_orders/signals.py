@@ -13,12 +13,20 @@ from apps.inspections.models import InspectionDefect
 @receiver(post_save, sender=WorkOrder)
 def sync_defect_status_on_work_order_save(sender, instance, created, **kwargs):
     """
-    Synchronize defect status when work order is updated.
+    Synchronize defect status and update asset meters when work order is updated.
 
     Status mapping:
     - WorkOrder COMPLETED → Defect RESOLVED
     - WorkOrder CANCELLED → Defect OPEN
+
+    Meter updates:
+    - WorkOrder COMPLETED → Update asset odometer/engine hours
     """
+    # Update asset meters if work order is completed
+    if instance.status == 'COMPLETED':
+        instance.update_asset_meters()
+
+    # Sync defect status
     if instance.source_type != 'INSPECTION_DEFECT':
         return
 
