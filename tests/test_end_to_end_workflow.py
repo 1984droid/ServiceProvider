@@ -320,10 +320,10 @@ class EndToEndWorkflowTest(TestCase):
 
     def test_severity_filtering_workflow(self):
         """
-        Test work order generation with severity filtering:
+        Test work order generation includes ALL defects with blocks_operation flag:
         1. Create defects with different severities
-        2. Generate work orders for MAJOR and above
-        3. Verify only appropriate defects get work orders
+        2. Generate work orders for all defects
+        3. Verify CRITICAL defects have blocks_operation=True
         """
         # Step 1: Create inspection
         inspection = InspectionRun.objects.create(
@@ -381,17 +381,16 @@ class EndToEndWorkflowTest(TestCase):
             description='Advisory issue description'
         )
 
-        # Step 2: Generate work orders for MAJOR and above
+        # Step 2: Generate work orders for ALL defects
         work_orders = DefectToWorkOrderService.generate_work_orders_from_inspection(
             inspection=inspection,
-            group_by_location=False,
-            min_severity='MAJOR'
+            group_by_location=False
         )
 
-        # Step 3: Should only create 2 work orders (CRITICAL + MAJOR)
-        self.assertEqual(len(work_orders), 2)
+        # Step 3: Should create 4 work orders (one for each defect)
+        self.assertEqual(len(work_orders), 4)
 
-        # Verify correct defects got work orders
+        # Verify ALL defects got work orders
         critical.refresh_from_db()
         major.refresh_from_db()
         minor.refresh_from_db()
@@ -399,8 +398,16 @@ class EndToEndWorkflowTest(TestCase):
 
         self.assertEqual(critical.status, 'WORK_ORDER_CREATED')
         self.assertEqual(major.status, 'WORK_ORDER_CREATED')
-        self.assertEqual(minor.status, 'OPEN')  # Not converted
-        self.assertEqual(advisory.status, 'OPEN')  # Not converted
+        self.assertEqual(minor.status, 'WORK_ORDER_CREATED')
+        self.assertEqual(advisory.status, 'WORK_ORDER_CREATED')
+
+        # Step 4: Verify CRITICAL defect has blocks_operation=True
+        critical_wo = next(wo for wo in work_orders if wo.priority == 'EMERGENCY')
+        self.assertTrue(critical_wo.lines.first().blocks_operation)
+
+        # Step 5: Verify non-CRITICAL defects have blocks_operation=False
+        advisory_wo = next(wo for wo in work_orders if wo.priority == 'LOW')
+        self.assertFalse(advisory_wo.lines.first().blocks_operation)
 
     def test_approval_workflow(self):
         """

@@ -622,6 +622,13 @@ class WorkOrderLine(BaseModel):
         help_text="Employee assigned to this specific line"
     )
 
+    # Priority/Blocking
+    blocks_operation = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="If true, this defect prevents safe operation (typically CRITICAL severity)"
+    )
+
     # Status
     LINE_STATUS_CHOICES = [
         ('PENDING', 'Pending'),

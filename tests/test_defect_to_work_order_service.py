@@ -272,16 +272,22 @@ class DefectToWorkOrderServiceTest(TestCase):
             description='Minor issue description'
         )
 
-        # Generate work orders for MAJOR and above
+        # Generate work orders - should include ALL defects
         work_orders = DefectToWorkOrderService.generate_work_orders_from_inspection(
             inspection=self.inspection,
-            group_by_location=False,
-            min_severity='MAJOR'
+            group_by_location=False
         )
 
-        # Should only include CRITICAL (defect1) and exclude ADVISORY/MINOR
-        self.assertEqual(len(work_orders), 1)
-        self.assertEqual(work_orders[0].priority, 'EMERGENCY')  # CRITICAL → EMERGENCY
+        # Should include all 3 defects (CRITICAL, ADVISORY, MINOR)
+        self.assertEqual(len(work_orders), 3)
+
+        # Verify CRITICAL defect has blocks_operation=True
+        critical_wo = next(wo for wo in work_orders if wo.priority == 'EMERGENCY')
+        self.assertTrue(critical_wo.lines.first().blocks_operation)
+
+        # Verify non-CRITICAL defects have blocks_operation=False
+        advisory_wo = next(wo for wo in work_orders if wo.priority == 'LOW')
+        self.assertFalse(advisory_wo.lines.first().blocks_operation)
 
     def test_generate_work_orders_no_open_defects(self):
         """Test generating work orders when no open defects exist."""

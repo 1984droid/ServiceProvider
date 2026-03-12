@@ -245,6 +245,7 @@ class DefectToWorkOrderService:
             noun=vocab['noun'],
             service_location=vocab['service_location'],
             description=vocab['description'],
+            blocks_operation=(defect.severity == 'CRITICAL'),
             status='PENDING'
         )
 
@@ -279,32 +280,26 @@ class DefectToWorkOrderService:
         cls,
         inspection: InspectionRun,
         group_by_location: bool = True,
-        min_severity: Optional[str] = None,
         department_id: Optional[str] = None,
         auto_approve: bool = False
     ) -> List[WorkOrder]:
         """
-        Generate work orders from all defects in an inspection.
+        Generate work orders from ALL defects in an inspection.
+
+        All defects are included regardless of severity. CRITICAL defects
+        will have blocks_operation=True on their work order lines.
 
         Args:
             inspection: InspectionRun instance
             group_by_location: Group defects by service location into single WO
-            min_severity: Minimum severity to include (CRITICAL, MAJOR, MINOR, ADVISORY)
             department_id: Department to assign work orders to
             auto_approve: Automatically approve work orders
 
         Returns:
             List of created WorkOrder instances
         """
-        # Get defects that need work orders
+        # Get ALL defects that need work orders (no severity filtering)
         defects = inspection.defects.filter(status='OPEN')
-
-        # Filter by severity if specified
-        if min_severity:
-            severity_order = ['ADVISORY', 'MINOR', 'MAJOR', 'CRITICAL']
-            min_index = severity_order.index(min_severity)
-            allowed_severities = severity_order[min_index:]
-            defects = defects.filter(severity__in=allowed_severities)
 
         if not defects.exists():
             return []
@@ -426,6 +421,7 @@ class DefectToWorkOrderService:
                 noun=vocab['noun'],
                 service_location=vocab['service_location'],
                 description=f"[{defect.get_severity_display()}] {vocab['description']}",
+                blocks_operation=(defect.severity == 'CRITICAL'),
                 status='PENDING'
             )
 
