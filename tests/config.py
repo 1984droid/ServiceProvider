@@ -91,16 +91,16 @@ EQUIPMENT_DATA = {
     },
     'minimal': {
         'serial_number': 'SN-MIN-00001',
-        'equipment_type': 'GENERATOR',
+        'equipment_type': 'AERIAL_DEVICE',
     },
     'insulated_aerial': {
         'serial_number': 'SN-AERIAL-9999',
         'asset_number': 'EQ-100',
-        'equipment_type': 'INSULATED_AERIAL',
+        'equipment_type': 'AERIAL_DEVICE',
         'manufacturer': 'Altec',
         'model': 'AT40G',
         'year': 2021,
-        'capabilities': ['AERIAL_DEVICE', 'INSULATED_BOOM', 'DIELECTRIC'],
+        'capabilities': ['DIELECTRIC'],
         'equipment_data': {
             'placard_data': {
                 'max_platform_height': 45,

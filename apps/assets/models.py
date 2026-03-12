@@ -288,11 +288,24 @@ class Equipment(BaseModel):
     )
 
     # Equipment Classification
+    EQUIPMENT_TYPE_CHOICES = [
+        ('', 'Not Specified'),
+        ('AERIAL_DEVICE', 'Aerial Device'),
+        # Add more as we create inspection templates for them:
+        # ('CRANE', 'Crane'),
+        # ('FORKLIFT', 'Forklift'),
+        # ('DIGGER_DERRICK', 'Digger Derrick'),
+        # ('GENERATOR', 'Generator'),
+        # ('COMPRESSOR', 'Compressor'),
+        # ('WELDER', 'Welder'),
+    ]
     equipment_type = models.CharField(
-        max_length=100,
+        max_length=20,
+        choices=EQUIPMENT_TYPE_CHOICES,
         blank=True,
+        default='',
         db_index=True,
-        help_text="Aerial Device, Crane, Generator, Compressor, etc."
+        help_text="Equipment type (only add types we have inspection templates for)"
     )
     manufacturer = models.CharField(max_length=100, blank=True)
     model = models.CharField(max_length=100, blank=True)

@@ -201,8 +201,8 @@ class TestEquipmentModel:
         equipment = EquipmentFactory.insulated_aerial()
         aerial_data = get_test_data('equipment', 'insulated_aerial')
         assert equipment.equipment_type == aerial_data['equipment_type']
-        assert 'AERIAL_DEVICE' in equipment.capabilities
-        assert 'INSULATED_BOOM' in equipment.capabilities
+        assert equipment.equipment_type == 'AERIAL_DEVICE'
+        assert 'DIELECTRIC' in equipment.capabilities
         assert equipment.equipment_data is not None
 
     def test_equipment_str_representation(self, equipment):
