@@ -8,8 +8,14 @@ from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from django.core.exceptions import ValidationError as DjangoValidationError
+
+from apps.authentication.permissions import (
+    CanEditOwnInspection,
+    CannotEditFinalizedInspection,
+    IsAdmin,
+)
 
 from .models import InspectionRun, InspectionDefect
 from .services.template_service import (
@@ -47,9 +53,12 @@ class TemplateViewSet(viewsets.ViewSet):
     - GET /api/templates/for_equipment/ - Get templates for equipment
     - GET /api/templates/published/ - Get only published templates
     - GET /api/templates/by_standard/ - Get templates by standard
+
+    Permissions:
+    - Authenticated users can view templates
     """
 
-    permission_classes = []  # Public access for now
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
         """
@@ -399,10 +408,32 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
     - GET /api/inspections/{id}/step/{step_key}/ - Get step response
     - DELETE /api/inspections/{id}/clear_step/ - Clear step response
     - GET /api/inspections/{id}/next_step/ - Get next incomplete step
+
+    Permissions:
+    - Must be authenticated
+    - Can view: Users with inspections.view_inspectionrun permission
+    - Can create: Inspectors and dispatchers
+    - Can edit own: Inspectors can edit inspections they created (until finalized)
+    - Cannot edit finalized: Only super admins can reopen finalized inspections
+    - Can delete: Admins only (and only non-finalized inspections)
     """
 
-    permission_classes = []  # Public for now, add auth later
+    permission_classes = [IsAuthenticated, CanEditOwnInspection, CannotEditFinalizedInspection]
     queryset = InspectionRun.objects.all().select_related('customer').prefetch_related('defects')
+
+    def get_permissions(self):
+        """
+        Customize permissions per action.
+        """
+        if self.action == 'destroy':
+            # Only admins can delete inspections
+            return [IsAuthenticated(), IsAdmin(), CannotEditFinalizedInspection()]
+        elif self.action in ['list', 'retrieve', 'export_pdf', 'defects', 'completion']:
+            # Read-only actions require authentication only
+            return [IsAuthenticated()]
+        else:
+            # Create, update, finalize require custom permissions
+            return [IsAuthenticated(), CanEditOwnInspection(), CannotEditFinalizedInspection()]
 
     def get_serializer_class(self):
         """Return appropriate serializer."""

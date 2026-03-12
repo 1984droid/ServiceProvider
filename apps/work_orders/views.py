@@ -7,6 +7,7 @@ REST API views for work order management.
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -43,8 +44,13 @@ class WorkOrderViewSet(viewsets.ModelViewSet):
     - POST /work-orders/{id}/reject/ - Reject work order
     - POST /work-orders/{id}/start/ - Start work order
     - POST /work-orders/{id}/complete/ - Complete work order
+
+    Permissions:
+    - Must be authenticated
+    - Uses Django model permissions (view, add, change, delete)
     """
 
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = WorkOrder.objects.all().select_related(
         'customer',
         'department',

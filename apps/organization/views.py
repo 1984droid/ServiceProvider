@@ -2,6 +2,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from .models import Company, Department, Employee
 from .serializers import (
     CompanySerializer,
@@ -16,7 +17,12 @@ class CompanyViewSet(viewsets.ModelViewSet):
     API endpoint for Company.
 
     Single-tenant: Only one company record should exist.
+
+    Permissions:
+    - Must be authenticated
+    - Uses Django model permissions (view, add, change, delete)
     """
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
@@ -34,7 +40,14 @@ class CompanyViewSet(viewsets.ModelViewSet):
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):
-    """API endpoint for Departments."""
+    """
+    API endpoint for Departments.
+
+    Permissions:
+    - Must be authenticated
+    - Uses Django model permissions (view, add, change, delete)
+    """
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
     filterset_fields = ['is_active', 'allows_floating']
@@ -55,7 +68,14 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
-    """API endpoint for Employees."""
+    """
+    API endpoint for Employees.
+
+    Permissions:
+    - Must be authenticated
+    - Uses Django model permissions (view, add, change, delete)
+    """
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     filterset_fields = ['is_active', 'base_department']

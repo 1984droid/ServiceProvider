@@ -9,6 +9,7 @@ Provides REST API endpoints for:
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, Count
 
@@ -46,7 +47,12 @@ class VehicleViewSet(viewsets.ModelViewSet):
     Ordering:
     - ?ordering=unit_number
     - ?ordering=-year
+
+    Permissions:
+    - Must be authenticated
+    - Uses Django model permissions (view, add, change, delete)
     """
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = Vehicle.objects.all().select_related('customer').prefetch_related('equipment')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active', 'customer', 'make', 'year']
@@ -264,7 +270,12 @@ class EquipmentViewSet(viewsets.ModelViewSet):
     Ordering:
     - ?ordering=asset_number
     - ?ordering=-created_at
+
+    Permissions:
+    - Must be authenticated
+    - Uses Django model permissions (view, add, change, delete)
     """
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
     queryset = Equipment.objects.all().select_related('customer', 'mounted_on_vehicle')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active', 'customer', 'equipment_type', 'mounted_on_vehicle']
