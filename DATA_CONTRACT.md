@@ -7,6 +7,7 @@ Complete data model specification for the ServiceProvider application.
 **Single-Tenant Django 6.0 Application**
 - UUID primary keys, PostgreSQL 18+, Python 3.14+
 - RESTful API via Django REST Framework
+- JWT Authentication with role-based access control
 
 ## Core Principles
 
@@ -16,6 +17,96 @@ Complete data model specification for the ServiceProvider application.
 4. **Capability-Based Operations** - Assets use JSON capabilities array for inspection/maintenance routing
 5. **Polymorphic Asset References** - Work orders/inspections reference Vehicle or Equipment via asset_type/asset_id
 6. **Template-Driven Inspections** - JSON templates with automated validation and defect generation
+7. **Secure by Default** - All API endpoints require authentication and role-based permissions
+
+---
+
+## Module 0: Authentication (`apps/authentication`)
+
+### Authentication System
+**Technology:** JWT (JSON Web Tokens) via `djangorestframework-simplejwt`
+
+**Token Strategy:**
+- **Access Token:** 15-minute lifetime, contains user identity + permissions
+- **Refresh Token:** 7-day lifetime, rotates on use, can be blacklisted
+- **Storage:** Tokens stored client-side, refresh tokens tracked in database
+
+**Endpoints:**
+- `POST /api/auth/login/` - Obtain access + refresh tokens
+- `POST /api/auth/logout/` - Blacklist refresh token
+- `POST /api/auth/refresh/` - Rotate tokens
+- `GET /api/auth/me/` - Get current user profile with permissions
+- `PATCH /api/auth/me/` - Update user profile
+- `POST /api/auth/change-password/` - Change password
+- `POST /api/auth/register/` - Create user (admin only)
+- `GET /api/auth/users/` - List users (admin only)
+
+---
+
+### Roles and Permissions
+
+**7 Predefined Roles (Django Groups):**
+
+1. **SUPER_ADMIN** - Full system access (all permissions)
+2. **ADMIN** - Manage customers, assets, organization (32 permissions)
+3. **INSPECTOR** - Perform inspections, view work orders (13 permissions)
+4. **SERVICE_TECH** - Manage work orders, update assets (11 permissions)
+5. **DISPATCHER** - Schedule inspections and work orders (15 permissions)
+6. **CUSTOMER_SERVICE** - Manage customers, view reports (12 permissions)
+7. **VIEWER** - Read-only access (10 permissions)
+
+**Permission Strategy:**
+- **Django Model Permissions:** Auto-generated `view`, `add`, `change`, `delete` per model
+- **Custom Business Permissions:** Defined in `apps/authentication/permissions.py`
+  - `CanEditOwnInspection` - Inspectors can only edit their own inspections
+  - `CannotEditFinalizedInspection` - Completed inspections immutable (super admin only)
+  - `CanViewDepartmentWorkOrders` - Department-based access filtering
+
+**API Security:**
+- All endpoints require `Authorization: Bearer <access_token>` header
+- Permissions checked per request via DRF permission classes
+- Object-level permissions for sensitive operations (inspection ownership, finalized state)
+
+---
+
+### User Model Integration
+
+**Django User Model:**
+- Standard `django.contrib.auth.User` model
+- OneToOne relationship with `Employee` model (optional)
+- Users can exist without employee record (system users, admins)
+- Employees can exist without user (non-system staff)
+
+**User Profile Response (`/api/auth/me/`):**
+```json
+{
+  "id": 1,
+  "username": "john.inspector",
+  "email": "john@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "is_active": true,
+  "is_staff": false,
+  "is_superuser": false,
+  "employee": {
+    "id": "uuid",
+    "employee_number": "EMP001",
+    "full_name": "John Doe",
+    "department": "Inspection",
+    "department_code": "INSP",
+    "title": "Senior Inspector"
+  },
+  "roles": ["INSPECTOR"],
+  "permissions": [
+    "inspections.view_inspectionrun",
+    "inspections.add_inspectionrun",
+    "inspections.change_inspectionrun",
+    ...
+  ],
+  "last_login": "2026-03-12T10:30:00Z",
+  "date_joined": "2025-01-15T09:00:00Z"
+}
+```
 
 ---
 

@@ -4,6 +4,74 @@ Quick reference for all available API endpoints.
 
 **Base URL:** `http://localhost:8100/api/`
 
+**Authentication:** All endpoints require JWT Bearer token (except login/register)
+**Header:** `Authorization: Bearer <access_token>`
+
+---
+
+## Authentication
+
+### Login & Token Management
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/auth/login/` | Login (get access + refresh tokens) | No |
+| POST | `/auth/logout/` | Logout (blacklist refresh token) | Yes |
+| POST | `/auth/refresh/` | Refresh tokens | No |
+| GET | `/auth/me/` | Get current user profile + permissions | Yes |
+| PATCH | `/auth/me/` | Update user profile | Yes |
+| POST | `/auth/change-password/` | Change password | Yes |
+
+**Login Request:**
+```json
+{
+  "username": "john.inspector",
+  "password": "SecurePass123!"
+}
+```
+
+**Login Response:**
+```json
+{
+  "access": "eyJhbGc...",
+  "refresh": "eyJhbGc...",
+  "user": {
+    "id": 1,
+    "username": "john.inspector",
+    "email": "john@example.com",
+    "employee": {...},
+    "roles": ["INSPECTOR"],
+    "permissions": ["inspections.view_inspectionrun", ...]
+  }
+}
+```
+
+### User Management (Admin Only)
+
+| Method | Endpoint | Description | Permission |
+|--------|----------|-------------|------------|
+| POST | `/auth/register/` | Create new user | Admin |
+| GET | `/auth/users/` | List all users | Admin |
+| GET | `/auth/users/{id}/` | Get user detail | Admin |
+| PATCH | `/auth/users/{id}/` | Update user | Admin |
+| DELETE | `/auth/users/{id}/` | Delete user | Admin |
+
+### Roles & Permissions
+
+**Available Roles:**
+- `SUPER_ADMIN` - Full system access
+- `ADMIN` - Manage customers, assets, organization
+- `INSPECTOR` - Perform inspections
+- `SERVICE_TECH` - Manage work orders
+- `DISPATCHER` - Schedule work
+- `CUSTOMER_SERVICE` - Manage customers
+- `VIEWER` - Read-only
+
+**Management Command:**
+```bash
+python manage.py create_roles  # Create/update all roles
+```
+
 ---
 
 ## Organization Management

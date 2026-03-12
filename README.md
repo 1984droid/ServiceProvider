@@ -11,6 +11,7 @@ Single-tenant service provider application for equipment inspection and work ord
 - No premature optimization - add complexity only when needed
 
 **Key Models:**
+- **Authentication**: JWT-based auth with role-based access control (7 roles)
 - **Organization**: Company info, departments, and employees
 - **Customer**: Business entity only (NO contact info)
 - **Contact**: All communication details (multiple per customer)
@@ -18,6 +19,12 @@ Single-tenant service provider application for equipment inspection and work ord
 - **Equipment**: Serial number-based assets (aerial devices, cranes) with tag-based routing
 - **Inspections**: Template-driven inspection execution with immutability
 - **Work Orders**: Multi-department work order management with employee assignments
+
+**Security:**
+- All API endpoints require authentication
+- JWT tokens (15-min access, 7-day refresh)
+- Role-based permissions (SUPER_ADMIN, ADMIN, INSPECTOR, SERVICE_TECH, DISPATCHER, CUSTOMER_SERVICE, VIEWER)
+- Object-level permissions for sensitive operations
 
 ## Quick Start
 
@@ -40,9 +47,15 @@ Visit: http://localhost:8100/admin
 - Creates `.env` file from `.env.example`
 - Installs all dependencies from `requirements.txt`
 - Creates PostgreSQL database (`service_provider_new`)
-- Runs all migrations
+- Runs all migrations (including JWT token blacklist tables)
 - Prompts to create superuser
+- Creates roles and permissions
 - Collects static files
+
+**After setup, create roles:**
+```bash
+python manage.py create_roles
+```
 
 **Other commands:**
 ```bash
@@ -74,6 +87,14 @@ service-provider/
 │   └── wsgi.py
 │
 ├── apps/                   # Django applications
+│   ├── authentication/     # JWT auth, roles, permissions
+│   │   ├── views.py         # Login, logout, refresh, me endpoints
+│   │   ├── serializers.py   # User, token serializers
+│   │   ├── permissions.py   # Custom permission classes
+│   │   ├── urls.py
+│   │   └── management/
+│   │       └── commands/
+│   │           └── create_roles.py  # Role creation command
 │   ├── organization/       # Company, Department, Employee models
 │   │   ├── models.py
 │   │   ├── admin.py
