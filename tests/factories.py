@@ -368,7 +368,7 @@ class WorkOrderFactory(DjangoModelFactory):
     source_inspection_run = None
     description = factory.LazyFunction(lambda: get_test_data('work_order', 'default')['description'])
     scheduled_date = None
-    assigned_to = ''
+    assigned_to = None
     started_at = None
     completed_at = None
     odometer_at_service = None

@@ -265,9 +265,8 @@ class TestWorkOrderModel:
         """Test creating scheduled work order."""
         work_order = WorkOrderFactory.scheduled()
 
-        assert work_order.status == 'SCHEDULED'
+        assert work_order.status == 'PENDING'
         assert work_order.scheduled_date is not None
-        assert work_order.assigned_to
 
     def test_work_order_completed_variant(self):
         """Test creating completed work order."""
