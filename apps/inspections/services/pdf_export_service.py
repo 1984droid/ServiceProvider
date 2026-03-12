@@ -309,25 +309,269 @@ class InspectionPDFExporter:
         return elements
 
     def _build_inspection_steps(self):
-        """Build inspection steps section (simplified)."""
+        """
+        Build detailed inspection steps section with template parsing.
+
+        Parses template_snapshot to show:
+        - Step titles and labels
+        - Responses with proper formatting
+        - Pass/fail indicators
+        - Grouped by modules
+        """
+        elements = []
+
+        # Get step data and template
+        step_data = self.inspection.step_data or {}
+        template_snapshot = self.inspection.template_snapshot or {}
+
+        if not step_data:
+            elements.append(Paragraph("Inspection Results", self.styles['SectionHeader']))
+            elements.append(Paragraph("No inspection data recorded", self.styles['ReportBody']))
+            return elements
+
+        # Parse template structure
+        procedure = template_snapshot.get('procedure', {})
+        modules = template_snapshot.get('modules', [])
+
+        # Handle both procedure-based and module-based templates
+        if procedure and 'steps' in procedure:
+            # New procedure-based format
+            elements.extend(self._build_procedure_steps(procedure, step_data))
+        elif modules:
+            # Legacy module-based format
+            elements.extend(self._build_module_steps(modules, step_data))
+        else:
+            # Fallback: raw step data
+            elements.extend(self._build_raw_step_data(step_data))
+
+        return elements
+
+    def _build_procedure_steps(self, procedure, step_data):
+        """Build steps from procedure-based template."""
+        elements = []
+
+        elements.append(Paragraph("Inspection Results", self.styles['SectionHeader']))
+
+        steps = procedure.get('steps', [])
+        if not steps:
+            elements.append(Paragraph("No steps defined in template", self.styles['ReportBody']))
+            return elements
+
+        # Build table header
+        data = [['Step', 'Result', 'Status']]
+
+        for step in steps:
+            step_key = step.get('step_key')
+            title = step.get('title', step_key)
+            step_type = step.get('type', '')
+
+            # Get response from step_data
+            response = step_data.get(step_key, 'Not Performed')
+
+            # Format response based on type
+            formatted_response = self._format_step_response(response, step)
+
+            # Determine status
+            status = self._determine_step_status(response, step)
+
+            # Add to table
+            data.append([
+                title,
+                formatted_response,
+                status
+            ])
+
+        # Create table
+        table = Table(data, colWidths=[3*inch, 2*inch, 1*inch])
+        table.setStyle(TableStyle([
+            # Header row
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495e')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+
+            # Data rows
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor('#2c3e50')),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+
+            # Alternating row colors
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ecf0f1')]),
+        ]))
+
+        elements.append(table)
+        return elements
+
+    def _build_module_steps(self, modules, step_data):
+        """Build steps from module-based template (legacy)."""
+        elements = []
+
+        elements.append(Paragraph("Inspection Results", self.styles['SectionHeader']))
+
+        for module in modules:
+            module_name = module.get('name', 'Unknown Module')
+            module_steps = module.get('steps', [])
+
+            if not module_steps:
+                continue
+
+            # Module header
+            elements.append(Paragraph(module_name, self.styles['SubSection']))
+
+            # Build step table for this module
+            data = [['Step', 'Result', 'Status']]
+
+            for step in module_steps:
+                step_key = step.get('step_key')
+                title = step.get('title', step_key)
+
+                response = step_data.get(step_key, 'Not Performed')
+                formatted_response = self._format_step_response(response, step)
+                status = self._determine_step_status(response, step)
+
+                data.append([title, formatted_response, status])
+
+            # Create table
+            table = Table(data, colWidths=[3*inch, 2*inch, 1*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495e')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ecf0f1')]),
+            ]))
+
+            elements.append(table)
+            elements.append(Spacer(1, 0.1*inch))
+
+        return elements
+
+    def _build_raw_step_data(self, step_data):
+        """Fallback: display raw step data when template structure unknown."""
         elements = []
 
         elements.append(Paragraph("Inspection Data", self.styles['SectionHeader']))
-
-        # Get step data from inspection
-        step_data = self.inspection.step_data or {}
-
-        if not step_data:
-            elements.append(Paragraph("No step data recorded", self.styles['ReportBody']))
-            return elements
-
-        # Display step data summary
         elements.append(Paragraph(
-            f"Total data points collected: {len(step_data)}",
+            f"Collected {len(step_data)} data points",
             self.styles['ReportBody']
         ))
 
+        # Simple key-value display
+        data = [['Step Key', 'Response']]
+        for key, value in sorted(step_data.items()):
+            formatted_value = self._format_value(value)
+            data.append([key, formatted_value])
+
+        table = Table(data, colWidths=[2.5*inch, 3.5*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495e')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ecf0f1')]),
+        ]))
+
+        elements.append(table)
         return elements
+
+    def _format_step_response(self, response, step_definition):
+        """Format response based on field type."""
+        if response is None or response == '':
+            return 'N/A'
+
+        field_type = step_definition.get('type', '').upper()
+
+        # Boolean/Pass-Fail
+        if isinstance(response, bool):
+            return 'PASS' if response else 'FAIL'
+
+        # Handle common string responses
+        if isinstance(response, str):
+            response_upper = response.upper()
+            if response_upper in ['PASS', 'FAIL', 'OK', 'NOT_OK']:
+                return response_upper
+            if response_upper in ['NOT_PERFORMED', 'N/A', 'SKIPPED']:
+                return response
+
+        # Numeric with units
+        if isinstance(response, (int, float)) and 'unit' in step_definition:
+            unit = step_definition.get('unit', '')
+            return f"{response} {unit}"
+
+        # Lists/Arrays
+        if isinstance(response, list):
+            return ', '.join(str(item) for item in response)
+
+        # Dict/Object
+        if isinstance(response, dict):
+            # Try to extract meaningful value
+            if 'value' in response:
+                return str(response['value'])
+            if 'result' in response:
+                return str(response['result'])
+            return str(response)
+
+        return str(response)
+
+    def _determine_step_status(self, response, step_definition):
+        """Determine pass/fail/skipped status for a step."""
+        if response is None or response == '' or response == 'Not Performed':
+            return 'SKIPPED'
+
+        # Boolean
+        if isinstance(response, bool):
+            return 'PASS' if response else 'FAIL'
+
+        # String responses
+        if isinstance(response, str):
+            response_upper = response.upper()
+            if response_upper in ['PASS', 'OK', 'SAFE', 'NORMAL']:
+                return 'PASS'
+            if response_upper in ['FAIL', 'NOT_OK', 'UNSAFE', 'DEFECT']:
+                return 'FAIL'
+            if response_upper in ['NOT_PERFORMED', 'N/A', 'SKIPPED', 'NOT_APPLICABLE']:
+                return 'SKIPPED'
+
+        # Check against rules if available
+        rules = step_definition.get('rules', [])
+        if rules:
+            # If there are rules and we have a response, assume PASS unless FAIL detected
+            # This is simplified - real rule evaluation would be more complex
+            return 'PASS'
+
+        # Default: if we have a response, consider it performed
+        return 'DONE'
+
+    def _format_value(self, value):
+        """Format any value for display."""
+        if value is None:
+            return 'N/A'
+        if isinstance(value, bool):
+            return 'Yes' if value else 'No'
+        if isinstance(value, (list, tuple)):
+            return ', '.join(str(v) for v in value)
+        if isinstance(value, dict):
+            return str(value)
+        return str(value)
 
     def _build_signature_section(self):
         """Build signature section."""

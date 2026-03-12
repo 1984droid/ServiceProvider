@@ -69,8 +69,8 @@ def main():
         }
     )
 
-    # 1. Minimal inspection (no defects)
-    print("1. Creating minimal inspection PDF...")
+    # 1. Minimal inspection (no defects) - WITH STEP DATA
+    print("1. Creating minimal inspection with step data PDF...")
     inspection1 = InspectionRun.objects.create(
         asset_type='VEHICLE',
         asset_id=vehicle.id,
@@ -80,8 +80,47 @@ def main():
         started_at=timezone.now(),
         finalized_at=timezone.now(),
         inspector_name='John Smith',
-        template_snapshot={'modules': [], 'metadata': {}},
-        step_data={}
+        template_snapshot={
+            'procedure': {
+                'steps': [
+                    {
+                        'step_key': 'visual_inspection',
+                        'title': 'Visual Inspection',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'function_test',
+                        'title': 'Operational Function Test',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'hydraulic_pressure',
+                        'title': 'Hydraulic System Pressure',
+                        'type': 'MEASURE',
+                        'field_type': 'NUMERIC',
+                        'unit': 'PSI'
+                    },
+                    {
+                        'step_key': 'dielectric_test',
+                        'title': 'Dielectric Insulation Test',
+                        'type': 'TEST',
+                        'field_type': 'PASS_FAIL'
+                    }
+                ]
+            },
+            'metadata': {
+                'template_key': 'ansi_a92_2_annual',
+                'version': '2.0.0'
+            }
+        },
+        step_data={
+            'visual_inspection': 'PASS',
+            'function_test': 'PASS',
+            'hydraulic_pressure': {'value': 2850, 'unit': 'PSI'},
+            'dielectric_test': 'PASS'
+        }
     )
 
     exporter = InspectionPDFExporter(inspection1)
@@ -91,8 +130,8 @@ def main():
         f.write(pdf_buffer.getvalue())
     print(f"   OK Created: {os.path.basename(filepath)}")
 
-    # 2. Inspection with CRITICAL defects
-    print("2. Creating inspection with CRITICAL defects PDF...")
+    # 2. Inspection with CRITICAL defects - WITH FAILED STEPS
+    print("2. Creating inspection with CRITICAL defects and failed steps PDF...")
     inspection2 = InspectionRun.objects.create(
         asset_type='EQUIPMENT',
         asset_id=equipment.id,
@@ -102,8 +141,51 @@ def main():
         started_at=timezone.now(),
         finalized_at=timezone.now(),
         inspector_name='Sarah Johnson',
-        template_snapshot={'modules': [], 'metadata': {}},
-        step_data={}
+        template_snapshot={
+            'procedure': {
+                'steps': [
+                    {
+                        'step_key': 'visual_inspection',
+                        'title': 'Visual Structural Inspection',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'hose_inspection',
+                        'title': 'Hydraulic Hose Condition',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'weld_inspection',
+                        'title': 'Structural Weld Integrity',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'safety_systems',
+                        'title': 'Safety System Functional Test',
+                        'type': 'TEST',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'boom_extension',
+                        'title': 'Boom Extension Measurement',
+                        'type': 'MEASURE',
+                        'field_type': 'NUMERIC',
+                        'unit': 'feet'
+                    }
+                ]
+            },
+            'metadata': {}
+        },
+        step_data={
+            'visual_inspection': 'PASS',
+            'hose_inspection': 'FAIL',  # Critical defect
+            'weld_inspection': 'FAIL',  # Critical defect
+            'safety_systems': 'PASS',
+            'boom_extension': {'value': 40, 'unit': 'feet'}
+        }
     )
 
     InspectionDefect.objects.create(
@@ -135,8 +217,8 @@ def main():
         f.write(pdf_buffer.getvalue())
     print(f"   OK Created: {os.path.basename(filepath)}")
 
-    # 3. Inspection with mixed severity defects
-    print("3. Creating inspection with mixed defects PDF...")
+    # 3. Inspection with mixed severity defects - WITH COMPREHENSIVE STEP DATA
+    print("3. Creating inspection with comprehensive step data PDF...")
     inspection3 = InspectionRun.objects.create(
         asset_type='EQUIPMENT',
         asset_id=equipment.id,
@@ -146,8 +228,81 @@ def main():
         started_at=timezone.now(),
         finalized_at=timezone.now(),
         inspector_name='Mike Davis',
-        template_snapshot={'modules': [], 'metadata': {}},
-        step_data={}
+        template_snapshot={
+            'procedure': {
+                'steps': [
+                    {
+                        'step_key': 'pre_inspection_setup',
+                        'title': 'Pre-Inspection Setup',
+                        'type': 'SETUP',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'boom_visual',
+                        'title': 'Boom Visual Condition',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'hydraulic_pressure',
+                        'title': 'Hydraulic System Pressure',
+                        'type': 'MEASURE',
+                        'field_type': 'NUMERIC',
+                        'unit': 'PSI'
+                    },
+                    {
+                        'step_key': 'platform_capacity',
+                        'title': 'Platform Rated Capacity',
+                        'type': 'MEASURE',
+                        'field_type': 'NUMERIC',
+                        'unit': 'lbs'
+                    },
+                    {
+                        'step_key': 'dielectric_test_result',
+                        'title': 'Dielectric Test Result',
+                        'type': 'TEST',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'control_panel',
+                        'title': 'Control Panel Functionality',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'safety_labels',
+                        'title': 'Safety Label Condition',
+                        'type': 'CHECK',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'load_test',
+                        'title': 'Load Test Completion',
+                        'type': 'TEST',
+                        'field_type': 'PASS_FAIL'
+                    },
+                    {
+                        'step_key': 'next_service_interval',
+                        'title': 'Hours Until Next Service',
+                        'type': 'INFO',
+                        'field_type': 'NUMERIC',
+                        'unit': 'hours'
+                    }
+                ]
+            },
+            'metadata': {}
+        },
+        step_data={
+            'pre_inspection_setup': 'PASS',
+            'boom_visual': 'FAIL',  # Minor paint defect
+            'hydraulic_pressure': {'value': 2750, 'unit': 'PSI'},
+            'platform_capacity': {'value': 500, 'unit': 'lbs'},
+            'dielectric_test_result': 'PASS',
+            'control_panel': 'FAIL',  # Major defect
+            'safety_labels': 'FAIL',  # Minor defect
+            'load_test': 'PASS',
+            'next_service_interval': {'value': 150, 'unit': 'hours'}
+        }
     )
 
     defects_data = [
@@ -181,10 +336,10 @@ def main():
     print("=" * 60)
     files = [f for f in os.listdir(output_dir) if f.endswith('.pdf')]
     print(f"\nOK Generated {len(files)} PDF files")
-    print(f"📁 Location: {output_dir}\n")
+    print(f"Location: {output_dir}\n")
     for f in sorted(files):
         size = os.path.getsize(os.path.join(output_dir, f)) / 1024
-        print(f"   📄 {f} ({size:.1f} KB)")
+        print(f"   * {f} ({size:.1f} KB)")
     print()
 
 
