@@ -157,6 +157,62 @@ Quick reference for all available API endpoints.
 
 ---
 
+## Inspection Management
+
+### Inspections
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/inspections/` | List all inspections |
+| POST | `/inspections/` | Create inspection (requires template_key) |
+| GET | `/inspections/{id}/` | Get inspection detail |
+| PATCH | `/inspections/{id}/` | Update inspection |
+| DELETE | `/inspections/{id}/` | Delete inspection |
+| POST | `/inspections/{id}/complete_step/` | Mark step as complete with data |
+| POST | `/inspections/{id}/finalize/` | Finalize inspection (immutable after) |
+| GET | `/inspections/{id}/next_incomplete_step/` | Get next incomplete step |
+| POST | `/inspections/{id}/evaluate_rules/` | **Evaluate rules and generate defects** |
+| GET | `/inspections/{id}/defects/` | **Get defects with summary statistics** |
+
+**Filters:** `status`, `customer`, `asset_type`, `template_key`, `is_finalized`
+**Search:** `template_key`, `inspector_name`, `notes`
+
+**New in Phase 4:**
+- Automated defect generation via rule evaluation
+- 14 assertion types supported
+- Idempotent defect creation (re-evaluation updates existing defects)
+
+### Defects
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/inspections/{id}/defects/` | List defects for inspection with summary |
+| POST | `/inspections/{id}/evaluate_rules/` | Generate defects from rules |
+
+**Defect Summary Response:**
+```json
+{
+  "count": 3,
+  "defects": [...],
+  "summary": {
+    "total_defects": 3,
+    "by_severity": {
+      "CRITICAL": 1,
+      "MAJOR": 1,
+      "MINOR": 1,
+      "ADVISORY": 0
+    },
+    "by_status": {
+      "OPEN": 2,
+      "WORK_ORDER_CREATED": 1,
+      "RESOLVED": 0
+    }
+  }
+}
+```
+
+---
+
 ## Common Features
 
 ### Pagination

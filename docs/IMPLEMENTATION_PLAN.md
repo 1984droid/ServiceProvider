@@ -991,63 +991,378 @@ def create_defect_from_rule(inspection_run, rule, module_key, step_key, response
 
 ### 4.4 Phase 4 Deliverables
 
+**Status:** ✅ **COMPLETE** (March 12, 2026)
+
 **Checklist:**
-- [ ] Rule definition structure finalized
-- [ ] Rule evaluation engine working
-- [ ] Defect generation with idempotency
-- [ ] Multiple test rules created
-- [ ] Rule tests passing
-- [ ] Can trigger defects during inspection
-- [ ] Documentation updated
+- [x] Rule definition structure finalized (14 assertion types)
+- [x] Rule evaluation engine working (RuleEvaluator service)
+- [x] Defect generation with idempotency (SHA256 hash-based)
+- [x] Multiple test rules created (ANSI A92.2-2021 templates)
+- [x] Rule tests passing (92 tests, 100%)
+- [x] Can trigger defects during inspection (API endpoints + runtime)
+- [x] Documentation updated (PHASE_4_COMPLETION.md)
+
+**Key Achievements:**
+- 14 assertion types implemented
+- Path resolution (simple, nested, array indices)
+- Idempotent defect creation via SHA256 identity
+- Comprehensive audit trails (evaluation_trace)
+- API endpoints: `/evaluate_rules/`, `/defects/`
+- Admin UI with color-coded defects
+- 92 tests passing (100%)
+
+See [PHASE_4_COMPLETION.md](PHASE_4_COMPLETION.md) for complete report.
 
 ---
 
-## Phase 5: Work Order System
+## Phase 5: Inspection-to-Work Order Integration
 
-**Goal:** Complete the work order flow from defect selection through completion.
+**Goal:** Build automated bridge between inspection defects and work order generation.
 
-### 5.1 Work Order Creation from Defects
+**Status:** 🔄 **IN PROGRESS**
+
+### 5.1 Work Order Core Enhancement
+
+**Objective:** Extend WorkOrder model with work order lines and enhanced fields.
+
+**New Models:**
+
+#### WorkOrderLine
+Individual repair/maintenance tasks within a work order.
 
 ```python
-def create_work_order_from_inspection(inspection_run, defect_ids, **kwargs):
-    """Create work order from selected defects."""
-    # Implementation
+class WorkOrderLine(models.Model):
+    """Work order line item - single task."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    work_order = models.ForeignKey(WorkOrder, related_name='lines')
+    line_number = models.IntegerField()  # Ordering within WO
+
+    # Vocabulary-based task description
+    verb = models.CharField(max_length=50)  # e.g., "Replace", "Inspect"
+    noun = models.CharField(max_length=100)  # e.g., "Hydraulic Hose"
+    service_location = models.CharField(max_length=100)  # e.g., "Boom Assembly"
+    description = models.TextField()  # Generated or manual
+
+    # Time tracking
+    estimated_hours = models.DecimalField(max_digits=5, decimal_places=2)
+    actual_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+
+    # Parts
+    parts_required = models.JSONField(default=list)  # List of part numbers
+
+    # Status
+    status = models.CharField(max_length=20, choices=[
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ])
+
+    assigned_to = models.ForeignKey(Employee, null=True)
+```
+
+#### WorkOrder Enhancements
+```python
+# Additional fields
+source_type = models.CharField(max_length=30, choices=[
+    ('INSPECTION_DEFECT', 'Inspection Defect'),
+    ('MAINTENANCE_SCHEDULE', 'Maintenance Schedule'),
+    ('CUSTOMER_REQUEST', 'Customer Request'),
+    ('MANUAL', 'Manual'),
+])
+source_id = models.UUIDField(null=True)  # Polymorphic reference
+priority = models.CharField(max_length=20)  # Derived from defect severity
+approval_status = models.CharField(max_length=20)
+approved_by = models.ForeignKey(Employee, null=True)
+approved_at = models.DateTimeField(null=True)
+```
+
+**Tests:** ~15 tests
+- Model creation/validation
+- Relationship integrity
+- Status transitions
+- Approval workflows
+
+### 5.2 Defect-to-Work Order Service
+
+**Objective:** Automate work order generation from inspection defects.
+
+**Service:** `apps/inspections/services/defect_to_work_order_service.py`
+
+```python
+class DefectToWorkOrderService:
+    """Bridge between inspection defects and work orders."""
+
+    @classmethod
+    def generate_work_order_from_defect(
+        cls,
+        defect: InspectionDefect,
+        **options
+    ) -> WorkOrder:
+        """
+        Generate work order from single defect.
+
+        Steps:
+        1. Check if defect already has work order
+        2. Map defect to vocabulary (verb/noun/location)
+        3. Create work order with appropriate priority
+        4. Generate work order lines
+        5. Update defect status to WORK_ORDER_CREATED
+
+        Returns:
+            Created work order
+        """
+        pass
+
+    @classmethod
+    def generate_work_orders_from_inspection(
+        cls,
+        inspection_run: InspectionRun,
+        severity_threshold: str = 'MINOR',
+        grouping: str = 'BY_SEVERITY'
+    ) -> List[WorkOrder]:
+        """
+        Batch generate work orders for inspection defects.
+
+        Args:
+            severity_threshold: Only create WOs for defects >= this severity
+            grouping: 'BY_SEVERITY', 'BY_LOCATION', 'ONE_PER_DEFECT'
+
+        Returns:
+            List of created work orders
+        """
+        pass
+
+    @classmethod
+    def map_defect_to_vocabulary(
+        cls,
+        defect: InspectionDefect
+    ) -> Dict[str, str]:
+        """
+        Map defect to work order vocabulary.
+
+        Uses:
+        1. Direct mapping from catalog
+        2. Rule-based extraction from defect metadata
+        3. Fallback to generic values
+
+        Returns:
+            {'verb': '...', 'noun': '...', 'location': '...'}
+        """
+        pass
+```
+
+**Mapping Strategy:**
+1. **Direct Catalog Mapping:** Use `inspection_defect_to_work_order_seed_map_ansi_a92_2_2021.json`
+2. **Rule-Based:** Extract from step_key, defect title/description
+3. **AI-Assisted:** (Future) NLP for custom defects
+
+**Tests:** ~25 tests
+- Single defect → work order
+- Batch generation with different groupings
+- Vocabulary mapping accuracy
+- Idempotency (re-running doesn't duplicate)
+- Priority mapping (CRITICAL→URGENT, MAJOR→HIGH, etc.)
+- Status synchronization
+
+### 5.3 Work Order Vocabulary Service
+
+**Objective:** Load and validate work order vocabulary catalog.
+
+**Service:** `apps/work_orders/services/vocabulary_service.py`
+
+```python
+class VocabularyService:
+    """Work order vocabulary management."""
+
+    _vocabulary_cache = None
+
+    @classmethod
+    def load_vocabulary(cls) -> Dict[str, Any]:
+        """
+        Load vocabulary from JSON files.
+
+        Returns:
+            {
+                'verbs': [...],
+                'nouns': [...],
+                'service_locations': [...],
+                'noun_categories': [...],
+                'location_categories': [...]
+            }
+        """
+        pass
+
+    @classmethod
+    def validate_line_vocabulary(
+        cls,
+        verb: str,
+        noun: str,
+        location: str
+    ) -> bool:
+        """Validate vocabulary combination exists."""
+        pass
+
+    @classmethod
+    def suggest_vocabulary(
+        cls,
+        description: str
+    ) -> Dict[str, List[str]]:
+        """
+        Suggest verb/noun/location from description.
+
+        Args:
+            description: Free-text description
+
+        Returns:
+            {'verbs': [...], 'nouns': [...], 'locations': [...]}
+        """
+        pass
+
+    @classmethod
+    def get_verbs(cls) -> List[Dict]:
+        """Get all verbs."""
+        pass
+
+    @classmethod
+    def get_nouns(cls, category: str = None) -> List[Dict]:
+        """Get nouns, optionally filtered by category."""
+        pass
+
+    @classmethod
+    def get_service_locations(cls) -> List[Dict]:
+        """Get all service locations."""
+        pass
+```
+
+**Data Sources:**
+- `asset_templates_v2_3/work_order_vocabulary/verbs.json`
+- `asset_templates_v2_3/work_order_vocabulary/nouns.json`
+- `asset_templates_v2_3/work_order_vocabulary/service_locations.json`
+
+**Tests:** ~10 tests
+- Vocabulary loading
+- Validation
+- Suggestion accuracy (basic keyword matching)
+
+### 5.4 API Endpoints
+
+**Objective:** Expose work order functionality via REST API.
+
+**New Endpoints:**
+
+#### Work Order Management
+```
+POST   /api/work-orders/                        # Create work order
+GET    /api/work-orders/                        # List work orders
+GET    /api/work-orders/{id}/                   # Work order detail
+PATCH  /api/work-orders/{id}/                   # Update work order
+DELETE /api/work-orders/{id}/                   # Delete work order
+POST   /api/work-orders/{id}/approve/           # Approve work order
+POST   /api/work-orders/{id}/start/             # Start work
+POST   /api/work-orders/{id}/complete/          # Complete work order
+```
+
+#### Work Order Lines
+```
+POST   /api/work-orders/{id}/lines/             # Add line
+GET    /api/work-orders/{id}/lines/             # List lines
+PATCH  /api/work-orders/{id}/lines/{line_id}/   # Update line
+DELETE /api/work-orders/{id}/lines/{line_id}/   # Delete line
+```
+
+#### Defect Integration
+```
+POST   /api/inspections/{id}/generate-work-orders/  # Generate WOs from inspection
+POST   /api/defects/{id}/create-work-order/         # Create WO from single defect
+```
+
+**Tests:** ~20 tests
+- CRUD operations
+- Approval workflows
+- Line management
+- Defect integration endpoints
+
+### 5.5 Admin Interface Enhancements
+
+**Objective:** Update admin UI for work order management.
+
+**WorkOrderAdmin:**
+- Inline work order lines display
+- Color-coded priority/status badges
+- Source defect link (if applicable)
+- Approval actions
+- Bulk operations (approve multiple, assign to tech)
+
+**WorkOrderLineAdmin:**
+- Vocabulary autocomplete
+- Time tracking display
+- Status badges
+- Parts list display
+
+**InspectionDefect Updates:**
+- Display linked work order (if exists)
+- "Create Work Order" admin action
+- Status change to WORK_ORDER_CREATED when WO linked
+
+**Tests:** Admin functionality tested via integration tests
+
+### 5.6 Status Synchronization
+
+**Objective:** Bi-directional status sync between defects and work orders.
+
+**Signal Handlers:** `apps/work_orders/signals.py`
+
+```python
+@receiver(post_save, sender=WorkOrder)
+def sync_defect_status(sender, instance, created, **kwargs):
+    """
+    Update defect status when work order changes:
+    - WO created → defect.status = WORK_ORDER_CREATED
+    - WO completed → defect.status = RESOLVED
+    - WO cancelled → defect.status = OPEN (reopen)
+    """
+    pass
+
+@receiver(post_save, sender=InspectionDefect)
+def sync_work_order_defects(sender, instance, created, **kwargs):
+    """
+    Handle defect status changes affecting work orders.
+    - Defect resolved manually → update WO if all defects resolved
+    """
     pass
 ```
 
-### 5.2 Work Order Status Management
+**Tests:** ~8 tests
+- Status propagation defect→WO
+- Status propagation WO→defect
+- Edge cases (multiple defects per WO)
+- Reopening defects
 
-```python
-def start_work_order(work_order):
-    """Start work on a work order."""
-    # Implementation
-    pass
+### 5.7 Phase 5 Deliverables
 
-def complete_work_order(work_order, completion_data):
-    """Complete work order and update assets."""
-    # Implementation
-    pass
-```
-
-### 5.3 Asset Meter Updates
-
-```python
-def update_asset_meters(work_order, completion_data):
-    """Update asset meters from work order completion."""
-    # Implementation
-    pass
-```
-
-### 5.4 Phase 5 Deliverables
+**Target:** 85+ new tests
 
 **Checklist:**
-- [ ] Work order creation from defects
-- [ ] Status management working
-- [ ] Meter updates implemented
-- [ ] Work order API endpoints
-- [ ] Work order tests passing
-- [ ] Can complete full work order flow
+- [ ] WorkOrderLine model created
+- [ ] WorkOrder enhancements completed
+- [ ] DefectToWorkOrderService implemented
+- [ ] VocabularyService implemented
+- [ ] API endpoints created
+- [ ] Admin UI enhanced
+- [ ] Status synchronization working
+- [ ] 85+ tests passing
 - [ ] Documentation updated
+- [ ] Can generate WO from defect via API
+- [ ] Can generate WOs from entire inspection
+- [ ] Vocabulary mapping accurate for ANSI A92.2 rules
+
+**Timeline:** 12-15 hours
+- Models & migrations: 2-3 hours
+- Services: 5-6 hours
+- API: 2 hours
+- Admin: 2 hours
+- Testing: 3-4 hours
 
 ---
 
