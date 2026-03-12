@@ -74,8 +74,9 @@ class WorkOrder(BaseModel):
     # Status
     STATUS_CHOICES = [
         ('DRAFT', 'Draft'),
-        ('SCHEDULED', 'Scheduled'),
+        ('PENDING', 'Pending'),
         ('IN_PROGRESS', 'In Progress'),
+        ('ON_HOLD', 'On Hold'),
         ('COMPLETED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
     ]
@@ -89,18 +90,38 @@ class WorkOrder(BaseModel):
     # Priority
     PRIORITY_CHOICES = [
         ('LOW', 'Low'),
-        ('MEDIUM', 'Medium'),
+        ('NORMAL', 'Normal'),
         ('HIGH', 'High'),
-        ('URGENT', 'Urgent'),
+        ('EMERGENCY', 'Emergency'),
     ]
     priority = models.CharField(
         max_length=20,
         choices=PRIORITY_CHOICES,
-        default='MEDIUM',
+        default='NORMAL',
         help_text="Priority level for scheduling and dispatch"
     )
 
-    # Source tracking
+    # Source tracking (enhanced for Phase 5)
+    SOURCE_TYPE_CHOICES = [
+        ('INSPECTION_DEFECT', 'Inspection Defect'),
+        ('MAINTENANCE_SCHEDULE', 'Maintenance Schedule'),
+        ('CUSTOMER_REQUEST', 'Customer Request'),
+        ('BREAKDOWN', 'Breakdown'),
+        ('MANUAL', 'Manual'),
+    ]
+    source_type = models.CharField(
+        max_length=30,
+        choices=SOURCE_TYPE_CHOICES,
+        default='MANUAL',
+        help_text="Type of source that created this work order"
+    )
+    source_id = models.UUIDField(
+        null=True,
+        blank=True,
+        help_text="UUID of source object (defect, maintenance task, etc.)"
+    )
+
+    # Legacy source field - kept for backward compatibility
     SOURCE_CHOICES = [
         ('INSPECTION', 'Inspection'),
         ('CUSTOMER_REQUEST', 'Customer Request'),
@@ -110,7 +131,8 @@ class WorkOrder(BaseModel):
     source = models.CharField(
         max_length=30,
         choices=SOURCE_CHOICES,
-        help_text="How this work order originated"
+        default='CUSTOMER_REQUEST',
+        help_text="Legacy: How this work order originated (use source_type instead)"
     )
     source_inspection_run = models.ForeignKey(
         'inspections.InspectionRun',
@@ -122,22 +144,36 @@ class WorkOrder(BaseModel):
     )
 
     # Work details
+    title = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="Brief title for work order"
+    )
     description = models.TextField(
         help_text="Description of work to be performed"
     )
 
-    # Department assignments
+    # Department assignments (Phase 5: added single department for primary assignment)
+    department = models.ForeignKey(
+        'organization.Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_work_orders',
+        help_text="Primary department assigned to this work order"
+    )
     departments = models.ManyToManyField(
         'organization.Department',
         blank=True,
         related_name='work_orders',
-        help_text="Departments involved in this work order"
+        help_text="Legacy: Departments involved in this work order"
     )
     assigned_employees = models.ManyToManyField(
         'organization.Employee',
         blank=True,
         related_name='assigned_work_orders',
-        help_text="Employees assigned to this work order"
+        help_text="Legacy: Employees assigned to this work order (use WorkOrderLine.assigned_to instead)"
     )
 
     # Scheduling
@@ -147,10 +183,19 @@ class WorkOrder(BaseModel):
         db_index=True,
         help_text="When work is scheduled to be performed"
     )
-    assigned_to = models.CharField(
-        max_length=200,
+    due_date = models.DateField(
+        null=True,
         blank=True,
-        help_text="Legacy: Technician name or ID (use assigned_employees instead)"
+        db_index=True,
+        help_text="When work must be completed by"
+    )
+    assigned_to = models.ForeignKey(
+        'organization.Employee',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='primary_assigned_work_orders',
+        help_text="Primary employee assigned to this work order"
     )
 
     # Execution tracking
@@ -181,6 +226,42 @@ class WorkOrder(BaseModel):
     notes = models.TextField(
         blank=True,
         help_text="General notes about the work order"
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this work order is active (soft delete flag)"
+    )
+
+    # Approval workflow (Phase 5)
+    APPROVAL_STATUS_CHOICES = [
+        ('DRAFT', 'Draft'),
+        ('PENDING_APPROVAL', 'Pending Approval'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+    approval_status = models.CharField(
+        max_length=20,
+        choices=APPROVAL_STATUS_CHOICES,
+        default='DRAFT',
+        help_text="Approval status for work order"
+    )
+    approved_by = models.ForeignKey(
+        'organization.Employee',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_work_orders',
+        help_text="Employee who approved this work order"
+    )
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When work order was approved"
+    )
+    rejected_reason = models.TextField(
+        blank=True,
+        help_text="Reason for rejection if approval_status is REJECTED"
     )
 
     class Meta:
@@ -413,5 +494,175 @@ class WorkOrderDefect(models.Model):
 
     def save(self, *args, **kwargs):
         """Save with validation."""
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class WorkOrderLine(BaseModel):
+    """
+    Individual task/line item within a work order.
+
+    Core Principles:
+    - Work orders consist of multiple lines (tasks)
+    - Each line uses vocabulary (verb + noun + location)
+    - Lines can be assigned to specific employees
+    - Track estimated vs actual hours
+    - Parts required tracked per line
+    - Each line has its own status
+
+    Vocabulary Structure:
+    - Verb: Action to perform (e.g., "Replace", "Inspect", "Repair")
+    - Noun: Component/part (e.g., "Hydraulic Hose", "Boom Cylinder")
+    - Service Location: Where work is performed (e.g., "Boom Assembly", "Chassis")
+
+    Status Flow:
+    PENDING → IN_PROGRESS → COMPLETED
+                          → CANCELLED
+    """
+
+    work_order = models.ForeignKey(
+        WorkOrder,
+        on_delete=models.CASCADE,
+        related_name='lines',
+        help_text="Parent work order"
+    )
+
+    line_number = models.IntegerField(
+        help_text="Line number for ordering (1, 2, 3, ...)"
+    )
+
+    # Vocabulary-based task description
+    verb = models.CharField(
+        max_length=50,
+        help_text="Action verb (e.g., 'Replace', 'Inspect', 'Repair')"
+    )
+    noun = models.CharField(
+        max_length=100,
+        help_text="Component/part noun (e.g., 'Hydraulic Hose', 'Boom Cylinder')"
+    )
+    service_location = models.CharField(
+        max_length=100,
+        help_text="Service location (e.g., 'Boom Assembly', 'Chassis')"
+    )
+
+    # Generated or manual description
+    description = models.TextField(
+        help_text="Full description of task (auto-generated from vocabulary or manual)"
+    )
+
+    # Time tracking
+    estimated_hours = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Estimated hours to complete this line"
+    )
+    actual_hours = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Actual hours spent on this line"
+    )
+
+    # Parts
+    parts_required = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of part numbers/descriptions required"
+    )
+
+    # Assignment
+    assigned_to = models.ForeignKey(
+        'organization.Employee',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_work_order_lines',
+        help_text="Employee assigned to this specific line"
+    )
+
+    # Status
+    LINE_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=LINE_STATUS_CHOICES,
+        default='PENDING',
+        help_text="Status of this line item"
+    )
+
+    # Completion tracking
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When this line was completed"
+    )
+    completed_by = models.ForeignKey(
+        'organization.Employee',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='completed_work_order_lines',
+        help_text="Employee who completed this line"
+    )
+
+    notes = models.TextField(
+        blank=True,
+        help_text="Notes specific to this line"
+    )
+
+    class Meta:
+        db_table = 'work_order_lines'
+        ordering = ['work_order', 'line_number']
+        unique_together = [['work_order', 'line_number']]
+        indexes = [
+            models.Index(fields=['work_order', 'line_number']),
+            models.Index(fields=['status']),
+            models.Index(fields=['assigned_to']),
+        ]
+        verbose_name = 'Work Order Line'
+        verbose_name_plural = 'Work Order Lines'
+
+    def __str__(self):
+        return f"{self.work_order.work_order_number} - Line {self.line_number}: {self.verb} {self.noun}"
+
+    def clean(self):
+        """Validate model before save."""
+        super().clean()
+
+        # Validate line number is positive
+        if self.line_number is not None and self.line_number < 1:
+            raise ValidationError({
+                'line_number': 'Line number must be positive'
+            })
+
+        # Validate actual hours not greater than 100
+        if self.actual_hours and self.actual_hours > 100:
+            raise ValidationError({
+                'actual_hours': 'Actual hours seems unreasonably high (>100)'
+            })
+
+        # Validate parts_required is a list
+        if not isinstance(self.parts_required, list):
+            raise ValidationError({
+                'parts_required': 'Parts required must be a list'
+            })
+
+        # Validate completed status has completed_at
+        if self.status == 'COMPLETED' and not self.completed_at:
+            self.completed_at = timezone.now()
+
+    def save(self, *args, **kwargs):
+        """Save with validation."""
+        # Auto-generate description if not provided
+        if not self.description:
+            self.description = f"{self.verb} {self.noun} at {self.service_location}"
+
         self.full_clean()
         super().save(*args, **kwargs)
