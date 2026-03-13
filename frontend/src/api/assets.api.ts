@@ -107,4 +107,28 @@ export const equipmentApi = {
     const response = await apiClient.get<Equipment>(`/equipment/${id}/`);
     return response.data;
   },
+
+  async create(data: Omit<Equipment, 'id' | 'created_at' | 'updated_at' | 'equipment_data'>): Promise<Equipment> {
+    const response = await apiClient.post<Equipment>('/equipment/', data);
+    return response.data;
+  },
+
+  async update(id: string, data: Partial<Omit<Equipment, 'id' | 'created_at' | 'updated_at' | 'equipment_data'>>): Promise<Equipment> {
+    const response = await apiClient.patch<Equipment>(`/equipment/${id}/`, data);
+    return response.data;
+  },
+
+  async delete(id: string): Promise<void> {
+    await apiClient.delete(`/equipment/${id}/`);
+  },
+};
+
+// Combined assets API for forms
+export const assetsApi = {
+  getVehicles: vehiclesApi.list,
+  getEquipment: equipmentApi.list,
+  createVehicle: vehiclesApi.create,
+  createEquipment: equipmentApi.create,
+  updateEquipment: equipmentApi.update,
+  deleteEquipment: equipmentApi.delete,
 };

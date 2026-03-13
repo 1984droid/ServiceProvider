@@ -16,9 +16,10 @@ import { ContactDetailPage } from '@/features/contacts/ContactDetailPage';
 import { ContactEditPage } from '@/features/contacts/ContactEditPage';
 import { AssetsListPage } from '@/features/assets/AssetsListPage';
 import { VehicleCreatePage } from '@/features/assets/VehicleCreatePage';
+import { EquipmentCreatePage } from '@/features/assets/EquipmentCreatePage';
 import { InspectionsListPage } from '@/features/inspections/InspectionsListPage';
 
-type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'inspections';
+type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections';
 
 interface NavigationState {
   customerId?: string;
@@ -391,12 +392,22 @@ function App() {
               onNavigateToCustomer={navigateToCustomer}
               onClearSelection={() => setNavState({})}
               onCreateVehicle={() => setCurrentPage('assets-create-vehicle')}
+              onCreateEquipment={() => setCurrentPage('assets-create-equipment')}
             />
           )}
           {currentPage === 'assets-create-vehicle' && (
             <VehicleCreatePage
               onSuccess={(vehicleId) => {
                 setNavState({ vehicleId });
+                setCurrentPage('assets');
+              }}
+              onCancel={() => setCurrentPage('assets')}
+            />
+          )}
+          {currentPage === 'assets-create-equipment' && (
+            <EquipmentCreatePage
+              onSuccess={(equipmentId) => {
+                setNavState({ equipmentId });
                 setCurrentPage('assets');
               }}
               onCancel={() => setCurrentPage('assets')}

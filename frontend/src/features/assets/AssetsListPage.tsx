@@ -19,6 +19,7 @@ interface AssetsListPageProps {
   onNavigateToCustomer: (customerId: string) => void;
   onClearSelection: () => void;
   onCreateVehicle: () => void;
+  onCreateEquipment?: () => void;
 }
 
 export function AssetsListPage({
@@ -27,6 +28,7 @@ export function AssetsListPage({
   onNavigateToCustomer,
   onClearSelection,
   onCreateVehicle,
+  onCreateEquipment,
 }: AssetsListPageProps) {
   const [activeTab, setActiveTab] = useState<Tab>('vehicles');
   const [currentView, setCurrentView] = useState<View>('list');
@@ -140,8 +142,8 @@ export function AssetsListPage({
           onClick={() => {
             if (activeTab === 'vehicles') {
               onCreateVehicle();
-            } else {
-              alert('Create Equipment - Coming soon!');
+            } else if (onCreateEquipment) {
+              onCreateEquipment();
             }
           }}
           className="px-4 py-2 text-sm font-medium text-white rounded transition-colors"
