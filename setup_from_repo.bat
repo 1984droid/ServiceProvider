@@ -48,6 +48,7 @@ if not exist "manage.py" (
 echo + Found project root
 
 REM Check Python
+echo [DEBUG] Checking Python...
 python --version >nul 2>&1
 if errorlevel 1 (
     echo X Python not found. Please install Python 3.14+
@@ -55,8 +56,10 @@ if errorlevel 1 (
     exit /b 1
 )
 echo + Python found
+echo [DEBUG] Python check passed
 
 REM Check Node.js
+echo [DEBUG] Checking Node.js...
 node --version >nul 2>&1
 if errorlevel 1 (
     echo X Node.js not found. Please install Node.js 18+
@@ -64,8 +67,10 @@ if errorlevel 1 (
     exit /b 1
 )
 echo + Node.js found
+echo [DEBUG] Node.js check passed
 
 REM Check npm
+echo [DEBUG] Checking npm...
 npm --version >nul 2>&1
 if errorlevel 1 (
     echo X npm not found. Please install npm
@@ -73,17 +78,23 @@ if errorlevel 1 (
     exit /b 1
 )
 echo + npm found
+echo [DEBUG] npm check passed
+echo [DEBUG] About to check PostgreSQL...
 
 REM Check PostgreSQL client
 set HAVE_PSQL=false
+echo [DEBUG] Set HAVE_PSQL=false
 psql --version >nul 2>&1
 if errorlevel 1 (
     echo ! psql client not found - PostgreSQL setup will be manual
+    echo [DEBUG] psql not found, continuing...
 ) else (
     echo + PostgreSQL client found
     set HAVE_PSQL=true
+    echo [DEBUG] Set HAVE_PSQL=true
 )
 
+echo [DEBUG] Finished PostgreSQL check
 echo.
 echo All prerequisites met!
 echo.
