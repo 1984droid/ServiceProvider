@@ -49,7 +49,7 @@ echo + Found project root
 
 REM Check Python
 echo [DEBUG] Checking Python...
-python --version >nul 2>&1
+where python >nul 2>&1
 if errorlevel 1 (
     echo X Python not found. Please install Python 3.14+
     pause
@@ -60,7 +60,7 @@ echo [DEBUG] Python check passed
 
 REM Check Node.js
 echo [DEBUG] Checking Node.js...
-node --version >nul 2>&1
+where node >nul 2>&1
 if errorlevel 1 (
     echo X Node.js not found. Please install Node.js 18+
     pause
@@ -71,7 +71,7 @@ echo [DEBUG] Node.js check passed
 
 REM Check npm
 echo [DEBUG] Checking npm...
-npm --version >nul 2>&1
+where npm >nul 2>&1
 if errorlevel 1 (
     echo X npm not found. Please install npm
     pause
@@ -84,7 +84,7 @@ echo [DEBUG] About to check PostgreSQL...
 REM Check PostgreSQL client
 set HAVE_PSQL=false
 echo [DEBUG] Set HAVE_PSQL=false
-psql --version >nul 2>&1
+where psql >nul 2>&1
 if errorlevel 1 (
     echo ! psql client not found - PostgreSQL setup will be manual
     echo [DEBUG] psql not found, continuing...
