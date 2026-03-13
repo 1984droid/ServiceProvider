@@ -3,8 +3,8 @@ REM Complete dev environment setup script from fresh git clone
 REM This sets up ServiceProvider application from scratch on Windows
 
 echo [DEBUG] Script started
-setlocal enabledelayedexpansion
-echo [DEBUG] Delayed expansion enabled
+setlocal
+echo [DEBUG] Environment initialized
 
 echo =======================================
 echo ServiceProvider - Dev Setup from Repo
@@ -99,14 +99,8 @@ echo ========================================
 echo.
 
 if exist ".venv" (
-    echo ! .venv already exists
-    set /p RECREATE="Delete and recreate? (y/n): "
-    if /i "!RECREATE!"=="y" (
-        rmdir /s /q .venv
-        echo + Removed existing .venv
-    ) else (
-        echo - Using existing .venv
-    )
+    echo ! .venv already exists - using existing
+    echo - Using existing .venv
 )
 
 if not exist ".venv" (
@@ -157,20 +151,15 @@ echo ========================================
 echo.
 
 if exist ".env" (
-    echo ! .env file already exists
-    set /p OVERWRITE="Overwrite with .env.dev? (y/n): "
-    if /i "!OVERWRITE!"=="y" (
-        copy /y .env.dev .env >nul
-        echo + .env copied from .env.dev
-    ) else (
-        echo - Using existing .env
-    )
+    echo ! .env file already exists - using existing
+    echo - Using existing .env
 ) else (
     if exist ".env.dev" (
         copy .env.dev .env >nul
         echo + .env copied from .env.dev
     ) else (
         echo X .env.dev not found. Please create .env manually.
+        pause
         exit /b 1
     )
 )
@@ -207,15 +196,8 @@ if "%HAVE_PSQL%"=="true" (
     REM Check if database exists
     psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '%DB_NAME%'" | findstr "1" >nul
     if not errorlevel 1 (
-        echo ! Database '%DB_NAME%' already exists
-        set /p DROP_DB="Drop and recreate? (y/n): "
-        if /i "!DROP_DB!"=="y" (
-            echo Dropping database...
-            psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -c "DROP DATABASE IF EXISTS %DB_NAME%"
-            echo + Database dropped
-        ) else (
-            echo - Using existing database
-        )
+        echo ! Database '%DB_NAME%' already exists - using existing
+        echo - Using existing database
     )
 
     REM Create database if needed
