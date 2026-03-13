@@ -2,7 +2,9 @@
 REM Complete dev environment setup script from fresh git clone
 REM This sets up ServiceProvider application from scratch on Windows
 
+echo [DEBUG] Script started
 setlocal enabledelayedexpansion
+echo [DEBUG] Delayed expansion enabled
 
 echo =======================================
 echo ServiceProvider - Dev Setup from Repo
@@ -19,8 +21,12 @@ echo   7. Seed initial data
 echo   8. Set up frontend
 echo.
 set /p CONFIRM="Continue? (y/n): "
-if /i not "%CONFIRM%"=="y" (
+if /i "%CONFIRM%"=="n" (
     echo Setup cancelled.
+    exit /b 1
+)
+if /i not "%CONFIRM%"=="y" (
+    echo Invalid input. Please run again and type 'y' or 'n'.
     exit /b 1
 )
 echo.
@@ -36,6 +42,7 @@ echo.
 REM Check if we're in the right directory
 if not exist "manage.py" (
     echo X Error: manage.py not found. Are you in the project root?
+    pause
     exit /b 1
 )
 echo + Found project root
@@ -44,42 +51,43 @@ REM Check Python
 python --version >nul 2>&1
 if errorlevel 1 (
     echo X Python not found. Please install Python 3.14+
+    pause
     exit /b 1
 )
-for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
-echo + Python %PYTHON_VERSION% found
+echo + Python found
 
 REM Check Node.js
 node --version >nul 2>&1
 if errorlevel 1 (
     echo X Node.js not found. Please install Node.js 18+
+    pause
     exit /b 1
 )
-for /f %%i in ('node --version') do set NODE_VERSION=%%i
-echo + Node.js %NODE_VERSION% found
+echo + Node.js found
 
 REM Check npm
 npm --version >nul 2>&1
 if errorlevel 1 (
     echo X npm not found. Please install npm
+    pause
     exit /b 1
 )
-for /f %%i in ('npm --version') do set NPM_VERSION=%%i
-echo + npm %NPM_VERSION% found
+echo + npm found
 
 REM Check PostgreSQL client
+set HAVE_PSQL=false
 psql --version >nul 2>&1
 if errorlevel 1 (
     echo ! psql client not found - PostgreSQL setup will be manual
-    set HAVE_PSQL=false
 ) else (
-    for /f "tokens=3" %%i in ('psql --version') do set PSQL_VERSION=%%i
-    echo + PostgreSQL client %PSQL_VERSION% found
+    echo + PostgreSQL client found
     set HAVE_PSQL=true
 )
 
 echo.
 echo All prerequisites met!
+echo.
+echo DEBUG: About to proceed to step 2...
 echo.
 
 REM ============================================================================
