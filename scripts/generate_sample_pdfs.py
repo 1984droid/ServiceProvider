@@ -62,7 +62,7 @@ def main():
         defaults={
             'customer': customer,
             'asset_number': "AER-001",
-            'equipment_type': 'AERIAL_DEVICE',
+            'equipment_type': 'A92_2_AERIAL',
             'manufacturer': "Altec",
             'model': "AT40G",
             'capabilities': ['DIELECTRIC', 'HYDRAULIC']

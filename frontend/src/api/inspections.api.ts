@@ -8,13 +8,25 @@ import { apiClient } from '@/lib/axios';
 
 // Inspection Template Types
 export interface InspectionTemplate {
-  key: string;
+  template_key: string;
   name: string;
-  version: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'DEPRECATED';
+  standard_code?: string;
+  standard_revision?: string;
+  inspection_kind?: string;
+  domain?: string;
+  tags?: string[];
+  step_count?: number;
+  rule_count?: number;
+  required_capabilities?: string[] | null;
+
+  // Legacy fields for backwards compatibility
+  key?: string;
+  version?: string;
   description?: string;
   equipment_types?: string[];
   vehicle_types?: string[];
-  published: boolean;
+  published?: boolean;
   standard_reference?: string;
 }
 
@@ -96,6 +108,19 @@ export const inspectionsApi = {
   async getTemplatesForEquipment(equipmentType: string): Promise<TemplateListResponse> {
     const response = await apiClient.get<TemplateListResponse>('/templates/for_equipment/', {
       params: { equipment_type: equipmentType }
+    });
+    return response.data;
+  },
+
+  /**
+   * Get templates applicable to a specific asset (uses standards-based filtering)
+   */
+  async getTemplatesForAsset(assetType: 'vehicle' | 'equipment', assetId: string): Promise<TemplateListResponse> {
+    const response = await apiClient.get<TemplateListResponse>('/templates/for_asset/', {
+      params: {
+        asset_type: assetType.toLowerCase(),
+        asset_id: assetId
+      }
     });
     return response.data;
   },

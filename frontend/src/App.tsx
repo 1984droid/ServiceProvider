@@ -15,9 +15,10 @@ import { CustomerDetailPage } from '@/features/customers/CustomerDetailPage';
 import { ContactDetailPage } from '@/features/contacts/ContactDetailPage';
 import { ContactEditPage } from '@/features/contacts/ContactEditPage';
 import { AssetsListPage } from '@/features/assets/AssetsListPage';
+import { VehicleCreatePage } from '@/features/assets/VehicleCreatePage';
 import { InspectionsListPage } from '@/features/inspections/InspectionsListPage';
 
-type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'inspections';
+type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'inspections';
 
 interface NavigationState {
   customerId?: string;
@@ -389,6 +390,16 @@ function App() {
               initialEquipmentId={navState.equipmentId}
               onNavigateToCustomer={navigateToCustomer}
               onClearSelection={() => setNavState({})}
+              onCreateVehicle={() => setCurrentPage('assets-create-vehicle')}
+            />
+          )}
+          {currentPage === 'assets-create-vehicle' && (
+            <VehicleCreatePage
+              onSuccess={(vehicleId) => {
+                setNavState({ vehicleId });
+                setCurrentPage('assets');
+              }}
+              onCancel={() => setCurrentPage('assets')}
             />
           )}
           {currentPage === 'inspections' && (

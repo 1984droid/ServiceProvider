@@ -19,7 +19,7 @@ export default defineConfig({
     strictPort: true, // Fail if port 5174 is not available
     proxy: {
       '/api': {
-        target: 'http://localhost:8001',
+        target: 'http://localhost:8100',
         changeOrigin: true,
       },
     },

@@ -136,17 +136,33 @@ class Vehicle(BaseModel):
     make = models.CharField(max_length=100, blank=True, db_index=True)
     model = models.CharField(max_length=100, blank=True)
 
-    # Body Type (for incomplete vehicles with special bodies)
+    # VIN Decode Data - from NHTSA (read-only, populated by decode)
+    vehicle_type = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Vehicle type from VIN decode (e.g., 'Truck', 'Incomplete Vehicle', 'Trailer')"
+    )
+    body_class = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Body class from VIN decode (e.g., 'Cab & Chassis', 'Van', 'Pickup')"
+    )
+
+    # Body Type - User selected based on what body is installed
     BODY_TYPE_CHOICES = [
-        ('', 'Standard (No Special Body)'),
-        ('AERIAL', 'Aerial Device (Bucket Truck)'),
-        # Add more as we create inspection templates for them:
-        # ('REFUSE', 'Refuse/Garbage Body'),
-        # ('SWEEPER', 'Street Sweeper'),
-        # ('SCHOOL_BUS', 'School Bus'),
-        # ('DUMP', 'Dump Body'),
-        # ('TANK', 'Tank Body'),
-        # ('TOW', 'Tow/Wrecker Body'),
+        ('', 'None / As Delivered'),
+        ('SERVICE', 'Service Body'),
+        ('FLATBED', 'Flatbed'),
+        ('STAKE', 'Stake Body'),
+        ('DUMP', 'Dump Body'),
+        ('VAN', 'Van Body'),
+        ('BOX', 'Box/Cargo Body'),
+        ('REFUSE', 'Refuse Body'),
+        ('TANK', 'Tank Body'),
+        ('CRANE', 'Crane Body'),
+        ('TOW', 'Tow/Wrecker Body'),
+        ('UTILITY', 'Utility Body'),
+        ('OTHER', 'Other'),
     ]
     body_type = models.CharField(
         max_length=20,
@@ -154,7 +170,7 @@ class Vehicle(BaseModel):
         blank=True,
         default='',
         db_index=True,
-        help_text="Special body type if vehicle is incomplete/upfitted (only add types we have inspection templates for)"
+        help_text="Type of body installed on the vehicle (if any)"
     )
 
     # Status
@@ -295,25 +311,36 @@ class Equipment(BaseModel):
         help_text="Customer's internal asset/equipment number"
     )
 
-    # Equipment Classification
+    # Equipment Classification - Standards-Based Taxonomy
+    # Equipment types are aligned with applicable ANSI/ASME/OSHA standards
     EQUIPMENT_TYPE_CHOICES = [
         ('', 'Not Specified'),
-        ('AERIAL_DEVICE', 'Aerial Device'),
-        # Add more as we create inspection templates for them:
-        # ('CRANE', 'Crane'),
-        # ('FORKLIFT', 'Forklift'),
-        # ('DIGGER_DERRICK', 'Digger Derrick'),
-        # ('GENERATOR', 'Generator'),
-        # ('COMPRESSOR', 'Compressor'),
-        # ('WELDER', 'Welder'),
+
+        # ANSI A92 Series - Mobile Elevating Work Platforms
+        ('A92_2_AERIAL', 'Aerial Device (ANSI A92.2 - Vehicle-Mounted Elevating & Rotating)'),
+        ('A92_20_SCISSOR', 'Scissor Lift (ANSI A92.20 - Self-Propelled)'),
+        ('A92_20_BOOM', 'Boom Lift (ANSI A92.20 - Self-Propelled)'),
+        ('A92_3_VERTICAL', 'Vertical Mast Lift (ANSI A92.3 - Manually Propelled)'),
+
+        # ANSI/ASME B30 Series - Cranes and Hoists
+        ('B30_5_CRANE', 'Mobile/Locomotive Crane (ANSI/ASME B30.5)'),
+        ('B30_22_ARTICULATING', 'Articulating Boom Crane (ANSI/ASME B30.22)'),
+
+        # Other Equipment (add standards as inspection templates are created)
+        ('DIGGER_DERRICK', 'Digger Derrick'),
+        ('FORKLIFT', 'Forklift'),
+        ('GENERATOR', 'Generator'),
+        ('COMPRESSOR', 'Air Compressor'),
+        ('WELDER', 'Welder'),
+        ('CRANE_BOOM_TRUCK', 'Crane/Boom Truck'),
     ]
     equipment_type = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=EQUIPMENT_TYPE_CHOICES,
         blank=True,
         default='',
         db_index=True,
-        help_text="Equipment type (only add types we have inspection templates for)"
+        help_text="Equipment type aligned with applicable inspection standards (ANSI/ASME/OSHA)"
     )
     manufacturer = models.CharField(max_length=100, blank=True)
     model = models.CharField(max_length=100, blank=True)

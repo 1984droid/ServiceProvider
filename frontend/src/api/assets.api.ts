@@ -45,6 +45,8 @@ export interface Vehicle {
   year: number | null;
   make: string;
   model: string;
+  vehicle_type: string;
+  body_class: string;
   body_type: string;
   is_active: boolean;
   odometer_miles: number | null;
@@ -86,6 +88,11 @@ export const vehiclesApi = {
 
   async get(id: string): Promise<Vehicle> {
     const response = await apiClient.get<Vehicle>(`/vehicles/${id}/`);
+    return response.data;
+  },
+
+  async create(data: Omit<Vehicle, 'id' | 'created_at' | 'updated_at' | 'vin_decode_data'>): Promise<Vehicle> {
+    const response = await apiClient.post<Vehicle>('/vehicles/', data);
     return response.data;
   },
 };

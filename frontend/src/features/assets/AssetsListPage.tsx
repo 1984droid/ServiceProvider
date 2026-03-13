@@ -18,6 +18,7 @@ interface AssetsListPageProps {
   initialEquipmentId?: string;
   onNavigateToCustomer: (customerId: string) => void;
   onClearSelection: () => void;
+  onCreateVehicle: () => void;
 }
 
 export function AssetsListPage({
@@ -25,6 +26,7 @@ export function AssetsListPage({
   initialEquipmentId,
   onNavigateToCustomer,
   onClearSelection,
+  onCreateVehicle,
 }: AssetsListPageProps) {
   const [activeTab, setActiveTab] = useState<Tab>('vehicles');
   const [currentView, setCurrentView] = useState<View>('list');
@@ -135,7 +137,13 @@ export function AssetsListPage({
           </p>
         </div>
         <button
-          onClick={() => alert(`Create ${activeTab === 'vehicles' ? 'Vehicle' : 'Equipment'} - Coming soon!`)}
+          onClick={() => {
+            if (activeTab === 'vehicles') {
+              onCreateVehicle();
+            } else {
+              alert('Create Equipment - Coming soon!');
+            }
+          }}
           className="px-4 py-2 text-sm font-medium text-white rounded transition-colors"
           style={{ backgroundColor: '#7ed321' }}
         >

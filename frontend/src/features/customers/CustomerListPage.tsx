@@ -166,17 +166,11 @@ export function CustomerListPage({ onNavigateToCreate, onNavigateToDetail }: Cus
                       </p>
                     </td>
                     <td className="px-4 py-3">
-                      {customer.email && (
+                      {customer.primary_contact_name ? (
                         <p className="text-sm" style={{ color: '#111827' }}>
-                          {customer.email}
+                          {customer.primary_contact_name}
                         </p>
-                      )}
-                      {customer.phone && (
-                        <p className="text-xs" style={{ color: '#6b7280' }}>
-                          {customer.phone}
-                        </p>
-                      )}
-                      {!customer.email && !customer.phone && (
+                      ) : (
                         <span className="text-sm" style={{ color: '#6b7280' }}>—</span>
                       )}
                     </td>

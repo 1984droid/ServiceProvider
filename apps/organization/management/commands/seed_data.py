@@ -433,7 +433,8 @@ class Command(BaseCommand):
             'International': ['LT', 'RH', 'HX', 'MV'],
             'Mack': ['Anthem', 'Pinnacle', 'Granite', 'TerraPro'],
         }
-        body_types = ['', 'AERIAL']  # Valid choices from model
+        # Valid body types from Vehicle model
+        body_types = ['', 'SERVICE', 'FLATBED', 'STAKE', 'DUMP', 'VAN', 'BOX']
         states = ['IL', 'IN', 'WI', 'MI', 'OH', 'IA']
 
         vehicles = []
@@ -445,8 +446,8 @@ class Command(BaseCommand):
                 make = random.choice(truck_makes)
                 model = random.choice(truck_models[make])
                 year = random.randint(2016, 2024)
-                # Most trucks have standard body, 20% have aerial
-                body_type = 'AERIAL' if random.random() < 0.2 else ''
+                # 40% have no special body, 60% have various body types
+                body_type = random.choice(body_types)
 
                 vehicle, created = Vehicle.objects.get_or_create(
                     customer=customer,
@@ -472,9 +473,9 @@ class Command(BaseCommand):
 
     def _create_equipment(self, customers, vehicles):
         """Create equipment with comprehensive data, some mounted on vehicles."""
-        # Only AERIAL_DEVICE is valid choice currently
+        # Standards-based equipment types
         equipment_types = {
-            'AERIAL_DEVICE': {
+            'A92_2_AERIAL': {
                 'manufacturers': ['Altec', 'Terex', 'Versalift', 'Elliott', 'Manitex'],
                 'models': {
                     'Altec': ['AT40G', 'AT37G', 'L42A', 'LRV-55'],

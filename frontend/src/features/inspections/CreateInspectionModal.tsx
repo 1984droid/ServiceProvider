@@ -35,26 +35,24 @@ export function CreateInspectionModal({
 
   useEffect(() => {
     loadTemplates();
-  }, [assetType, equipmentType]);
+  }, [assetType, assetId]);
 
   const loadTemplates = async () => {
     setLoading(true);
     setError(null);
     try {
-      let response;
-      if (assetType === 'EQUIPMENT' && equipmentType) {
-        response = await inspectionsApi.getTemplatesForEquipment(equipmentType);
-      } else {
-        response = await inspectionsApi.listTemplates();
-      }
+      // Use new standards-based filtering endpoint
+      const response = await inspectionsApi.getTemplatesForAsset(
+        assetType.toLowerCase() as 'vehicle' | 'equipment',
+        assetId
+      );
 
-      // Filter published templates only
-      const publishedTemplates = response.templates.filter(t => t.published);
-      setTemplates(publishedTemplates);
+      // Use all templates returned by the API (filtering is done server-side)
+      setTemplates(response.templates);
 
       // Auto-select if only one template
-      if (publishedTemplates.length === 1) {
-        setSelectedTemplate(publishedTemplates[0].key);
+      if (response.templates.length === 1) {
+        setSelectedTemplate(response.templates[0].template_key || response.templates[0].key || '');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load inspection templates');
@@ -87,7 +85,9 @@ export function CreateInspectionModal({
     }
   };
 
-  const selectedTemplateInfo = templates.find(t => t.key === selectedTemplate);
+  const selectedTemplateInfo = templates.find(
+    t => (t.template_key || t.key) === selectedTemplate
+  );
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -164,35 +164,40 @@ export function CreateInspectionModal({
                   Select Inspection Template <span className="text-red-500">*</span>
                 </label>
                 <div className="space-y-2">
-                  {templates.map((template) => (
-                    <button
-                      key={template.key}
-                      onClick={() => setSelectedTemplate(template.key)}
-                      className={`w-full text-left border rounded-lg p-4 transition-all ${
-                        selectedTemplate === template.key
-                          ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900">{template.name}</h4>
-                          <p className="text-xs text-gray-500 mt-0.5">Version {template.version}</p>
-                          {template.description && (
-                            <p className="text-sm text-gray-600 mt-2">{template.description}</p>
-                          )}
-                          {template.standard_reference && (
-                            <p className="text-xs text-gray-500 mt-1">Standard: {template.standard_reference}</p>
+                  {templates.map((template) => {
+                    const templateKey = template.template_key || template.key || '';
+                    return (
+                      <button
+                        key={templateKey}
+                        onClick={() => setSelectedTemplate(templateKey)}
+                        className={`w-full text-left border rounded-lg p-4 transition-all ${
+                          selectedTemplate === templateKey
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-2-blue-500'
+                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900">{template.name}</h4>
+                            {(template.standard_code || template.standard_reference) && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {template.standard_code} {template.standard_revision && `(${template.standard_revision})`}
+                                {!template.standard_code && template.standard_reference}
+                              </p>
+                            )}
+                            {template.inspection_kind && (
+                              <p className="text-xs text-gray-500 mt-1">{template.inspection_kind}</p>
+                            )}
+                          </div>
+                          {selectedTemplate === templateKey && (
+                            <svg className="w-6 h-6 text-blue-600 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                           )}
                         </div>
-                        {selectedTemplate === template.key && (
-                          <svg className="w-6 h-6 text-blue-600 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        )}
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -205,14 +210,19 @@ export function CreateInspectionModal({
                       <dt className="inline font-medium text-blue-800">Name:</dt>
                       <dd className="inline ml-2 text-blue-900">{selectedTemplateInfo.name}</dd>
                     </div>
-                    <div>
-                      <dt className="inline font-medium text-blue-800">Version:</dt>
-                      <dd className="inline ml-2 text-blue-900">{selectedTemplateInfo.version}</dd>
-                    </div>
-                    {selectedTemplateInfo.standard_reference && (
+                    {(selectedTemplateInfo.standard_code || selectedTemplateInfo.standard_reference) && (
                       <div>
                         <dt className="inline font-medium text-blue-800">Standard:</dt>
-                        <dd className="inline ml-2 text-blue-900">{selectedTemplateInfo.standard_reference}</dd>
+                        <dd className="inline ml-2 text-blue-900">
+                          {selectedTemplateInfo.standard_code} {selectedTemplateInfo.standard_revision}
+                          {!selectedTemplateInfo.standard_code && selectedTemplateInfo.standard_reference}
+                        </dd>
+                      </div>
+                    )}
+                    {selectedTemplateInfo.step_count !== undefined && (
+                      <div>
+                        <dt className="inline font-medium text-blue-800">Steps:</dt>
+                        <dd className="inline ml-2 text-blue-900">{selectedTemplateInfo.step_count}</dd>
                       </div>
                     )}
                   </dl>

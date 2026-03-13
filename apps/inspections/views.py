@@ -23,6 +23,7 @@ from .services.template_service import (
     TemplateNotFoundError,
     TemplateValidationError
 )
+from .services.template_filter_service import TemplateFilterService
 from .services.runtime_service import (
     InspectionRuntime,
     InspectionRuntimeError,
@@ -202,6 +203,94 @@ class TemplateViewSet(viewsets.ViewSet):
                 'count': len(templates),
                 'templates': templates
             })
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to get applicable templates: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'])
+    def for_asset(self, request):
+        """
+        Get templates applicable to a specific asset (vehicle or equipment).
+
+        Uses the new TemplateFilterService with standards-based filtering.
+
+        Query params:
+            asset_type: 'vehicle' or 'equipment'
+            asset_id: UUID of the asset
+
+        Returns:
+            200: List of applicable templates
+            400: Missing or invalid parameters
+            404: Asset not found
+        """
+        from apps.assets.models import Vehicle, Equipment
+
+        asset_type = request.query_params.get('asset_type', '').lower()
+        asset_id = request.query_params.get('asset_id')
+
+        if not asset_type:
+            return Response(
+                {'error': 'asset_type query parameter required (vehicle or equipment)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not asset_id:
+            return Response(
+                {'error': 'asset_id query parameter required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if asset_type not in ['vehicle', 'equipment']:
+            return Response(
+                {'error': 'asset_type must be "vehicle" or "equipment"'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            if asset_type == 'vehicle':
+                asset = Vehicle.objects.get(id=asset_id)
+                asset_dict = {
+                    'id': str(asset.id),
+                    'body_type': asset.body_type,
+                    'capabilities': asset.capabilities,
+                }
+                templates = TemplateFilterService.get_applicable_templates_for_vehicle(asset_dict)
+                asset_info = {
+                    'asset_type': 'vehicle',
+                    'asset_id': str(asset.id),
+                    'unit_number': asset.unit_number,
+                    'body_type': asset.body_type,
+                    'capabilities': asset.capabilities,
+                }
+            else:  # equipment
+                asset = Equipment.objects.get(id=asset_id)
+                asset_dict = {
+                    'id': str(asset.id),
+                    'equipment_type': asset.equipment_type,
+                    'capabilities': asset.capabilities,
+                }
+                templates = TemplateFilterService.get_applicable_templates_for_equipment(asset_dict)
+                asset_info = {
+                    'asset_type': 'equipment',
+                    'asset_id': str(asset.id),
+                    'serial_number': asset.serial_number,
+                    'equipment_type': asset.equipment_type,
+                    'capabilities': asset.capabilities,
+                }
+
+            return Response({
+                **asset_info,
+                'count': len(templates),
+                'templates': templates
+            })
+
+        except (Vehicle.DoesNotExist, Equipment.DoesNotExist):
+            return Response(
+                {'error': f'{asset_type.capitalize()} with id {asset_id} not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
             return Response(
                 {'error': f'Failed to get applicable templates: {str(e)}'},
