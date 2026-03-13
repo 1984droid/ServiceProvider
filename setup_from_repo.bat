@@ -49,7 +49,7 @@ echo + Found project root
 
 REM Check Python
 echo [DEBUG] Checking Python...
-where python >nul 2>&1
+call python --version >nul 2>&1
 if errorlevel 1 (
     echo X Python not found. Please install Python 3.14+
     pause
@@ -60,7 +60,7 @@ echo [DEBUG] Python check passed
 
 REM Check Node.js
 echo [DEBUG] Checking Node.js...
-where node >nul 2>&1
+call node --version >nul 2>&1
 if errorlevel 1 (
     echo X Node.js not found. Please install Node.js 18+
     pause
@@ -71,7 +71,7 @@ echo [DEBUG] Node.js check passed
 
 REM Check npm
 echo [DEBUG] Checking npm...
-where npm >nul 2>&1
+call npm --version >nul 2>&1
 if errorlevel 1 (
     echo X npm not found. Please install npm
     pause
@@ -84,10 +84,11 @@ echo [DEBUG] About to check PostgreSQL...
 REM Check PostgreSQL client
 set HAVE_PSQL=false
 echo [DEBUG] Set HAVE_PSQL=false
-where psql >nul 2>&1
+call psql --version >nul 2>&1
 if errorlevel 1 (
-    echo ! psql client not found - PostgreSQL setup will be manual
-    echo [DEBUG] psql not found, continuing...
+    echo ! psql client not found - database setup will be manual
+    echo   To add psql to PATH: Add C:\Program Files\PostgreSQL\18\bin to system PATH
+    echo [DEBUG] psql not found, continuing without psql...
 ) else (
     echo + PostgreSQL client found
     set HAVE_PSQL=true
