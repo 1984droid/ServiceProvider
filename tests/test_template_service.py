@@ -93,7 +93,7 @@ class TestTemplateServiceDiscovery:
         templates = TemplateService.list_all_templates()
 
         assert len(templates) > 0
-        assert len(templates) == 17  # We have 17 ANSI A92.2 modules
+        assert len(templates) == 22  # 17 modular templates + 5 monolithic templates (frequent, periodic, load_test, dielectric, major_structural)
 
         # Check structure of each template summary
         for template in templates:
@@ -124,7 +124,7 @@ class TestTemplateServiceDiscovery:
         """Test getting templates by standard code."""
         templates = TemplateService.get_templates_by_standard('ANSI/SAIA A92.2')
 
-        assert len(templates) == 17  # All our templates are ANSI A92.2
+        assert len(templates) == 22  # All our templates are ANSI A92.2 (17 modular + 5 monolithic)
         for template in templates:
             assert template['standard_code'] == 'ANSI/SAIA A92.2'
             assert template['standard_revision'] == '2021'

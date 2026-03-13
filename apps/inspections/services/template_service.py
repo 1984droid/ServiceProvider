@@ -118,7 +118,7 @@ class TemplateService:
             )
 
         # Convert to dict for caching
-        template_dict = validated_template.dict(by_alias=True)
+        template_dict = validated_template.model_dump(by_alias=True)
 
         # Cache it
         if use_cache:
@@ -180,7 +180,7 @@ class TemplateService:
                 try:
                     template = cls.get_template_object(template_file.stem, use_cache=False)
                     summary = TemplateSummary.from_template(template)
-                    templates.append(summary.dict())
+                    templates.append(summary.model_dump())
                 except (TemplateNotFoundError, TemplateValidationError) as e:
                     # Log error but continue
                     print(f"Warning: Skipping invalid template {template_file.name}: {e}")
@@ -400,7 +400,7 @@ class TemplateService:
         """
         template = cls.get_template_object(template_key)
         step = template.get_step(step_key)
-        return step.dict() if step else None
+        return step.model_dump() if step else None
 
     @classmethod
     def get_required_steps(cls, template_key: str) -> List[Dict[str, Any]]:
@@ -414,7 +414,7 @@ class TemplateService:
             List of required step dicts
         """
         template = cls.get_template_object(template_key)
-        return [step.dict() for step in template.get_required_steps()]
+        return [step.model_dump() for step in template.get_required_steps()]
 
     @classmethod
     def get_template_enums(cls, template_key: str) -> Dict[str, List[str]]:

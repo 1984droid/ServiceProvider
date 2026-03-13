@@ -1,0 +1,1085 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_periodic_dielectric_test",
+    "name": "ANSI A92.2-2021 Periodic Dielectric Test",
+    "status": "PUBLISHED",
+    "standard": {
+      "code": "ANSI/SAIA A92.2",
+      "revision": "2021"
+    },
+    "intent": {
+      "inspection_kind": "PERIODIC",
+      "domain": "AERIAL_DEVICE",
+      "tags": [
+        "dielectric",
+        "electrical",
+        "insulating",
+        "periodic",
+        "high-voltage",
+        "leakage-current"
+      ]
+    },
+    "applicability": {
+      "asset_types": ["EQUIPMENT"],
+      "equipment_types": ["A92_2_AERIAL"],
+      "notes": "For insulating aerial devices requiring periodic electrical testing per ANSI A92.2-2021 Section 5.3.3 and 8.2.4(16). This test verifies the integrity of the insulating system by measuring leakage current at specified test voltages. CRITICAL SAFETY TEST - Must be performed by qualified personnel with proper test equipment meeting IEEE Std. 4-2013 requirements."
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+  "enums": {
+    "severity": [
+      "SAFE",
+      "MINOR",
+      "SERVICE_REQUIRED",
+      "UNSAFE_OUT_OF_SERVICE"
+    ],
+    "pass_fail": [
+      "PASS",
+      "FAIL",
+      "NOT_APPLICABLE"
+    ],
+    "unit_category": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "test_method": [
+      "METHOD_A_AC_TABLE2",
+      "METHOD_B_DC_TABLE2",
+      "METHOD_C_BEFORE_USE_TABLE3"
+    ],
+    "test_voltage_type": [
+      "AC",
+      "DC"
+    ],
+    "yes_no": [
+      "YES",
+      "NO"
+    ],
+    "cleanliness_status": [
+      "CLEAN",
+      "CONTAMINATED"
+    ],
+    "boom_position_figure": [
+      "FIGURE_1",
+      "FIGURE_2",
+      "FIGURE_2A",
+      "FIGURE_3",
+      "FIGURE_4"
+    ],
+    "test_setup_method": [
+      "METHOD_A_B_PER_FIGURE",
+      "METHOD_C_FIELD_TEST"
+    ],
+    "chassis_test_method": [
+      "AC_35KV_3MIN",
+      "DC_50KV_3MIN"
+    ],
+    "current_unit": [
+      "MICROAMPS",
+      "MILLIAMPS"
+    ]
+  },
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "dielectric_test_table2_ac",
+        "title": "AC Dielectric Test Measurements (Table 2)",
+        "fields": [
+          {
+            "field_id": "rated_line_voltage_kv",
+            "label": "Rated line voltage (kV)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 1,
+            "help_text": "Voltage rating from unit nameplate"
+          },
+          {
+            "field_id": "applied_test_voltage_kv",
+            "label": "Applied test voltage (kV RMS)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 1,
+            "min": 1,
+            "help_text": "Per Table 2 - voltage applied during test"
+          },
+          {
+            "field_id": "test_duration_seconds",
+            "label": "Test duration (seconds)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 60,
+            "help_text": "Must be minimum 60 seconds for AC test"
+          },
+          {
+            "field_id": "final_leakage_current_microamps",
+            "label": "Final leakage current (µA RMS)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 0,
+            "help_text": "Leakage current at end of test period"
+          }
+        ]
+      },
+      {
+        "measurement_set_id": "dielectric_test_table2_dc",
+        "title": "DC Dielectric Test Measurements (Table 2)",
+        "fields": [
+          {
+            "field_id": "rated_line_voltage_kv",
+            "label": "Rated line voltage (kV)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 1,
+            "help_text": "Voltage rating from unit nameplate"
+          },
+          {
+            "field_id": "applied_test_voltage_kv",
+            "label": "Applied test voltage (kV DC)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 1,
+            "min": 1,
+            "help_text": "Per Table 2 - DC voltage applied during test"
+          },
+          {
+            "field_id": "test_duration_seconds",
+            "label": "Test duration (seconds)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 180,
+            "help_text": "Must be minimum 180 seconds for DC test"
+          },
+          {
+            "field_id": "final_leakage_current_microamps",
+            "label": "Final leakage current (µA)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 0,
+            "help_text": "DC leakage current at end of test period"
+          }
+        ]
+      },
+      {
+        "measurement_set_id": "before_use_test_table3",
+        "title": "Before Use Test Measurements (Table 3)",
+        "fields": [
+          {
+            "field_id": "line_voltage_kv",
+            "label": "Energized line voltage (kV)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 1,
+            "min": 0.1,
+            "help_text": "Actual line voltage during field test"
+          },
+          {
+            "field_id": "test_duration_seconds",
+            "label": "Test duration (seconds)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 180,
+            "help_text": "Must be minimum 180 seconds"
+          },
+          {
+            "field_id": "measured_current_microamps",
+            "label": "Measured leakage current (µA)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 3,
+            "min": 0,
+            "help_text": "Leakage current measured during field test"
+          },
+          {
+            "field_id": "test_voltage_type",
+            "label": "Line voltage type",
+            "type": "ENUM",
+            "enum_ref": "test_voltage_type",
+            "required": true,
+            "help_text": "AC or DC line voltage"
+          }
+        ]
+      },
+      {
+        "measurement_set_id": "chassis_insulating_system_test",
+        "title": "Chassis Insulating System Test Measurements",
+        "fields": [
+          {
+            "field_id": "test_voltage_kv",
+            "label": "Applied test voltage (kV)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 1,
+            "help_text": "AC: 35kV or DC: 50kV per Section 5.4.3.4(5)"
+          },
+          {
+            "field_id": "test_duration_seconds",
+            "label": "Test duration (seconds)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 180,
+            "help_text": "Must be 180 seconds (3 minutes)"
+          },
+          {
+            "field_id": "final_current_value",
+            "label": "Final current value",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 3,
+            "min": 0,
+            "help_text": "AC: ≤3 mA, DC: ≤100 µA"
+          },
+          {
+            "field_id": "current_unit",
+            "label": "Current measurement unit",
+            "type": "ENUM",
+            "enum_ref": "current_unit",
+            "required": true,
+            "help_text": "Microamps or milliamps"
+          }
+        ]
+      }
+    ],
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        {
+          "field_id": "title",
+          "type": "TEXT",
+          "required": true
+        },
+        {
+          "field_id": "severity",
+          "type": "ENUM",
+          "enum_ref": "severity",
+          "required": true
+        },
+        {
+          "field_id": "description",
+          "type": "TEXT_AREA",
+          "required": true
+        },
+        {
+          "field_id": "standard_reference",
+          "type": "TEXT",
+          "required": false
+        },
+        {
+          "field_id": "location",
+          "type": "TEXT",
+          "required": false
+        },
+        {
+          "field_id": "photo_evidence",
+          "type": "PHOTO",
+          "required": false
+        },
+        {
+          "field_id": "corrective_action",
+          "type": "TEXT_AREA",
+          "required": false
+        }
+      ]
+    }
+  },
+  "procedure": {
+    "inputs": [
+      {
+        "input_id": "unit_category",
+        "label": "Unit Category (from nameplate)",
+        "type": "ENUM",
+        "enum_ref": "unit_category",
+        "required": true,
+        "help_text": "Insulating aerial device category per ANSI A92.2-2021 Section 5.1.2 (A, B, C, D, or E)"
+      },
+      {
+        "input_id": "test_method",
+        "label": "Test Method",
+        "type": "ENUM",
+        "enum_ref": "test_method",
+        "required": true,
+        "help_text": "Select test method per ANSI A92.2-2021 Section 5.4.3: Method A (AC per Table 2), Method B (DC per Table 2), or Method C (Before Use per Table 3)"
+      },
+      {
+        "input_id": "has_chassis_insulating_system",
+        "label": "Equipped with chassis insulating system?",
+        "type": "ENUM",
+        "enum_ref": "yes_no",
+        "required": true,
+        "help_text": "Per Section 5.2.5 - Required for Cat C/D articulated units to work near energized lines"
+      }
+    ],
+    "steps": [
+      {
+        "step_key": "test_information",
+        "type": "SETUP",
+        "title": "Dielectric Test Information",
+        "standard_reference": "ANSI A92.2-2021 Section 5.6.3",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "test_date",
+            "label": "Test Date",
+            "type": "DATE",
+            "required": true
+          },
+          {
+            "field_id": "testing_entity_name",
+            "label": "Name of entity performing test",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Section 5.6.3(1) - Company name"
+          },
+          {
+            "field_id": "tester_name",
+            "label": "Name of person performing test",
+            "type": "TEXT",
+            "required": true
+          },
+          {
+            "field_id": "tester_qualifications",
+            "label": "Tester qualifications/certification",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Must be qualified personnel per Section 5.4"
+          },
+          {
+            "field_id": "device_make",
+            "label": "Aerial device make",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Section 5.6.3(2)"
+          },
+          {
+            "field_id": "device_model",
+            "label": "Aerial device model",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Section 5.6.3(2)"
+          },
+          {
+            "field_id": "device_serial_number",
+            "label": "Aerial device serial number",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Section 5.6.3(2)"
+          },
+          {
+            "field_id": "rated_line_voltage_kv",
+            "label": "Rated line voltage (kV)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 1,
+            "min": 0.1,
+            "help_text": "Section 5.6.3(4) - From nameplate"
+          },
+          {
+            "field_id": "test_notes",
+            "label": "Test Information Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "pre_test_visual_inspection",
+        "type": "VISUAL_INSPECTION",
+        "title": "Pre-Test Visual Inspection of Insulating Components",
+        "standard_reference": "ANSI A92.2-2021 Section 5.4.1",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Thoroughly inspect all insulating components before testing",
+            "Check for dirt, oil, moisture, salt, or other contamination",
+            "Look for cracks, checks, or other visible damage to insulating sections",
+            "Verify no conditions exist that would compromise the insulation",
+            "Clean contaminated components before proceeding with test",
+            "Document any damage or conditions found"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "insulating_components_clean",
+            "label": "Insulating components clean and free of contamination?",
+            "type": "ENUM",
+            "enum_ref": "cleanliness_status",
+            "required": true,
+            "help_text": "Check for dirt, oil, moisture, salt, or other contamination"
+          },
+          {
+            "field_id": "visible_damage",
+            "label": "Any visible damage to insulating components?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Cracks, checks, deterioration of insulating material"
+          },
+          {
+            "field_id": "conditions_compromising_insulation",
+            "label": "Any conditions that compromise insulation?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Missing covers, broken seals, water intrusion, etc."
+          },
+          {
+            "field_id": "visual_inspection_notes",
+            "label": "Visual Inspection Notes",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Document any issues found"
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "insulating_components_clean",
+              "equals": "CONTAMINATED"
+            },
+            "defect": {
+              "title": "Insulating components contaminated - must be cleaned before test",
+              "severity": "SERVICE_REQUIRED",
+              "description": "Insulating components must be clean and free of contamination before dielectric testing per Section 5.4.1."
+            }
+          },
+          {
+            "when": {
+              "path": "visible_damage",
+              "equals": true
+            },
+            "defect": {
+              "title": "CRITICAL: Visible damage to insulating components",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Visible damage found on insulating components. Unit must not be operated until damage is repaired and unit is retested."
+            }
+          },
+          {
+            "when": {
+              "path": "conditions_compromising_insulation",
+              "equals": true
+            },
+            "defect": {
+              "title": "Conditions found that compromise insulation integrity",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Conditions found that may compromise the insulating system. Must be corrected before testing."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "test_equipment_verification",
+        "type": "SETUP",
+        "title": "Test Equipment Verification",
+        "standard_reference": "ANSI A92.2-2021 Section 5.5",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "test_equipment_meets_ieee_std_4",
+            "label": "Test equipment meets IEEE Std. 4-2013 requirements?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.5.1 - RMS voltage ≤3% uncertainty, RMS current ≤5% uncertainty"
+          },
+          {
+            "field_id": "test_equipment_calibrated",
+            "label": "Test equipment current on calibration?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Equipment must have valid calibration"
+          },
+          {
+            "field_id": "calibration_due_date",
+            "label": "Calibration due date",
+            "type": "DATE",
+            "required": true,
+            "help_text": "Must be after test date"
+          },
+          {
+            "field_id": "test_equipment_manufacturer",
+            "label": "Test equipment manufacturer",
+            "type": "TEXT",
+            "required": true
+          },
+          {
+            "field_id": "test_equipment_model",
+            "label": "Test equipment model",
+            "type": "TEXT",
+            "required": true
+          },
+          {
+            "field_id": "test_equipment_serial",
+            "label": "Test equipment serial number",
+            "type": "TEXT",
+            "required": true
+          },
+          {
+            "field_id": "equipment_notes",
+            "label": "Test Equipment Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "test_setup_cat_ab",
+        "type": "SETUP",
+        "title": "Test Setup for Category A or B",
+        "standard_reference": "ANSI A92.2-2021 Section 5.4.3.1",
+        "required": true,
+        "visibility_conditions": {
+          "path": "inputs.unit_category",
+          "in": ["A", "B"]
+        },
+        "fields": [
+          {
+            "field_id": "platform_components_bonded",
+            "label": "All conductive material at platform bonded per Figure 5?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.1(1) - All conductive components electrically bonded"
+          },
+          {
+            "field_id": "metal_liner_installed_cat_a",
+            "label": "[Cat A only] Metal liner installed and bonded if non-conductive platform?",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Section 5.4.3.1(2) - Required for Category A non-conductive platforms"
+          },
+          {
+            "field_id": "vacuum_system_verified",
+            "label": "Vacuum limiting system inspected and function verified (if equipped)?",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Section 5.4.3.1(3) - Per manufacturer's manual"
+          },
+          {
+            "field_id": "lower_electrode_inspected",
+            "label": "Lower test electrode system inspected for completeness?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.1(4) - Inspect per Figure 1A"
+          },
+          {
+            "field_id": "lower_electrode_continuity_tested",
+            "label": "Lower test electrode continuity confirmed intact?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.1(4) - Must have continuity"
+          },
+          {
+            "field_id": "hydraulic_lines_filled",
+            "label": "All hydraulic lines crossing insulating section filled with oil?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.1(5) - Operate unit to fill lines"
+          },
+          {
+            "field_id": "shunting_installed",
+            "label": "Shunting jumpers installed if continuity cannot be ensured?",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Section 5.4.3.1(6) - Per Figure 1"
+          },
+          {
+            "field_id": "chassis_system_shunted",
+            "label": "Chassis insulating system shunted if equipped?",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Section 5.4.3.1(7) - Per Figure 3A"
+          },
+          {
+            "field_id": "vehicle_grounded",
+            "label": "Vehicle chassis grounded?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.1(8) - Critical safety requirement"
+          },
+          {
+            "field_id": "meter_connected",
+            "label": "Current meter receptacle connected via shielded cable to meter and ground?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.1(9)"
+          },
+          {
+            "field_id": "boom_positioned",
+            "label": "Boom positioned per Figure 1 or Figure 4?",
+            "type": "ENUM",
+            "enum_ref": "boom_position_figure",
+            "required": true,
+            "help_text": "Section 5.4.3.1(10) - Clear from potential grounding structures"
+          },
+          {
+            "field_id": "setup_notes",
+            "label": "Test Setup Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "test_setup_cat_cde",
+        "type": "SETUP",
+        "title": "Test Setup for Category C, D, or E",
+        "standard_reference": "ANSI A92.2-2021 Section 5.4.3.2",
+        "required": true,
+        "visibility_conditions": {
+          "path": "inputs.unit_category",
+          "in": ["C", "D", "E"]
+        },
+        "fields": [
+          {
+            "field_id": "platform_components_bonded",
+            "label": "All conductive material at platform bonded per Figure 5?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.2(1)"
+          },
+          {
+            "field_id": "hydraulic_lines_filled",
+            "label": "All hydraulic lines crossing insulating section filled with oil?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.2(2)"
+          },
+          {
+            "field_id": "shunting_installed",
+            "label": "Shunting jumpers installed if continuity cannot be ensured?",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Section 5.4.3.2(3) - Per Figures 2, 2A, 3, or 4"
+          },
+          {
+            "field_id": "chassis_system_shunted",
+            "label": "Chassis insulating system shunted if equipped?",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Section 5.4.3.2(4) - Per Figure 3A"
+          },
+          {
+            "field_id": "test_method_setup",
+            "label": "Test setup per selected method?",
+            "type": "ENUM",
+            "enum_ref": "test_setup_method",
+            "required": true,
+            "help_text": "Section 5.4.3.2(5) - See figures based on test method"
+          },
+          {
+            "field_id": "meter_connected",
+            "label": "Current meter connected via shielded cable and grounded?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.2(5)(a) or (b)"
+          },
+          {
+            "field_id": "boom_positioned",
+            "label": "Boom positioned per appropriate figure?",
+            "type": "ENUM",
+            "enum_ref": "boom_position_figure",
+            "required": true,
+            "help_text": "Section 5.4.3.2(5) - Clear from potential grounding structures"
+          },
+          {
+            "field_id": "setup_notes",
+            "label": "Test Setup Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "execute_test_method_a_ac",
+        "type": "MEASUREMENT",
+        "title": "Execute AC Test per Table 2 (Method A)",
+        "standard_reference": "ANSI A92.2-2021 Table 2 / Section 5.4.3",
+        "required": true,
+        "visibility_conditions": {
+          "path": "inputs.test_method",
+          "equals": "METHOD_A_AC_TABLE2"
+        },
+        "measurement_set_ref": "dielectric_test_table2_ac",
+        "fields": [
+          {
+            "field_id": "voltage_maintained_within_tolerance",
+            "label": "Test voltage maintained within ±3% for entire duration?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.5.2 - Voltage tolerance requirement"
+          },
+          {
+            "field_id": "current_stabilized",
+            "label": "Leakage current stabilized before recording final value?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Wait for current to stabilize before recording"
+          },
+          {
+            "field_id": "test_completed_successfully",
+            "label": "Test completed without breakdown or flashover?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "No breakdown indicates insulation integrity"
+          },
+          {
+            "field_id": "test_notes",
+            "label": "Test Execution Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "execute_test_method_b_dc",
+        "type": "MEASUREMENT",
+        "title": "Execute DC Test per Table 2 (Method B)",
+        "standard_reference": "ANSI A92.2-2021 Table 2 / Section 5.4.3",
+        "required": true,
+        "visibility_conditions": {
+          "path": "inputs.test_method",
+          "equals": "METHOD_B_DC_TABLE2"
+        },
+        "measurement_set_ref": "dielectric_test_table2_dc",
+        "fields": [
+          {
+            "field_id": "voltage_maintained_within_tolerance",
+            "label": "Test voltage maintained within ±3% for entire duration?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.5.2 - Voltage tolerance requirement"
+          },
+          {
+            "field_id": "current_stabilized",
+            "label": "Leakage current stabilized before recording final value?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "DC test requires longer stabilization time"
+          },
+          {
+            "field_id": "test_completed_successfully",
+            "label": "Test completed without breakdown or flashover?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "No breakdown indicates insulation integrity"
+          },
+          {
+            "field_id": "test_notes",
+            "label": "Test Execution Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "execute_test_method_c_before_use",
+        "type": "MEASUREMENT",
+        "title": "Execute Before Use Test per Table 3 (Method C)",
+        "standard_reference": "ANSI A92.2-2021 Table 3 / Section 5.4.3.1(11)(c)",
+        "required": true,
+        "visibility_conditions": {
+          "path": "inputs.test_method",
+          "equals": "METHOD_C_BEFORE_USE_TABLE3"
+        },
+        "measurement_set_ref": "before_use_test_table3",
+        "fields": [
+          {
+            "field_id": "vehicle_grounded",
+            "label": "Vehicle grounded during test?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.1(11)(c) - Vehicle must be grounded"
+          },
+          {
+            "field_id": "boom_raised_into_line",
+            "label": "Boom raised into energized line?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Field test using actual energized power line"
+          },
+          {
+            "field_id": "line_voltage_within_limits",
+            "label": "Line voltage ≥ max working voltage AND ≤ qualification voltage?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Critical safety requirement - voltage must be in acceptable range"
+          },
+          {
+            "field_id": "test_completed_safely",
+            "label": "Test completed safely without incident?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "No arcing, flashover, or other incidents"
+          },
+          {
+            "field_id": "test_notes",
+            "label": "Test Execution Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "chassis_insulating_system_test",
+        "type": "MEASUREMENT",
+        "title": "Chassis Insulating System Test (if equipped)",
+        "standard_reference": "ANSI A92.2-2021 Section 5.4.3.4",
+        "required": false,
+        "visibility_conditions": {
+          "path": "inputs.has_chassis_insulating_system",
+          "equals": "YES"
+        },
+        "measurement_set_ref": "chassis_insulating_system_test",
+        "fields": [
+          {
+            "field_id": "test_method",
+            "label": "Test method",
+            "type": "ENUM",
+            "enum_ref": "chassis_test_method",
+            "required": true,
+            "help_text": "Section 5.4.3.4(5) - AC: 35kV for 3min or DC: 50kV for 3min"
+          },
+          {
+            "field_id": "voltage_applied_to_metal_above_system",
+            "label": "Voltage applied to metal above insulating system?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.4(1)"
+          },
+          {
+            "field_id": "hydraulic_lines_filled",
+            "label": "All hydraulic lines crossing system filled with oil?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.4(2)"
+          },
+          {
+            "field_id": "boom_positioned_fig3",
+            "label": "Boom positioned per Figure 3?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.4.3.4(4)"
+          },
+          {
+            "field_id": "test_completed_successfully",
+            "label": "Test completed without breakdown?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "No breakdown indicates chassis system integrity"
+          },
+          {
+            "field_id": "test_notes",
+            "label": "Chassis System Test Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "test_results_evaluation",
+        "type": "SETUP",
+        "title": "Test Results Evaluation",
+        "standard_reference": "ANSI A92.2-2021 Tables 2 & 3",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "test_duration_met",
+            "label": "Minimum test duration met per standard?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "AC: 60s min, DC: 180s min, Before Use: 180s min"
+          },
+          {
+            "field_id": "leakage_current_within_limits",
+            "label": "Leakage current within acceptable limits per Table 2 or Table 3?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Automatic validation rules will check specific limits"
+          },
+          {
+            "field_id": "no_breakdown_occurred",
+            "label": "No breakdown or flashover occurred during test?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Breakdown indicates insulation failure"
+          },
+          {
+            "field_id": "test_passed",
+            "label": "Dielectric test PASSED?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Check YES only if all requirements met"
+          },
+          {
+            "field_id": "test_results_summary",
+            "label": "Test Results Summary",
+            "type": "TEXT_AREA",
+            "required": true,
+            "help_text": "Summary of test results and findings"
+          }
+        ]
+      },
+      {
+        "step_key": "test_documentation",
+        "type": "SETUP",
+        "title": "Test Documentation and Certification",
+        "standard_reference": "ANSI A92.2-2021 Sections 5.6.3, 7.11.2, 8.3.2",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "placard_applied_to_mewp",
+            "label": "Placard indicating test completion date applied to MEWP?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Sections 7.11.2 & 8.3.2 - Required by standard"
+          },
+          {
+            "field_id": "placard_location",
+            "label": "Placard location on equipment",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Where placard was affixed"
+          },
+          {
+            "field_id": "report_provided_to_owner",
+            "label": "Certified test report will be provided to owner?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 5.6.2 - Required by standard"
+          },
+          {
+            "field_id": "records_filed",
+            "label": "Test records filed in equipment permanent file?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Section 7.11 - Permanent record keeping requirement"
+          },
+          {
+            "field_id": "next_test_due_date",
+            "label": "Next Dielectric Test Due Date",
+            "type": "DATE",
+            "required": true,
+            "help_text": "Per periodic test schedule or manufacturer requirements"
+          },
+          {
+            "field_id": "tester_signature",
+            "label": "Signature of person performing test",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Section 5.6.3(10) - Required certification"
+          },
+          {
+            "field_id": "documentation_notes",
+            "label": "Documentation Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  "rules": [
+    {
+      "rule_id": "table2_ac_duration_60_seconds",
+      "title": "AC test duration must be 60 seconds minimum (Table 2)",
+      "standard_reference": "ANSI A92.2-2021 Table 2",
+      "when": {
+        "path": "inputs.test_method",
+        "equals": "METHOD_A_AC_TABLE2"
+      },
+      "assert": {
+        "type": "NUMERIC_GTE",
+        "left": {
+          "path": "execute_test_method_a_ac.test_duration_seconds"
+        },
+        "right": 60
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "AC test duration less than required 60 seconds",
+        "defect_description": "Test invalid - AC dielectric test must be performed for minimum 60 seconds per Table 2."
+      }
+    },
+    {
+      "rule_id": "table2_dc_duration_180_seconds",
+      "title": "DC test duration must be 180 seconds minimum (Table 2)",
+      "standard_reference": "ANSI A92.2-2021 Table 2",
+      "when": {
+        "path": "inputs.test_method",
+        "equals": "METHOD_B_DC_TABLE2"
+      },
+      "assert": {
+        "type": "NUMERIC_GTE",
+        "left": {
+          "path": "execute_test_method_b_dc.test_duration_seconds"
+        },
+        "right": 180
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "DC test duration less than required 180 seconds",
+        "defect_description": "Test invalid - DC dielectric test must be performed for minimum 180 seconds per Table 2."
+      }
+    },
+    {
+      "rule_id": "table3_duration_180_seconds",
+      "title": "Before use test duration must be 180 seconds minimum (Table 3)",
+      "standard_reference": "ANSI A92.2-2021 Table 3",
+      "when": {
+        "path": "inputs.test_method",
+        "equals": "METHOD_C_BEFORE_USE_TABLE3"
+      },
+      "assert": {
+        "type": "NUMERIC_GTE",
+        "left": {
+          "path": "execute_test_method_c_before_use.test_duration_seconds"
+        },
+        "right": 180
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Before use test duration less than required 180 seconds",
+        "defect_description": "Test invalid - Before use test must be performed for minimum 180 seconds per Table 3."
+      }
+    },
+    {
+      "rule_id": "dielectric_test_must_pass",
+      "title": "Dielectric test must pass for unit to be safe for operation",
+      "standard_reference": "ANSI A92.2-2021 Section 5.4",
+      "assert": {
+        "type": "BOOLEAN_TRUE",
+        "path": "test_results_evaluation.test_passed"
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "CRITICAL: Dielectric test FAILED",
+        "defect_description": "Unit FAILED dielectric testing and must be tagged OUT OF SERVICE. Unit may not be used near energized conductors until insulation is repaired and unit passes retest."
+      }
+    }
+  ]
+}

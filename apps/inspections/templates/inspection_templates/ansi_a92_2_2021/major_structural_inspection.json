@@ -1,0 +1,1188 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_major_structural_inspection",
+    "name": "ANSI A92.2-2021 Major Structural Inspection",
+    "status": "PUBLISHED",
+    "standard": {
+      "code": "ANSI/SAIA A92.2",
+      "revision": "2021"
+    },
+    "intent": {
+      "inspection_kind": "MAJOR_STRUCTURAL",
+      "domain": "AERIAL_DEVICE",
+      "tags": [
+        "major-structural",
+        "post-repair",
+        "post-modification",
+        "post-incident",
+        "ndt",
+        "comprehensive",
+        "certification"
+      ]
+    },
+    "applicability": {
+      "asset_types": ["EQUIPMENT"],
+      "equipment_types": ["A92_2_AERIAL"],
+      "notes": "Major Structural Inspection per Section 8.2.5. Required after major repairs, structural modifications, overload events, or accidents. Includes comprehensive structural examination, non-destructive testing where appropriate, and mandatory load testing."
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+  "enums": {
+    "severity": [
+      "SAFE",
+      "MINOR",
+      "SERVICE_REQUIRED",
+      "UNSAFE_OUT_OF_SERVICE"
+    ],
+    "pass_fail_ndt": [
+      "PASS",
+      "FAIL",
+      "NOT_APPLICABLE",
+      "REQUIRES_NDT"
+    ],
+    "ndt_method": [
+      "MAGNETIC_PARTICLE",
+      "DYE_PENETRANT",
+      "ULTRASONIC",
+      "RADIOGRAPHIC",
+      "VISUAL_ENHANCED",
+      "NOT_PERFORMED"
+    ],
+    "repair_type": [
+      "WELD_REPAIR",
+      "STRUCTURAL_REPLACEMENT",
+      "CYLINDER_REPLACEMENT",
+      "BOOM_SECTION_REPLACEMENT",
+      "MODIFICATION",
+      "ACCIDENT_DAMAGE_REPAIR",
+      "OVERLOAD_EVENT",
+      "OTHER"
+    ],
+    "weld_defect_type": [
+      "CRACK",
+      "POROSITY",
+      "INCOMPLETE_PENETRATION",
+      "UNDERCUT",
+      "OVERLAP",
+      "SLAG_INCLUSION",
+      "OTHER"
+    ],
+    "structural_defect_type": [
+      "CRACK",
+      "DEFORMATION",
+      "CORROSION",
+      "WEAR",
+      "DAMAGE",
+      "MISALIGNMENT",
+      "OTHER"
+    ]
+  },
+  "schemas": {
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        {
+          "field_id": "title",
+          "type": "TEXT",
+          "required": true
+        },
+        {
+          "field_id": "severity",
+          "type": "ENUM",
+          "enum_ref": "severity",
+          "required": true
+        },
+        {
+          "field_id": "description",
+          "type": "TEXT_AREA",
+          "required": true
+        },
+        {
+          "field_id": "location",
+          "type": "TEXT",
+          "required": false
+        },
+        {
+          "field_id": "defect_type",
+          "type": "ENUM",
+          "enum_ref": "structural_defect_type",
+          "required": false
+        },
+        {
+          "field_id": "photo_evidence",
+          "type": "PHOTO",
+          "required": false
+        },
+        {
+          "field_id": "corrective_action",
+          "type": "TEXT_AREA",
+          "required": false
+        },
+        {
+          "field_id": "ndt_required",
+          "type": "BOOLEAN",
+          "required": false
+        }
+      ]
+    }
+  },
+  "procedure": {
+    "inputs": [],
+    "steps": [
+      {
+        "step_key": "inspection_info",
+        "type": "SETUP",
+        "title": "Major Structural Inspection Information",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "inspection_date",
+            "label": "Inspection Date",
+            "type": "DATE",
+            "required": true
+          },
+          {
+            "field_id": "inspector_name",
+            "label": "Inspector Name",
+            "type": "TEXT",
+            "required": true
+          },
+          {
+            "field_id": "inspector_certification",
+            "label": "Inspector Certification/Qualification",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Major structural inspections require qualified inspector per Section 8.2.5"
+          },
+          {
+            "field_id": "reason_for_inspection",
+            "label": "Reason for Major Structural Inspection",
+            "type": "ENUM",
+            "enum_ref": "repair_type",
+            "required": true,
+            "help_text": "Select primary reason for this inspection"
+          },
+          {
+            "field_id": "work_description",
+            "label": "Description of Work Performed",
+            "type": "TEXT_AREA",
+            "required": true,
+            "help_text": "Detailed description of repairs, modifications, or incident requiring this inspection"
+          },
+          {
+            "field_id": "work_order_reference",
+            "label": "Work Order/Repair Order Number",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Reference to work order or repair documentation"
+          }
+        ]
+      },
+      {
+        "step_key": "work_documentation_review",
+        "type": "VISUAL_INSPECTION",
+        "title": "Work Documentation Review",
+        "standard_reference": "ANSI A92.2-2021 Section 7.11, 8.2.5",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "SINGLE_PASS_FAIL",
+          "guidance": [
+            "Review all documentation related to repairs or modifications performed",
+            "Verify repair procedures and methods were approved",
+            "Check welding procedures specification (WPS) if welding was performed",
+            "Verify welder certifications if welding was performed",
+            "Confirm replacement parts are OEM or approved equivalent",
+            "Verify engineering approval for modifications or non-standard repairs",
+            "Confirm manufacturer consultation if required per nature of work"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "repair_procedures_reviewed",
+            "label": "Repair procedures and methods reviewed and approved",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "welding_procedures_reviewed",
+            "label": "Welding procedures specification (WPS) reviewed if welding performed",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "welder_certifications_verified",
+            "label": "Welder certifications verified if welding performed",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "parts_verification",
+            "label": "Replacement parts verified as OEM or approved equivalent",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "engineering_approval",
+            "label": "Engineering approval obtained for modifications or non-standard repairs",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "manufacturer_consultation",
+            "label": "Manufacturer consulted if required per nature of work",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "documentation_complete",
+            "label": "All documentation complete and acceptable",
+            "type": "BOOLEAN",
+            "required": true
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "documentation_complete",
+              "equals": false
+            },
+            "defect": {
+              "title": "CRITICAL: Repair documentation incomplete or inadequate",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "All repairs and modifications must be documented per Section 7.11 before unit can be returned to service. Missing or inadequate documentation found."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "detailed_structural_inspection",
+        "type": "VISUAL_INSPECTION",
+        "title": "Detailed Structural Component Inspection",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Comprehensive inspection of all structural components per Section 8.2.5",
+            "Focus on repaired areas and adjacent structure",
+            "Look for cracks, deformation, corrosion, wear, and damage",
+            "Check for proper alignment and fit of components",
+            "Inspect boom base section including mounting points",
+            "Inspect all intermediate boom sections",
+            "Inspect outermost boom section and platform mounting",
+            "Inspect turret structure thoroughly",
+            "Inspect pedestal and mounting to vehicle chassis",
+            "Inspect platform frame, floor, railings, and gates",
+            "Inspect all outrigger beams and mounting structure"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "boom_base_section",
+            "label": "Boom Base Section (Cracks, Deformation, Corrosion)",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Thoroughly inspect base section including mounting points"
+          },
+          {
+            "field_id": "boom_mid_sections",
+            "label": "Boom Mid Sections (All sections)",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect all intermediate boom sections"
+          },
+          {
+            "field_id": "boom_fly_section",
+            "label": "Boom Fly Section (Including platform attachment)",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect outermost boom section and platform mounting"
+          },
+          {
+            "field_id": "turret_structure",
+            "label": "Turret Structure and Frame",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Complete inspection of turret structure"
+          },
+          {
+            "field_id": "pedestal_structure",
+            "label": "Pedestal and Mounting Structure",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect pedestal and mounting to vehicle chassis"
+          },
+          {
+            "field_id": "platform_structure",
+            "label": "Platform Structure (Frame, Floor, Railings, Gates)",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Complete platform structural inspection"
+          },
+          {
+            "field_id": "outrigger_structure",
+            "label": "Outrigger/Stabilizer Structure",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect all outrigger beams and mounting structure"
+          },
+          {
+            "field_id": "structural_defects_found",
+            "label": "Any structural defects found?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "structural_notes",
+            "label": "Structural Inspection Notes",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Document any areas of concern or observations"
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "structural_defects_found",
+              "equals": true
+            },
+            "defect": {
+              "title": "CRITICAL: Structural defects found during major structural inspection",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Structural defects found that require correction before unit can be returned to service."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "weld_inspection_detailed",
+        "type": "VISUAL_INSPECTION",
+        "title": "Detailed Weld Inspection",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Comprehensive inspection of all welds per Section 8.2.5",
+            "Special attention to repaired welds and adjacent areas",
+            "Look for cracks, porosity, incomplete penetration, undercut, overlap, slag inclusion",
+            "NDT may be required for critical welds",
+            "Document exact location of all weld repairs",
+            "Inspect all accessible welds on boom structure",
+            "Inspect all turret and pedestal welds",
+            "Inspect platform frame and railing welds",
+            "Inspect outrigger structural welds"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "repaired_welds_location",
+            "label": "Location of Repaired Welds",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Document exact location of all weld repairs"
+          },
+          {
+            "field_id": "repaired_welds_condition",
+            "label": "Repaired Welds Visual Inspection",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Visual inspection of all repaired welds"
+          },
+          {
+            "field_id": "boom_welds_all",
+            "label": "All Boom Section Welds",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect all accessible welds on boom structure"
+          },
+          {
+            "field_id": "turret_pedestal_welds",
+            "label": "Turret and Pedestal Welds",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect all turret and pedestal welds"
+          },
+          {
+            "field_id": "platform_welds",
+            "label": "Platform Structural Welds",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect platform frame and railing welds"
+          },
+          {
+            "field_id": "outrigger_welds",
+            "label": "Outrigger/Stabilizer Welds",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Inspect outrigger structural welds"
+          },
+          {
+            "field_id": "weld_defects_found",
+            "label": "Any weld defects found?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "ndt_required",
+            "label": "Non-Destructive Testing (NDT) required?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Critical welds may require NDT per Section 8.2.5"
+          },
+          {
+            "field_id": "ndt_method_used",
+            "label": "NDT Method Used (if applicable)",
+            "type": "ENUM",
+            "enum_ref": "ndt_method",
+            "required": false,
+            "help_text": "Select NDT method(s) performed"
+          },
+          {
+            "field_id": "ndt_results",
+            "label": "NDT Results Summary",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Summary of NDT findings and test report references"
+          },
+          {
+            "field_id": "weld_inspection_notes",
+            "label": "Weld Inspection Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "weld_defects_found",
+              "equals": true
+            },
+            "defect": {
+              "title": "CRITICAL: Weld defects found during major structural inspection",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Weld defects found that require correction before unit can be returned to service."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "bolts_pins_fasteners_detailed",
+        "type": "VISUAL_INSPECTION",
+        "title": "Bolts, Pins, and Fasteners Detailed Inspection",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Detailed inspection of all bolts, pins, and fasteners",
+            "Special attention to critical mounting points",
+            "Verify correct grade bolts used per manufacturer specifications",
+            "Verify critical bolts torqued to specification",
+            "Check pedestal mounting bolts to chassis for tightness and condition",
+            "Check all turret bearing attachment bolts",
+            "Check all boom pivot pins for wear and security",
+            "Check all hydraulic cylinder mounting pins",
+            "Check platform attachment bolts and pins"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "replaced_fasteners_location",
+            "label": "Location of Replaced Fasteners",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Document which fasteners were replaced"
+          },
+          {
+            "field_id": "fastener_grades_verified",
+            "label": "Fastener grades verified per specifications?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Verify correct grade bolts used per manufacturer specs"
+          },
+          {
+            "field_id": "torque_values_verified",
+            "label": "Torque values verified per specifications?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Critical bolts torqued to specification"
+          },
+          {
+            "field_id": "pedestal_mounting_bolts",
+            "label": "Pedestal Mounting Bolts",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Critical mounting bolts to chassis - check tightness and condition"
+          },
+          {
+            "field_id": "turret_bearing_bolts",
+            "label": "Turret Bearing Mounting Bolts",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Check all turret bearing attachment bolts"
+          },
+          {
+            "field_id": "boom_pivot_pins",
+            "label": "Boom Pivot Pins and Retainers",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Check all boom pivot pins for wear and security"
+          },
+          {
+            "field_id": "cylinder_mounting_pins",
+            "label": "Cylinder Mounting Pins and Hardware",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Check all hydraulic cylinder mounting pins"
+          },
+          {
+            "field_id": "platform_mounting_hardware",
+            "label": "Platform Mounting Hardware",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Check platform attachment bolts and pins"
+          },
+          {
+            "field_id": "fastener_defects_found",
+            "label": "Any fastener defects found?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "fasteners_notes",
+            "label": "Fasteners Inspection Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "fastener_defects_found",
+              "equals": true
+            },
+            "defect": {
+              "title": "Fastener defects found during major structural inspection",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Fastener defects found that require correction before unit can be returned to service."
+            }
+          }
+        ]
+      },
+      {
+        "step_key": "hydraulic_system_detailed",
+        "type": "VISUAL_INSPECTION",
+        "title": "Hydraulic System Detailed Inspection",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Detailed inspection of hydraulic system components",
+            "Especially if hydraulic work was performed",
+            "Check all hydraulic cylinders for leaks, mounting, and rod condition",
+            "Inspect all hydraulic hoses and fittings",
+            "Check control valves and manifolds",
+            "Verify relief valve settings per manufacturer specifications",
+            "Test holding valves/load checks (will be tested under load)",
+            "Check hydraulic fluid level and condition"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "hydraulic_work_performed",
+            "label": "Was hydraulic work part of the major repair/modification?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "hydraulic_components_replaced",
+            "label": "Hydraulic Components Replaced (if applicable)",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "List cylinders, hoses, valves, etc. that were replaced"
+          },
+          {
+            "field_id": "hydraulic_cylinders_all",
+            "label": "All Hydraulic Cylinders (Leaks, Mounting, Rod Condition)",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true
+          },
+          {
+            "field_id": "hydraulic_hoses_all",
+            "label": "All Hydraulic Hoses and Fittings",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true
+          },
+          {
+            "field_id": "control_valves",
+            "label": "Control Valves and Manifolds",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true
+          },
+          {
+            "field_id": "relief_valves",
+            "label": "Relief Valve Settings Verified",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Relief valves set per manufacturer specifications"
+          },
+          {
+            "field_id": "holding_valves",
+            "label": "Holding Valves/Load Checks Tested",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Holding valves prevent drift - will be tested under load"
+          },
+          {
+            "field_id": "hydraulic_fluid_condition",
+            "label": "Hydraulic Fluid Condition and Level",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Check fluid level and condition (contamination, etc.)"
+          },
+          {
+            "field_id": "hydraulic_defects_found",
+            "label": "Any hydraulic system defects found?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "hydraulic_notes",
+            "label": "Hydraulic System Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "hydraulic_defects_found",
+              "equals": true
+            },
+            "defect": {
+              "title": "Hydraulic system defects found during major structural inspection",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Hydraulic system defects found that require correction before unit can be returned to service."
+            }
+          }
+        ]
+      },
+      {
+        "step_key": "functional_testing",
+        "type": "FUNCTION_TEST",
+        "title": "Comprehensive Functional Testing",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Complete functional test of all systems per Section 8.2.5",
+            "Test every control from both ground and platform positions",
+            "Test E-stop, ground override, manual lowering",
+            "Test all interlocks, warnings, boom angle indicators, etc.",
+            "Check that all boom movements are smooth and controlled",
+            "Listen for grinding, squeaking, or other abnormal sounds"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "all_controls_tested",
+            "label": "All Operating Controls Tested (Ground and Platform)",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Test every control from both positions"
+          },
+          {
+            "field_id": "emergency_controls_tested",
+            "label": "All Emergency Controls Tested",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Test E-stop, ground override, manual lowering"
+          },
+          {
+            "field_id": "safety_devices_tested",
+            "label": "All Safety Devices Tested",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "Test interlocks, warnings, boom angle indicators, etc."
+          },
+          {
+            "field_id": "boom_movement_smooth",
+            "label": "All Boom Movements Smooth and Controlled",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "No binding, jerking, or hesitation in any movement"
+          },
+          {
+            "field_id": "unusual_noises",
+            "label": "Any unusual noises during operation?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Listen for grinding, squeaking, or other abnormal sounds"
+          },
+          {
+            "field_id": "functional_defects_found",
+            "label": "Any functional defects found?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "functional_testing_notes",
+            "label": "Functional Testing Notes",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Document any abnormalities or concerns"
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "functional_defects_found",
+              "equals": true
+            },
+            "defect": {
+              "title": "Functional defects found during major structural inspection",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Functional defects found that require correction before unit can be returned to service."
+            }
+          }
+        ]
+      },
+      {
+        "step_key": "load_test_requirement",
+        "type": "SETUP",
+        "title": "Load Test Requirement (MANDATORY)",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "load_test_performed",
+            "label": "Load test performed?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "REQUIRED after major structural work per ANSI A92.2"
+          },
+          {
+            "field_id": "load_test_date",
+            "label": "Load Test Date",
+            "type": "DATE",
+            "required": false,
+            "help_text": "If performed separately, enter date"
+          },
+          {
+            "field_id": "load_test_passed",
+            "label": "Load Test Result: PASS",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Load test must pass before return to service"
+          },
+          {
+            "field_id": "load_test_reference",
+            "label": "Load Test Report Reference",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Reference to separate load test inspection or report"
+          },
+          {
+            "field_id": "load_test_notes",
+            "label": "Load Test Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "dielectric_test_requirement",
+        "type": "SETUP",
+        "title": "Dielectric Test Requirement (If Applicable)",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": false,
+        "fields": [
+          {
+            "field_id": "unit_is_insulated",
+            "label": "Is this an insulated aerial device?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "dielectric_test_required",
+            "label": "Is dielectric test required for this work?",
+            "type": "BOOLEAN",
+            "required": false,
+            "help_text": "Required if insulating components were repaired or modified"
+          },
+          {
+            "field_id": "dielectric_test_performed",
+            "label": "Dielectric test performed?",
+            "type": "BOOLEAN",
+            "required": false
+          },
+          {
+            "field_id": "dielectric_test_date",
+            "label": "Dielectric Test Date",
+            "type": "DATE",
+            "required": false
+          },
+          {
+            "field_id": "dielectric_test_passed",
+            "label": "Dielectric Test Result: PASS",
+            "type": "BOOLEAN",
+            "required": false
+          },
+          {
+            "field_id": "dielectric_test_reference",
+            "label": "Dielectric Test Report Reference",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Reference to separate dielectric test inspection"
+          }
+        ]
+      },
+      {
+        "step_key": "markings_and_documentation",
+        "type": "VISUAL_INSPECTION",
+        "title": "Markings, Placards, and Documentation",
+        "standard_reference": "ANSI A92.2-2021 Section 7.11",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Verify all markings, placards, and required documentation are present and current",
+            "If modifications affect capacity, new chart required",
+            "Modifications must be documented with placard per Section 7.11",
+            "Operating manual must reflect any modifications made"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "capacity_chart_current",
+            "label": "Capacity Chart Current and Accurate",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true,
+            "help_text": "If modifications affect capacity, new chart required"
+          },
+          {
+            "field_id": "serial_plate_present",
+            "label": "Manufacturer Serial Plate Present",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true
+          },
+          {
+            "field_id": "modification_placard",
+            "label": "Modification Placard (if modifications were made)",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": false,
+            "help_text": "Modifications must be documented with placard per Section 7.11"
+          },
+          {
+            "field_id": "operating_manual_updated",
+            "label": "Operating Manual Updated for Modifications",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Manual must reflect any modifications made"
+          },
+          {
+            "field_id": "warning_labels_intact",
+            "label": "All Warning Labels Present and Legible",
+            "type": "ENUM",
+            "enum_ref": "pass_fail_ndt",
+            "required": true
+          },
+          {
+            "field_id": "markings_defects_found",
+            "label": "Any marking or documentation deficiencies found?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "markings_notes",
+            "label": "Markings and Documentation Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "markings_defects_found",
+              "equals": true
+            },
+            "defect": {
+              "title": "Marking or documentation deficiencies found",
+              "severity": "SERVICE_REQUIRED",
+              "description": "Markings, placards, or documentation deficiencies found that require correction."
+            }
+          }
+        ]
+      },
+      {
+        "step_key": "final_evaluation",
+        "type": "SETUP",
+        "title": "Major Structural Inspection Final Evaluation",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "major_work_completed",
+            "label": "Major structural work completed per specifications?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "structural_inspection_completed",
+            "label": "Complete structural inspection performed?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "no_structural_defects",
+            "label": "No structural defects or safety issues found?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "All defects corrected and verified"
+          },
+          {
+            "field_id": "all_tests_passed",
+            "label": "All required tests passed (functional, load, dielectric if applicable)?",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "repair_documentation_complete",
+            "label": "All repair/modification documentation complete?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Work orders, procedures, certifications, test results"
+          },
+          {
+            "field_id": "ready_for_service",
+            "label": "Equipment is ready for return to service?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Check YES only if ALL requirements met"
+          },
+          {
+            "field_id": "restrictions_limitations",
+            "label": "Any operational restrictions or limitations?",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Document any restrictions on operation"
+          },
+          {
+            "field_id": "final_evaluation_summary",
+            "label": "Final Evaluation Summary",
+            "type": "TEXT_AREA",
+            "required": true,
+            "help_text": "Comprehensive summary of inspection findings and recommendations"
+          }
+        ]
+      },
+      {
+        "step_key": "documentation_requirements",
+        "type": "SETUP",
+        "title": "Documentation and Record Keeping Requirements",
+        "standard_reference": "ANSI A92.2-2021 Section 7.11",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "inspection_report_complete",
+            "label": "Comprehensive inspection report completed with all findings documented",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "repair_records_attached",
+            "label": "All repair/modification records attached to inspection file",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "test_results_attached",
+            "label": "All test results attached (load test, dielectric test, NDT results)",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "photos_documentation",
+            "label": "Photographs of repaired areas and critical components documented",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "engineering_approvals_filed",
+            "label": "Any required engineering approvals or calculations filed",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "manufacturer_correspondence",
+            "label": "Any manufacturer correspondence or approvals filed",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "inspection_decal_applied",
+            "label": "Inspection decal applied with date and next inspection due",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "customer_notified",
+            "label": "Customer provided complete inspection report and documentation package",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "permanent_records_filed",
+            "label": "All records filed in permanent equipment file per Section 7.11",
+            "type": "BOOLEAN",
+            "required": true
+          }
+        ]
+      }
+    ]
+  },
+  "rules": [
+    {
+      "rule_id": "load_test_required_after_major_work",
+      "title": "Load test is REQUIRED after major structural work",
+      "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+      "when": {
+        "path": "final_evaluation.major_work_completed",
+        "equals": true
+      },
+      "assert": {
+        "type": "BOOLEAN_TRUE",
+        "path": "load_test_requirement.load_test_performed"
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Load test not performed after major structural work",
+        "defect_description": "ANSI A92.2 requires load test after major repairs or modifications. Unit cannot be returned to service without load test."
+      }
+    },
+    {
+      "rule_id": "load_test_must_pass",
+      "title": "Load test must pass before return to service",
+      "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+      "when": {
+        "path": "load_test_requirement.load_test_performed",
+        "equals": true
+      },
+      "assert": {
+        "type": "BOOLEAN_TRUE",
+        "path": "load_test_requirement.load_test_passed"
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Load test failed",
+        "defect_description": "Load test must pass before unit can be returned to service."
+      }
+    },
+    {
+      "rule_id": "repairs_properly_documented",
+      "title": "All repairs and modifications must be properly documented",
+      "standard_reference": "ANSI A92.2-2021 Section 7.11",
+      "when": {
+        "path": "final_evaluation.major_work_completed",
+        "equals": true
+      },
+      "assert": {
+        "type": "BOOLEAN_TRUE",
+        "path": "final_evaluation.repair_documentation_complete"
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Repair documentation incomplete",
+        "defect_description": "All repairs and modifications must be documented per Section 7.11 before unit can be returned to service."
+      }
+    },
+    {
+      "rule_id": "no_structural_defects_found",
+      "title": "No structural defects remaining after inspection",
+      "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+      "when": {
+        "path": "final_evaluation.structural_inspection_completed",
+        "equals": true
+      },
+      "assert": {
+        "type": "BOOLEAN_TRUE",
+        "path": "final_evaluation.no_structural_defects"
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Structural defects found during major structural inspection",
+        "defect_description": "Structural defects remain that require correction before unit can be returned to service."
+      }
+    },
+    {
+      "rule_id": "all_tests_must_pass",
+      "title": "All required tests must pass",
+      "standard_reference": "ANSI A92.2-2021 Section 8.2.5",
+      "assert": {
+        "type": "BOOLEAN_TRUE",
+        "path": "final_evaluation.all_tests_passed"
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Not all required tests passed",
+        "defect_description": "All required tests (functional, load, dielectric if applicable) must pass before unit can be returned to service."
+      }
+    }
+  ]
+}

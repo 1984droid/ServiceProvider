@@ -1,0 +1,923 @@
+{
+  "format": "AF_INSPECTION_TEMPLATE",
+  "format_version": 1,
+  "template": {
+    "template_key": "ansi_a92_2_load_test_only",
+    "name": "ANSI A92.2-2021 Load Test Only",
+    "status": "PUBLISHED",
+    "standard": {
+      "code": "ANSI/SAIA A92.2",
+      "revision": "2021"
+    },
+    "intent": {
+      "inspection_kind": "LOAD_TEST",
+      "domain": "AERIAL_DEVICE",
+      "tags": [
+        "load-test",
+        "capacity-test",
+        "structural-test",
+        "holding-valve",
+        "drift-test",
+        "full-range-test"
+      ]
+    },
+    "applicability": {
+      "asset_types": ["EQUIPMENT"],
+      "equipment_types": ["A92_2_AERIAL"],
+      "notes": "Load Test per ANSI A92.2-2021 Section 8.2.4.1. Standalone load test to verify structural integrity and load-holding capability. Tests equipment at rated capacity through full range of motion. Required after major structural work, modifications, or as part of periodic inspection. CRITICAL SAFETY TEST - Equipment must pass load test before being returned to service after repairs or structural work."
+    },
+    "policy": {
+      "evidence_rules": {
+        "photo_required_if_severity_at_least": "SERVICE_REQUIRED",
+        "notes_required_on_fail": true,
+        "block_finalize_if_required_steps_incomplete": true
+      },
+      "hashing": {
+        "canonicalization": "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE",
+        "hash_algorithm": "SHA256"
+      }
+    }
+  },
+  "enums": {
+    "severity": [
+      "SAFE",
+      "MINOR",
+      "SERVICE_REQUIRED",
+      "UNSAFE_OUT_OF_SERVICE"
+    ],
+    "pass_fail": [
+      "PASS",
+      "FAIL",
+      "NOT_TESTED"
+    ],
+    "test_reason": [
+      "PERIODIC_INSPECTION",
+      "POST_REPAIR",
+      "POST_MODIFICATION",
+      "MAJOR_STRUCTURAL_WORK",
+      "ANNUAL_CERTIFICATION",
+      "POST_OVERLOAD_EVENT",
+      "OTHER"
+    ]
+  },
+  "schemas": {
+    "measurement_sets": [
+      {
+        "measurement_set_id": "drift_measurements",
+        "title": "Holding Valve Drift Measurements",
+        "fields": [
+          {
+            "field_id": "initial_height_inches",
+            "label": "Initial Height (inches from reference point)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 0,
+            "help_text": "Measure height from fixed reference point at start of 5-minute test"
+          },
+          {
+            "field_id": "height_after_5_min_inches",
+            "label": "Height After 5 Minutes (inches)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 0,
+            "help_text": "Measure height from same reference point after 5 minutes"
+          },
+          {
+            "field_id": "drift_amount_inches",
+            "label": "Total Drift Amount (inches)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 2,
+            "min": 0,
+            "help_text": "Calculated drift: initial height - height after 5 min (positive number)"
+          },
+          {
+            "field_id": "manufacturer_drift_limit_inches",
+            "label": "Manufacturer Drift Limit (inches)",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 2,
+            "min": 0,
+            "help_text": "Enter manufacturer's acceptable drift limit if specified in manual"
+          }
+        ]
+      }
+    ],
+    "defect_schema": {
+      "defect_id_format": "UUID",
+      "fields": [
+        {
+          "field_id": "title",
+          "type": "TEXT",
+          "required": true
+        },
+        {
+          "field_id": "severity",
+          "type": "ENUM",
+          "enum_ref": "severity",
+          "required": true
+        },
+        {
+          "field_id": "description",
+          "type": "TEXT_AREA",
+          "required": true
+        },
+        {
+          "field_id": "standard_reference",
+          "type": "TEXT",
+          "required": false
+        },
+        {
+          "field_id": "component",
+          "type": "TEXT",
+          "required": false
+        },
+        {
+          "field_id": "location",
+          "type": "TEXT",
+          "required": false
+        },
+        {
+          "field_id": "photo_evidence",
+          "type": "PHOTO",
+          "required": false
+        },
+        {
+          "field_id": "corrective_action",
+          "type": "TEXT_AREA",
+          "required": false
+        }
+      ]
+    }
+  },
+  "procedure": {
+    "inputs": [],
+    "steps": [
+      {
+        "step_key": "test_information",
+        "type": "SETUP",
+        "title": "Load Test Information",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "test_date",
+            "label": "Load Test Date",
+            "type": "DATE",
+            "required": true
+          },
+          {
+            "field_id": "tester_name",
+            "label": "Tester Name",
+            "type": "TEXT",
+            "required": true
+          },
+          {
+            "field_id": "tester_certification",
+            "label": "Tester Certification/Qualification",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Load tests should be performed by qualified personnel"
+          },
+          {
+            "field_id": "equipment_hours",
+            "label": "Equipment Hour Meter Reading",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 1,
+            "min": 0,
+            "help_text": "Record current hour meter reading if equipped"
+          },
+          {
+            "field_id": "test_reason",
+            "label": "Reason for Load Test",
+            "type": "ENUM",
+            "enum_ref": "test_reason",
+            "required": true,
+            "help_text": "Why is this load test being performed?"
+          },
+          {
+            "field_id": "test_info_notes",
+            "label": "Test Information Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "pre_test_preparation",
+        "type": "SETUP",
+        "title": "Pre-Test Preparation and Safety",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "capacity_chart_reviewed",
+            "label": "Capacity chart reviewed to determine rated platform capacity",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Must know exact rated capacity from manufacturer's chart"
+          },
+          {
+            "field_id": "test_area_clear",
+            "label": "Test area cleared of personnel and obstacles",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Critical safety - no personnel in test area during load test"
+          },
+          {
+            "field_id": "ground_conditions_suitable",
+            "label": "Ground conditions suitable for testing (level, firm surface)",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Unit must be on level, firm ground for valid test"
+          },
+          {
+            "field_id": "outriggers_deployed",
+            "label": "All outriggers/stabilizers fully deployed per manufacturer requirements",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Outriggers must be properly deployed for load test"
+          },
+          {
+            "field_id": "test_weights_verified",
+            "label": "Test weights verified to equal or exceed rated capacity",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Test load must be accurately measured and documented"
+          },
+          {
+            "field_id": "visual_inspection_completed",
+            "label": "Pre-test visual inspection completed (no obvious damage or defects)",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Quick visual check before applying load"
+          },
+          {
+            "field_id": "controls_functional",
+            "label": "All controls tested and functional before applying load",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Verify all controls work before starting load test"
+          },
+          {
+            "field_id": "preparation_notes",
+            "label": "Pre-Test Preparation Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "load_capacity_info",
+        "type": "SETUP",
+        "title": "Load Test Capacity Information",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "rated_capacity_lbs",
+            "label": "Rated Platform Capacity (lbs)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 0,
+            "help_text": "From manufacturer's capacity chart"
+          },
+          {
+            "field_id": "test_load_weight_lbs",
+            "label": "Actual Test Load Weight (lbs)",
+            "type": "NUMBER",
+            "required": true,
+            "precision": 0,
+            "min": 0,
+            "help_text": "Must equal or exceed rated capacity"
+          },
+          {
+            "field_id": "test_load_description",
+            "label": "Test Load Description",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "e.g., water barrels, calibrated weights, sandbags"
+          },
+          {
+            "field_id": "load_evenly_distributed",
+            "label": "Test load evenly distributed on platform",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Load must be evenly distributed per manufacturer specs"
+          },
+          {
+            "field_id": "load_secured",
+            "label": "Test load secured to prevent shifting",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Critical safety - load must not shift during test"
+          },
+          {
+            "field_id": "capacity_notes",
+            "label": "Load Capacity Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ]
+      },
+      {
+        "step_key": "boom_raise_test",
+        "type": "FUNCTION_TEST",
+        "title": "Boom Raise Test Under Load",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Raise boom to maximum height with rated load in platform",
+            "Boom should raise smoothly without jerking or hesitation",
+            "Listen for any unusual noises (grinding, popping, creaking)",
+            "Watch for any structural deflection, bending, or twisting",
+            "Observe hydraulic system for smooth operation",
+            "Monitor for any leaks or unusual cylinder behavior",
+            "All movements should be fully controlled"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "boom_raised_to_max_height",
+            "label": "Boom raised to maximum height successfully",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Must reach full height with rated load"
+          },
+          {
+            "field_id": "boom_raise_smooth",
+            "label": "Boom raised smoothly without jerking or hesitation",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Smooth operation indicates proper hydraulic function"
+          },
+          {
+            "field_id": "max_height_achieved_ft",
+            "label": "Maximum Height Achieved (feet)",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 1,
+            "min": 0,
+            "help_text": "Record actual height achieved"
+          },
+          {
+            "field_id": "unusual_noises",
+            "label": "Any unusual noises during raise?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Grinding, popping, creaking, or other abnormal sounds"
+          },
+          {
+            "field_id": "structural_issues_observed",
+            "label": "Any structural issues observed?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Excessive deflection, bending, cracking, etc."
+          },
+          {
+            "field_id": "no_defects_found",
+            "label": "No defects found during boom raise test",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "raise_test_notes",
+            "label": "Boom Raise Test Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "no_defects_found",
+              "equals": false
+            },
+            "defect": {
+              "title": "Boom raise test defect found under load",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Defect found during boom raise test with rated capacity load. Equipment must not be operated until issue is resolved."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "boom_extend_test",
+        "type": "FUNCTION_TEST",
+        "title": "Boom Extension Test Under Load",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Extend boom to maximum reach with rated load",
+            "Boom should extend smoothly without binding or jerking",
+            "Listen for unusual noises from boom sections",
+            "Watch for proper alignment of telescoping sections",
+            "Observe for any structural issues or excessive deflection",
+            "Check that extension stops properly at full reach"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "boom_extended_to_max_reach",
+            "label": "Boom extended to maximum reach successfully",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Must reach full extension with rated load"
+          },
+          {
+            "field_id": "boom_extend_smooth",
+            "label": "Boom extended smoothly without binding",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Smooth extension indicates proper wear pad condition"
+          },
+          {
+            "field_id": "max_reach_achieved_ft",
+            "label": "Maximum Reach Achieved (feet)",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 1,
+            "min": 0,
+            "help_text": "Record actual reach achieved"
+          },
+          {
+            "field_id": "unusual_noises",
+            "label": "Any unusual noises during extension?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Grinding, scraping, or other abnormal sounds"
+          },
+          {
+            "field_id": "structural_issues_observed",
+            "label": "Any structural issues observed?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Misalignment, excessive deflection, etc."
+          },
+          {
+            "field_id": "no_defects_found",
+            "label": "No defects found during boom extension test",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "extend_test_notes",
+            "label": "Boom Extension Test Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "no_defects_found",
+              "equals": false
+            },
+            "defect": {
+              "title": "Boom extension test defect found under load",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Defect found during boom extension test with rated capacity load. Equipment must not be operated until issue is resolved."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "boom_rotation_test",
+        "type": "FUNCTION_TEST",
+        "title": "Boom Rotation Test Under Load",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "With boom at maximum height and reach with rated load, rotate through full range",
+            "Rotation should be smooth without binding or hesitation",
+            "Listen for grinding or unusual noises from turret bearing",
+            "Watch for any structural issues during rotation",
+            "Observe turret bearing area for smooth operation",
+            "Check that rotation is fully controllable in both directions"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "boom_rotated_full_range",
+            "label": "Boom rotated through full range successfully",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Full rotation or manufacturer's specified range"
+          },
+          {
+            "field_id": "rotation_smooth",
+            "label": "Rotation smooth without binding or hesitation",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Smooth rotation indicates good turret bearing condition"
+          },
+          {
+            "field_id": "rotation_degrees",
+            "label": "Total Rotation Tested (degrees)",
+            "type": "NUMBER",
+            "required": false,
+            "precision": 0,
+            "min": 0,
+            "max": 360,
+            "help_text": "Record rotation range tested"
+          },
+          {
+            "field_id": "unusual_noises",
+            "label": "Any unusual noises during rotation?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Grinding from turret bearing is critical failure"
+          },
+          {
+            "field_id": "structural_issues_observed",
+            "label": "Any structural issues observed?",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Excessive movement, twisting, etc."
+          },
+          {
+            "field_id": "no_defects_found",
+            "label": "No defects found during boom rotation test",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "rotation_test_notes",
+            "label": "Boom Rotation Test Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "no_defects_found",
+              "equals": false
+            },
+            "defect": {
+              "title": "Boom rotation test defect found under load",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Defect found during boom rotation test with rated capacity load. Equipment must not be operated until issue is resolved."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "holding_valve_drift_test",
+        "type": "MEASUREMENT",
+        "title": "Holding Valve Drift Test (5 Minutes)",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "measurement_set_ref": "drift_measurements",
+        "fields": [
+          {
+            "field_id": "drift_test_completed",
+            "label": "Drift test completed successfully",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Full 5-minute test conducted"
+          },
+          {
+            "field_id": "reference_point_description",
+            "label": "Description of reference point used for measurements",
+            "type": "TEXT",
+            "required": true,
+            "help_text": "Fixed point on ground used to measure platform height"
+          },
+          {
+            "field_id": "platform_measurement_point",
+            "label": "Point on platform used for measurement",
+            "type": "TEXT",
+            "required": false,
+            "help_text": "Specific point on platform measured to reference"
+          },
+          {
+            "field_id": "drift_test_notes",
+            "label": "Drift Test Notes",
+            "type": "TEXT_AREA",
+            "required": false,
+            "help_text": "Document measurement method and any observations"
+          }
+        ]
+      },
+      {
+        "step_key": "boom_lowering_test",
+        "type": "FUNCTION_TEST",
+        "title": "Boom Lowering and Retraction Test Under Load",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "Lower and retract boom smoothly with rated load to stowed position",
+            "Lowering should be fully controlled - no free-falling or runaway",
+            "Retraction should be smooth without binding",
+            "All movements should be fully controllable at all times",
+            "Verify controls respond properly during lowering",
+            "Check that boom stows properly in travel position"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "boom_lowered_smoothly",
+            "label": "Boom lowered smoothly and controllably",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Controlled lowering is critical safety function"
+          },
+          {
+            "field_id": "boom_retracted_smoothly",
+            "label": "Boom retracted smoothly without binding",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Smooth retraction indicates proper function"
+          },
+          {
+            "field_id": "lowering_controlled",
+            "label": "Lowering was fully controlled (no free-falling or runaway)",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Free-fall indicates critical hydraulic system failure"
+          },
+          {
+            "field_id": "stowed_properly",
+            "label": "Boom stowed properly in travel position",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Must stow correctly for safe transport"
+          },
+          {
+            "field_id": "no_defects_found",
+            "label": "No defects found during lowering/retraction test",
+            "type": "BOOLEAN",
+            "required": true
+          },
+          {
+            "field_id": "lowering_test_notes",
+            "label": "Lowering/Retraction Test Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "no_defects_found",
+              "equals": false
+            },
+            "defect": {
+              "title": "Boom lowering/retraction test defect found under load",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Defect found during boom lowering/retraction test. Equipment must not be operated until issue is resolved."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "post_test_inspection",
+        "type": "VISUAL_INSPECTION",
+        "title": "Post-Test Structural Inspection",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "defect_schema_ref": "defect_schema",
+        "ui": {
+          "mode": "ADD_DEFECT_ITEMS",
+          "guidance": [
+            "After completing load test, thoroughly inspect all structural components",
+            "Look for any new cracks, deformation, or damage that may have occurred",
+            "Pay special attention to high-stress areas: welds, boom sections, mounting points",
+            "Check all bolts and pins for tightness",
+            "Inspect hydraulic cylinders for leaks or damage",
+            "Any damage found during or after load test requires immediate attention",
+            "Compare to pre-test condition - document any changes"
+          ]
+        },
+        "fields": [
+          {
+            "field_id": "boom_structure_pass",
+            "label": "Boom Structure - no new cracks, bends, or deformation",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Critical structural check"
+          },
+          {
+            "field_id": "welds_pass",
+            "label": "Welds - no new cracks or defects",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Weld cracks are critical failures"
+          },
+          {
+            "field_id": "cylinders_pass",
+            "label": "Hydraulic Cylinders - no leaks or damage",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Check all cylinders for leaks after load test"
+          },
+          {
+            "field_id": "pins_bolts_pass",
+            "label": "Pins and Bolts - all secure and undamaged",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Verify all fasteners remained secure during test"
+          },
+          {
+            "field_id": "platform_pass",
+            "label": "Platform - no damage to floor, railings, or structure",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Platform must be intact after load test"
+          },
+          {
+            "field_id": "turret_bearing_pass",
+            "label": "Turret Bearing - no damage or excessive movement",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Check for proper turret bearing function"
+          },
+          {
+            "field_id": "no_defects_found",
+            "label": "No structural damage found during or after load test",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Any damage = load test failure"
+          },
+          {
+            "field_id": "post_test_notes",
+            "label": "Post-Test Inspection Notes",
+            "type": "TEXT_AREA",
+            "required": false
+          }
+        ],
+        "auto_defect_on": [
+          {
+            "when": {
+              "path": "no_defects_found",
+              "equals": false
+            },
+            "defect": {
+              "title": "CRITICAL: Structural damage found during load test",
+              "severity": "UNSAFE_OUT_OF_SERVICE",
+              "description": "Structural damage detected during or after load test. Equipment has FAILED load test and must be tagged OUT OF SERVICE until damage is repaired and unit is retested."
+            }
+          }
+        ],
+        "blocking_fail": true
+      },
+      {
+        "step_key": "load_test_evaluation",
+        "type": "SETUP",
+        "title": "Load Test Overall Evaluation",
+        "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+        "required": true,
+        "fields": [
+          {
+            "field_id": "test_load_adequate",
+            "label": "Test load equaled or exceeded rated capacity",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Test invalid if load was insufficient"
+          },
+          {
+            "field_id": "all_movements_completed",
+            "label": "All movement tests completed (raise, extend, rotate, lower)",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Full range of motion tested"
+          },
+          {
+            "field_id": "all_movements_successful",
+            "label": "All movements successful with rated load",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Equipment performed all functions under load"
+          },
+          {
+            "field_id": "drift_within_limits",
+            "label": "Drift test within acceptable limits",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Holding valves functioning properly"
+          },
+          {
+            "field_id": "no_structural_damage",
+            "label": "No structural damage observed during or after test",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Critical requirement for passing load test"
+          },
+          {
+            "field_id": "load_test_pass",
+            "label": "LOAD TEST RESULT: PASS",
+            "type": "BOOLEAN",
+            "required": true,
+            "help_text": "Check YES only if ALL requirements met"
+          },
+          {
+            "field_id": "evaluation_summary",
+            "label": "Load Test Summary and Observations",
+            "type": "TEXT_AREA",
+            "required": true,
+            "help_text": "Comprehensive summary of load test results and any observations"
+          },
+          {
+            "field_id": "next_load_test_due_date",
+            "label": "Next Load Test Due Date",
+            "type": "DATE",
+            "required": false,
+            "help_text": "If applicable per periodic schedule"
+          }
+        ]
+      }
+    ]
+  },
+  "rules": [
+    {
+      "rule_id": "load_test_weight_adequate",
+      "title": "Test load must equal or exceed rated platform capacity",
+      "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+      "when": {
+        "path": "load_capacity_info.test_load_weight_lbs",
+        "exists": true
+      },
+      "assert": {
+        "type": "NUMERIC_GTE",
+        "left": {
+          "path": "load_capacity_info.test_load_weight_lbs"
+        },
+        "right": {
+          "path": "load_capacity_info.rated_capacity_lbs"
+        }
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Load test weight insufficient - test INVALID",
+        "defect_description": "Test load weight is less than rated platform capacity. Load test is INVALID and must be repeated with adequate test load equal to or exceeding rated capacity."
+      }
+    },
+    {
+      "rule_id": "drift_within_manufacturer_limit",
+      "title": "Drift must be within manufacturer specified limits",
+      "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+      "when": {
+        "all": [
+          {
+            "path": "holding_valve_drift_test.drift_test_completed",
+            "equals": true
+          },
+          {
+            "path": "drift_measurements.manufacturer_drift_limit_inches",
+            "exists": true
+          }
+        ]
+      },
+      "assert": {
+        "type": "NUMERIC_LTE",
+        "left": {
+          "path": "drift_measurements.drift_amount_inches"
+        },
+        "right": {
+          "path": "drift_measurements.manufacturer_drift_limit_inches"
+        }
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "Excessive drift detected - holding valve failure",
+        "defect_description": "Drift exceeds manufacturer specifications. Holding valves or cylinder seals may be leaking internally. Unit FAILED load test and must be removed from service, repaired, and retested."
+      }
+    },
+    {
+      "rule_id": "load_test_must_pass",
+      "title": "Equipment must pass load test before return to service",
+      "standard_reference": "ANSI A92.2-2021 Section 8.2.4.1",
+      "assert": {
+        "type": "BOOLEAN_TRUE",
+        "path": "load_test_evaluation.load_test_pass"
+      },
+      "on_fail": {
+        "severity": "UNSAFE_OUT_OF_SERVICE",
+        "defect_title": "CRITICAL: Load test FAILED - equipment OUT OF SERVICE",
+        "defect_description": "Equipment has FAILED load testing per ANSI A92.2-2021 Section 8.2.4.1. Unit must be tagged OUT OF SERVICE until all defects are corrected and load test is successfully repeated."
+      }
+    }
+  ]
+}

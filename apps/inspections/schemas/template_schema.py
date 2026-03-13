@@ -5,7 +5,7 @@ These schemas validate the AF_INSPECTION_TEMPLATE format from asset_templates_v2
 Ensures templates are properly structured before being loaded into the system.
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import List, Dict, Any, Optional, Literal, Union
 from enum import Enum
 
@@ -44,64 +44,61 @@ class TemplateStatus(str, Enum):
 
 class StandardReference(BaseModel):
     """Reference to inspection standard."""
+    model_config = ConfigDict(frozen=True)
+
     code: str = Field(..., description="Standard code (e.g., 'ANSI/SAIA A92.2')")
     revision: str = Field(..., description="Standard revision/year (e.g., '2021')")
-
-    class Config:
-        frozen = True
 
 
 class TemplateIntent(BaseModel):
     """Template intent and applicability indicators."""
+    model_config = ConfigDict(frozen=True)
+
     inspection_kind: str = Field(..., description="Type of inspection (PERIODIC, POST_REPAIR, etc.)")
     domain: str = Field(..., description="Equipment domain (AERIAL_DEVICE, CRANE, etc.)")
     tags: List[str] = Field(default_factory=list, description="Tags for categorization")
 
-    class Config:
-        frozen = True
-
 
 class ApplicabilityRules(BaseModel):
     """Rules for determining if template applies to an asset."""
+    model_config = ConfigDict(frozen=True)
+
     asset_types: Optional[List[str]] = Field(default=None, description="Applicable asset types")
+    equipment_types: Optional[List[str]] = Field(default=None, description="Applicable equipment types (e.g., A92_2_AERIAL)")
     required_capabilities: Optional[List[str]] = Field(default=None, description="Required capabilities")
     optional_capabilities: Optional[List[str]] = Field(default=None, description="Optional capabilities")
     notes: Optional[str] = Field(default=None, description="Additional applicability notes")
 
-    class Config:
-        frozen = True
-
 
 class EvidenceRules(BaseModel):
     """Rules for evidence collection (photos, notes)."""
+    model_config = ConfigDict(frozen=True)
+
     photo_required_if_severity_at_least: Optional[str] = None
     notes_required_on_fail: bool = False
     block_finalize_if_required_steps_incomplete: bool = True
 
-    class Config:
-        frozen = True
-
 
 class HashingPolicy(BaseModel):
     """Policy for template hashing."""
+    model_config = ConfigDict(frozen=True)
+
     canonicalization: str = "JSON_CANONICAL_SORT_KEYS_UTF8_NO_WHITESPACE"
     hash_algorithm: str = "SHA256"
-
-    class Config:
-        frozen = True
 
 
 class TemplatePolicy(BaseModel):
     """Template execution policies."""
+    model_config = ConfigDict(frozen=True)
+
     evidence_rules: EvidenceRules
     hashing: HashingPolicy
-
-    class Config:
-        frozen = True
 
 
 class TemplateMetadata(BaseModel):
     """Template metadata and configuration."""
+    model_config = ConfigDict(frozen=True)
+
     template_key: str = Field(..., description="Unique template identifier")
     name: str = Field(..., description="Human-readable template name")
     status: TemplateStatus = Field(..., description="Publication status")
@@ -110,9 +107,6 @@ class TemplateMetadata(BaseModel):
     applicability: Optional[ApplicabilityRules] = Field(default=None, description="Applicability rules")
     policy: TemplatePolicy = Field(..., description="Template policies")
 
-    class Config:
-        frozen = True
-
 
 # ============================================================================
 # Schema Definitions (for fields, defects, measurements)
@@ -120,6 +114,8 @@ class TemplateMetadata(BaseModel):
 
 class SchemaField(BaseModel):
     """Field definition in a schema."""
+    model_config = ConfigDict(use_enum_values=True)
+
     field_id: str
     label: Optional[str] = None
     type: Union[FieldType, str]  # Allow string for flexibility
@@ -130,9 +126,6 @@ class SchemaField(BaseModel):
     min: Optional[Union[int, float]] = None
     max: Optional[Union[int, float]] = None
     help_text: Optional[str] = None
-
-    class Config:
-        use_enum_values = True
 
 
 class MeasurementSet(BaseModel):
@@ -160,14 +153,13 @@ class TemplateSchemas(BaseModel):
 
 class ConditionWhen(BaseModel):
     """Condition for when something applies."""
+    model_config = ConfigDict(populate_by_name=True)
+
     path: Optional[str] = None
     equals: Optional[Any] = None
     in_: Optional[List[Any]] = Field(default=None, alias="in")
     all: Optional[List[Dict]] = None
     any: Optional[List[Dict]] = None
-
-    class Config:
-        allow_population_by_field_name = True
 
 
 class AutoDefect(BaseModel):
@@ -201,6 +193,8 @@ class ProcedureInput(BaseModel):
 
 class ProcedureStep(BaseModel):
     """A single step in an inspection procedure."""
+    model_config = ConfigDict(use_enum_values=True)
+
     step_key: str = Field(..., description="Unique step identifier within template")
     type: Union[StepType, str] = Field(..., description="Step type")
     title: str = Field(..., description="Step title")
@@ -213,10 +207,8 @@ class ProcedureStep(BaseModel):
     validations: Optional[List[StepValidation]] = None
     auto_defect_on: Optional[List[AutoDefect]] = None
 
-    class Config:
-        use_enum_values = True
-
-    @validator('step_key')
+    @field_validator('step_key')
+    @classmethod
     def step_key_valid_format(cls, v):
         """Validate step key format."""
         if not v or not v.replace('_', '').replace('-', '').isalnum():
@@ -227,9 +219,10 @@ class ProcedureStep(BaseModel):
 class Procedure(BaseModel):
     """Inspection procedure definition."""
     inputs: Optional[List[ProcedureInput]] = Field(default_factory=list)
-    steps: List[ProcedureStep] = Field(..., min_items=1)
+    steps: List[ProcedureStep] = Field(..., min_length=1)
 
-    @validator('steps')
+    @field_validator('steps')
+    @classmethod
     def steps_have_unique_keys(cls, v):
         """Validate step keys are unique."""
         keys = [step.step_key for step in v]
@@ -261,15 +254,14 @@ class RuleOnFail(BaseModel):
 
 class InspectionRule(BaseModel):
     """Automated rule for defect generation."""
+    model_config = ConfigDict(populate_by_name=True)
+
     rule_id: str
     title: str
     standard_reference: Optional[str] = None
     when: Optional[Union[Dict[str, Any], ConditionWhen]] = None
     assert_: Optional[RuleAssertion] = Field(default=None, alias="assert")
     on_fail: RuleOnFail
-
-    class Config:
-        allow_population_by_field_name = True
 
 
 # ============================================================================
@@ -282,6 +274,8 @@ class InspectionTemplate(BaseModel):
 
     This validates the AF_INSPECTION_TEMPLATE format used by asset_templates_v2_3.
     """
+    model_config = ConfigDict(validate_assignment=True)
+
     format: Literal["AF_INSPECTION_TEMPLATE"] = Field(..., description="Template format identifier")
     format_version: int = Field(..., description="Format version number")
     template: TemplateMetadata = Field(..., description="Template metadata")
@@ -290,10 +284,8 @@ class InspectionTemplate(BaseModel):
     procedure: Procedure = Field(..., description="Inspection procedure")
     rules: Optional[List[InspectionRule]] = Field(default_factory=list, description="Automated rules")
 
-    class Config:
-        validate_assignment = True
-
-    @validator('format_version')
+    @field_validator('format_version')
+    @classmethod
     def format_version_supported(cls, v):
         """Validate format version is supported."""
         if v != 1:
@@ -338,6 +330,8 @@ class TemplateSummary(BaseModel):
 
     Used when returning lists of templates without full details.
     """
+    model_config = ConfigDict(frozen=True)
+
     template_key: str
     name: str
     status: TemplateStatus
@@ -349,9 +343,6 @@ class TemplateSummary(BaseModel):
     step_count: int
     rule_count: int
     required_capabilities: Optional[List[str]] = None
-
-    class Config:
-        frozen = True
 
     @classmethod
     def from_template(cls, template: InspectionTemplate) -> "TemplateSummary":
