@@ -11,22 +11,22 @@
  */
 
 :root {
-  /* ===== Brand Colors ===== */
-  /* Primary - Main brand color */
-  --color-primary: 59 130 246; /* Blue-500 */
-  --color-primary-50: 239 246 255;
-  --color-primary-100: 219 234 254;
-  --color-primary-200: 191 219 254;
-  --color-primary-300: 147 197 253;
-  --color-primary-400: 96 165 250;
-  --color-primary-500: 59 130 246;
-  --color-primary-600: 37 99 235;
-  --color-primary-700: 29 78 216;
-  --color-primary-800: 30 64 175;
-  --color-primary-900: 30 58 138;
+  /* ===== Brand Colors (Advantage Fleet) ===== */
+  /* Primary - Lime Green from logo */
+  --color-primary: 126 211 33; /* #7ED321 - Vibrant lime green */
+  --color-primary-50: 245 254 237;
+  --color-primary-100: 236 252 219;
+  --color-primary-200: 217 249 183;
+  --color-primary-300: 188 240 143;
+  --color-primary-400: 157 226 96;
+  --color-primary-500: 126 211 33;
+  --color-primary-600: 101 169 26;
+  --color-primary-700: 76 127 20;
+  --color-primary-800: 63 106 23;
+  --color-primary-900: 54 89 23;
 
-  /* Secondary - Supporting brand color */
-  --color-secondary: 100 116 139; /* Slate-500 */
+  /* Secondary - Dark Gray/Charcoal from logo background */
+  --color-secondary: 45 55 72; /* Dark charcoal */
   --color-secondary-50: 248 250 252;
   --color-secondary-100: 241 245 249;
   --color-secondary-200: 226 232 240;
@@ -35,32 +35,32 @@
   --color-secondary-500: 100 116 139;
   --color-secondary-600: 71 85 105;
   --color-secondary-700: 51 65 85;
-  --color-secondary-800: 30 41 59;
-  --color-secondary-900: 15 23 42;
+  --color-secondary-800: 45 55 72;
+  --color-secondary-900: 30 41 59;
 
-  /* Accent - Highlight color for CTAs */
-  --color-accent: 168 85 247; /* Purple-500 */
-  --color-accent-50: 250 245 255;
-  --color-accent-100: 243 232 255;
-  --color-accent-200: 233 213 255;
-  --color-accent-300: 216 180 254;
-  --color-accent-400: 192 132 252;
-  --color-accent-500: 168 85 247;
-  --color-accent-600: 147 51 234;
-  --color-accent-700: 126 34 206;
-  --color-accent-800: 107 33 168;
-  --color-accent-900: 88 28 135;
+  /* Accent - Brighter green for highlights */
+  --color-accent: 139 233 50; /* Lighter lime for accents */
+  --color-accent-50: 247 254 237;
+  --color-accent-100: 237 252 219;
+  --color-accent-200: 220 249 183;
+  --color-accent-300: 195 242 143;
+  --color-accent-400: 167 237 96;
+  --color-accent-500: 139 233 50;
+  --color-accent-600: 110 186 40;
+  --color-accent-700: 83 139 30;
+  --color-accent-800: 69 116 28;
+  --color-accent-900: 59 98 27;
 
   /* ===== Semantic Colors ===== */
-  --color-success: 34 197 94; /* Green-500 */
+  --color-success: 126 211 33; /* Use brand green for success */
   --color-warning: 234 179 8; /* Yellow-500 */
   --color-danger: 239 68 68; /* Red-500 */
-  --color-info: 59 130 246; /* Blue-500 */
+  --color-info: 126 211 33; /* Use brand green for info */
 
   /* ===== UI Colors ===== */
   --color-background: 255 255 255; /* White */
-  --color-foreground: 15 23 42; /* Slate-900 */
-  --color-muted: 241 245 249; /* Slate-100 */
+  --color-foreground: 30 41 59; /* Dark slate */
+  --color-muted: 241 245 249; /* Light gray */
   --color-border: 226 232 240; /* Slate-200 */
 
   /* ===== Spacing ===== */

@@ -150,7 +150,9 @@ class USDOTProfile(BaseModel):
         Customer,
         on_delete=models.CASCADE,
         related_name='usdot_profile',
-        help_text="Customer this profile belongs to"
+        null=True,
+        blank=True,
+        help_text="Customer this profile belongs to (null until customer is created)"
     )
 
     # FMCSA Identifiers

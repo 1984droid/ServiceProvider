@@ -6,6 +6,17 @@
 
 ---
 
+## ⚠️ CRITICAL RULE: NO MOCK DATA
+
+**ABSOLUTE PROHIBITION ON HARDCODED/MOCK DATA IN FRONTEND:**
+- NEVER hardcode stats, counts, or metrics in the UI
+- NEVER use placeholder/fake data in production code
+- ALWAYS fetch real data from API endpoints
+- If data is unavailable, show empty state or loading indicator
+- Mock data is ONLY allowed in test files (*.test.ts, *.spec.ts)
+
+---
+
 ## Core Principles
 
 1. **Single-tenant** - No tenant isolation, all data belongs to the service provider
@@ -1098,6 +1109,174 @@ new_field = models.CharField(max_length=100)  # Breaks existing rows!
 ### Changing Constraints:
 - Loosen constraints: Safe (nullable → required is NOT safe)
 - Tighten constraints: Requires data validation first
+
+---
+
+## Seed Data
+
+### Overview
+
+The application includes comprehensive seed data for development and testing. Seed data is generated using randomized, realistic values (no hardcoding) to ensure the script is redeployable and produces varied but consistent data.
+
+### Running Seed Data
+
+```bash
+# Seed data (preserves existing data)
+python manage.py seed_data
+
+# Clear existing data and reseed (WARNING: Destructive!)
+python manage.py seed_data --clear
+```
+
+### Generated Data Summary
+
+**Company & Organization:**
+- 1 Company: "Advantage Fleet Services"
+- 4 Departments (Inspections, Service & Repair, Customer Service, Administration)
+- 6 Employees across departments
+- 6 Users with various roles (admin, inspector1, inspector2, service1, service2, support1)
+  - All users have password: `admin` (testing only)
+
+**Customers:**
+- 5 realistic customers with complete addresses and contact information
+- 4 of 5 customers have USDOT numbers
+- Varied locations across IL, IN, WI states
+- Business notes with service preferences
+
+**USDOT Profiles:**
+- Created for all customers with USDOT numbers
+- Realistic carrier information (operation type, cargo, safety rating)
+- Power unit counts: 8-85 vehicles
+- Driver counts: 5-65 drivers
+- Randomized entity types, safety ratings, operation classifications
+
+**Contacts:**
+- 3-4 contacts per customer with varied roles:
+  - Fleet Manager (primary contact, receives all correspondence)
+  - Accounting Manager (invoices and estimates only)
+  - Operations Director (service updates and inspection reports)
+  - Safety Coordinator (service updates and inspection reports)
+- 50% of customers have an automated email system contact
+- Realistic phone numbers, extensions, and mobile numbers
+- Correspondence preferences configured per role
+- Email format: `firstname.lastname@customerdomain.com`
+
+**Vehicles:**
+- 3-7 vehicles per customer (randomized)
+- Realistic truck makes: Freightliner, Peterbilt, Kenworth, Volvo, International, Mack
+- Model-specific to manufacturer
+- Years: 2016-2024
+- Body types: Tractor, Box Truck, Flatbed, Dump Truck, Sleeper Cab
+- VIN format: `1HGBH41JXMN######` (realistic pattern)
+- Odometer readings: 50,000-450,000 miles
+- Engine hours: 2,000-15,000 hours
+- 90% active, 10% inactive
+- License plates with realistic state/format
+
+**Equipment:**
+- 2-5 pieces per customer (randomized)
+- Three equipment types with realistic manufacturers and models:
+  - **AERIAL_DEVICE**: Altec, Terex, Versalift, Elliott, Manitex
+  - **CRANE**: Manitowoc, Liebherr, Tadano, Grove
+  - **BOOM_LIFT**: Genie, JLG, Skyjack, Haulotte
+- Model-specific to manufacturer
+- Years: 2014-2023
+- Serial number format: `MFG######### ` (manufacturer + year + random)
+- 60% mounted on customer vehicles, 40% standalone
+- Engine hours: 500-8,000 hours (for applicable types)
+- 85% active, 15% inactive
+- Notes include mount status
+
+### Seed Data Characteristics
+
+**Randomization:**
+- All values use Python's `random` module for variation
+- No hardcoded names, addresses, or identifiers (except templates)
+- Each seed run produces slightly different data distribution
+- Ensures testing with varied data sets
+
+**Realism:**
+- Actual truck manufacturers and models
+- Realistic equipment manufacturers and models
+- Valid phone number formats
+- Proper email patterns
+- Realistic mileage and hour ranges
+- Appropriate correspondence preferences per role
+
+**Relationships:**
+- Primary contacts properly linked to customers
+- Equipment mounted on vehicles from same customer only
+- USDOT profiles linked to customers with USDOT numbers
+- Automated contacts flagged with `is_automated=True`
+
+**Field Coverage:**
+- All optional fields populated for most records (notes, extensions, etc.)
+- Mix of populated and empty optional fields for realism
+- Active/inactive states distributed realistically
+- Complete address information
+
+### Data Volume (Approximate)
+
+- **Total Customers:** 5
+- **Total Contacts:** 15-20 (3-4 per customer + automated)
+- **Total Vehicles:** 15-35 (3-7 per customer)
+- **Total Equipment:** 10-25 (2-5 per customer)
+- **Total USDOT Profiles:** 4
+
+### Testing with Seed Data
+
+**Login Credentials:**
+```
+Username: admin    | Role: ADMIN            | Password: admin
+Username: inspector1 | Role: INSPECTOR      | Password: admin
+Username: inspector2 | Role: INSPECTOR      | Password: admin
+Username: service1   | Role: SERVICE_TECH   | Password: admin
+Username: service2   | Role: SERVICE_TECH   | Password: admin
+Username: support1   | Role: CUSTOMER_SERVICE | Password: admin
+```
+
+**Sample Customer Names:**
+- Midwest Express Logistics (USDOT: 2847291)
+- Northern Freight Solutions (USDOT: 1947382)
+- Metro Delivery Services (USDOT: 3928471)
+- Prairie Hauling Co (no USDOT)
+- Great Lakes Transport (USDOT: 2103847)
+
+**Sample Vehicle Unit Numbers:**
+- MID-001, MID-002, etc. (first 3 letters of customer name)
+
+**Sample Equipment Asset Numbers:**
+- MID-E001, MID-E002, etc.
+
+### Clearing and Reseeding
+
+The `--clear` flag performs a complete wipe and reseed:
+
+**What Gets Cleared:**
+- All InspectionRuns
+- All Equipment
+- All Vehicles
+- All Contacts
+- All USDOTProfiles
+- All Customers
+- All non-superuser Users
+- All Employees
+- All Departments
+- All Companies
+
+**What Persists:**
+- Superuser accounts
+- Role groups (ADMIN, INSPECTOR, etc.)
+- Database migrations
+
+**Safety Warning:**
+```bash
+# DANGER: This destroys all data!
+python manage.py seed_data --clear
+
+# Safe: Adds data without deleting
+python manage.py seed_data
+```
 
 ---
 

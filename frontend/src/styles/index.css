@@ -1,7 +1,5 @@
-/* Import Tailwind directives */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Import Tailwind CSS v4 */
+@import "tailwindcss";
 
 /* Import theme - change this to switch themes */
 @import './themes/default.css';

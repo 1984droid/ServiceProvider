@@ -147,7 +147,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 50,
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -161,8 +160,18 @@ REST_FRAMEWORK = {
 # CORS settings
 CORS_ALLOWED_ORIGINS = os.getenv(
     'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://localhost:5173'
+    'http://localhost:3000,http://localhost:5173,http://localhost:5174'
 ).split(',')
+
+# CSRF Trusted Origins (for POST requests from frontend)
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000,http://localhost:5173,http://localhost:5174'
+).split(',')
+
+# Exempt API endpoints from CSRF since we're using JWT authentication
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -203,6 +212,10 @@ LOGGING = {
 
 # Create logs directory if it doesn't exist
 (BASE_DIR / 'logs').mkdir(exist_ok=True)
+
+
+# FMCSA API Settings
+FMCSA_WEBKEY = os.getenv('FMCSA_WEBKEY', '')
 
 
 # JWT Settings

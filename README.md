@@ -457,17 +457,31 @@ python manage.py seed_data --clear
 
 ## Frontend Development
 
+### ⚠️ HARD RULES - Port Configuration
+
+**NON-NEGOTIABLE PORT REQUIREMENTS:**
+- **Backend MUST run on port 8001** (no exceptions)
+- **Frontend MUST run on port 5174** (no exceptions)
+
+These ports are enforced by `strictPort: true` in vite.config.ts. If the ports are unavailable, servers will fail to start.
+
 ### Quick Start
 
 ```bash
-# Install dependencies
+# 1. Check ports are available (REQUIRED)
+node scripts/check-ports.js
+
+# 2. Start backend on port 8001
+python manage.py runserver 8001
+
+# 3. Start frontend on port 5174
 cd frontend
 npm install
-
-# Start dev server (with HMR)
 npm run dev
-# Frontend: http://localhost:5173
-# API proxy: http://localhost:8000/api
+
+# Access:
+# Frontend: http://localhost:5174
+# Backend API: http://localhost:8001/api
 ```
 
 ### Frontend Structure

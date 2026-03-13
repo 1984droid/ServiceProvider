@@ -179,6 +179,14 @@ class Vehicle(BaseModel):
         help_text="Vehicle capabilities and features (e.g., ['UTILITY_TRUCK', 'INSULATED_BOOM', 'DIELECTRIC'])"
     )
 
+    # Photo
+    photo = models.ImageField(
+        upload_to='assets/vehicles/',
+        blank=True,
+        null=True,
+        help_text="Vehicle photo for quick identification"
+    )
+
     # Notes
     notes = models.TextField(blank=True, help_text="Internal notes")
 
@@ -350,6 +358,14 @@ class Equipment(BaseModel):
         default=dict,
         blank=True,
         help_text="Equipment-specific data: placard info, rated capacity, insulation class, etc."
+    )
+
+    # Photo
+    photo = models.ImageField(
+        upload_to='assets/equipment/',
+        blank=True,
+        null=True,
+        help_text="Equipment photo for quick identification"
     )
 
     # Notes

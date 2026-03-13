@@ -28,6 +28,7 @@ class VehicleListSerializer(serializers.ModelSerializer):
             'body_type',
             'is_active',
             'capabilities',
+            'photo',
             'created_at',
         ]
         read_only_fields = ['id', 'customer_name', 'created_at']
@@ -37,6 +38,7 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
     """Full serializer for vehicle CRUD operations"""
     customer_name = serializers.CharField(source='customer.name', read_only=True)
     equipment_count = serializers.SerializerMethodField()
+    vin_decode_data = serializers.SerializerMethodField()
 
     class Meta:
         model = Vehicle
@@ -56,16 +58,26 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
             'is_active',
             'notes',
             'capabilities',
+            'photo',
             'vin_decode_data',
             'equipment_count',
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'customer_name', 'equipment_count', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'customer_name', 'equipment_count', 'vin_decode_data', 'created_at', 'updated_at']
 
     def get_equipment_count(self, obj):
         """Get count of equipment mounted on this vehicle"""
         return obj.equipment.count()
+
+    def get_vin_decode_data(self, obj):
+        """Get VIN decode data if available"""
+        try:
+            if hasattr(obj, 'vin_decode') and obj.vin_decode:
+                return VINDecodeDataSerializer(obj.vin_decode).data
+        except VINDecodeData.DoesNotExist:
+            pass
+        return None
 
     def validate_vin(self, value):
         """
@@ -202,6 +214,7 @@ class EquipmentListSerializer(serializers.ModelSerializer):
             'mounted_on_unit',
             'is_active',
             'capabilities',
+            'photo',
             'created_at',
         ]
         read_only_fields = ['id', 'customer_name', 'mounted_on_unit', 'created_at']
@@ -232,6 +245,7 @@ class EquipmentDetailSerializer(serializers.ModelSerializer):
             'notes',
             'capabilities',
             'equipment_data',
+            'photo',
             'created_at',
             'updated_at',
         ]

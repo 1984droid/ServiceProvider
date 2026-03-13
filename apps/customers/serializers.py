@@ -112,27 +112,30 @@ class USDOTProfileSerializer(serializers.ModelSerializer):
             'mc_number',
             'legal_name',
             'dba_name',
-            'physical_address_line1',
-            'physical_address_line2',
+            'entity_type',
+            'physical_address',
             'physical_city',
             'physical_state',
-            'physical_postal_code',
-            'mailing_address_line1',
-            'mailing_address_line2',
+            'physical_zip',
+            'mailing_address',
             'mailing_city',
             'mailing_state',
-            'mailing_postal_code',
+            'mailing_zip',
             'phone',
             'email',
+            'carrier_operation',
+            'cargo_carried',
+            'operation_classification',
             'safety_rating',
-            'safety_rating_date',
+            'out_of_service_date',
             'total_power_units',
             'total_drivers',
             'raw_fmcsa_data',
+            'lookup_date',
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'lookup_date', 'created_at', 'updated_at']
 
     def validate_usdot_number(self, value):
         """Ensure USDOT number is clean"""

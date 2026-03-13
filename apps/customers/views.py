@@ -69,6 +69,31 @@ class CustomerViewSet(viewsets.ModelViewSet):
             return CustomerCreateSerializer
         return CustomerDetailSerializer
 
+    def perform_create(self, serializer):
+        """
+        Create customer and link to existing USDOTProfile if available.
+        """
+        customer = serializer.save()
+
+        # Link to existing USDOTProfile if customer has USDOT number
+        if customer.usdot_number:
+            clean_usdot = ''.join(c for c in customer.usdot_number if c.isalnum())
+            try:
+                profile = USDOTProfile.objects.get(usdot_number=clean_usdot, customer__isnull=True)
+                profile.customer = customer
+                profile.save(update_fields=['customer', 'updated_at'])
+            except USDOTProfile.DoesNotExist:
+                pass  # No profile exists, that's okay
+            except USDOTProfile.MultipleObjectsReturned:
+                # If multiple unlinked profiles exist, link the most recent one
+                profile = USDOTProfile.objects.filter(
+                    usdot_number=clean_usdot,
+                    customer__isnull=True
+                ).order_by('-lookup_date').first()
+                if profile:
+                    profile.customer = customer
+                    profile.save(update_fields=['customer', 'updated_at'])
+
     def get_queryset(self):
         """
         Optionally filter by custom query params:
@@ -318,27 +343,55 @@ class USDOTProfileViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def lookup_by_usdot(self, request):
         """
-        Lookup USDOT profile by USDOT number
-        GET /api/usdot-profiles/lookup_by_usdot/?usdot=123456
+        Lookup USDOT profile by USDOT number.
+        Checks cache first, then fetches from FMCSA API if not found.
+        GET /api/usdot-profiles/lookup_by_usdot/?usdot=123456&force_refresh=false&customer_id=uuid
         """
+        from apps.customers.services import FMCSAService
+        import requests
+
         usdot = request.query_params.get('usdot')
+        force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
+        customer_id = request.query_params.get('customer_id')
+
         if not usdot:
             return Response(
                 {'error': 'usdot parameter is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Clean USDOT number
-        clean_usdot = ''.join(c for c in usdot if c.isalnum())
-
         try:
-            profile = USDOTProfile.objects.get(usdot_number=clean_usdot)
+            service = FMCSAService()
+            profile = service.lookup_by_usdot(usdot, force_refresh=force_refresh)
+
+            # If customer_id is provided, link the profile to the customer
+            if customer_id:
+                try:
+                    customer = Customer.objects.get(id=customer_id)
+                    profile.customer = customer
+                    profile.save(update_fields=['customer', 'updated_at'])
+                except Customer.DoesNotExist:
+                    return Response(
+                        {'error': f'Customer with id {customer_id} not found'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+
             serializer = self.get_serializer(profile)
             return Response(serializer.data)
-        except USDOTProfile.DoesNotExist:
+        except ValueError as e:
             return Response(
-                {'error': f'USDOT profile {clean_usdot} not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except requests.HTTPError as e:
+            return Response(
+                {'error': 'FMCSA API error', 'details': str(e)},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {'error': 'Unexpected error during USDOT lookup', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     @action(detail=True, methods=['post'])
