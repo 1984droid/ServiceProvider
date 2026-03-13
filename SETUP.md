@@ -35,15 +35,15 @@ The automated setup script will:
 
 ### Required Software
 
-- **Python 3.11+** - [Download](https://www.python.org/downloads/)
+- **Python 3.14+** - [Download](https://www.python.org/downloads/)
 - **Node.js 18+** - [Download](https://nodejs.org/)
-- **PostgreSQL 14+** - [Download](https://www.postgresql.org/download/)
+- **PostgreSQL 18+** - [Download](https://www.postgresql.org/download/)
 - **Git** - [Download](https://git-scm.com/downloads/)
 
 ### Verify Installation
 
 ```bash
-python --version  # Should be 3.11 or higher
+python --version  # Should be 3.14 or higher
 node --version    # Should be 18 or higher
 npm --version     # Should come with Node.js
 psql --version    # PostgreSQL client
@@ -461,7 +461,7 @@ npm run type-check
 
 ### Database Considerations
 
-- PostgreSQL 14+ recommended (tested with 18)
+- PostgreSQL 18+ required
 - Uses custom port `8101` to avoid conflicts
 - Sample data includes ~5 customers, ~10 vehicles
 - Inspection templates are production-ready

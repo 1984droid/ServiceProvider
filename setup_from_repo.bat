@@ -43,7 +43,7 @@ echo + Found project root
 REM Check Python
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo X Python not found. Please install Python 3.11+
+    echo X Python not found. Please install Python 3.14+
     exit /b 1
 )
 for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
