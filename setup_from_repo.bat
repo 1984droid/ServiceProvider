@@ -224,10 +224,24 @@ if "%HAVE_PSQL%"=="true" (
         echo   Host: %DB_HOST%:%DB_PORT%
         echo   User: %DB_USER%
         echo.
-        echo Please ensure PostgreSQL is running and credentials in .env are correct.
-        exit /b 1
+        echo OPTION 1: Update password in .env file
+        echo   Edit .env and set DB_PASSWORD to your PostgreSQL password
+        echo.
+        echo OPTION 2: Use pgAdmin to create database manually
+        echo   1. Open pgAdmin 4 from Start menu
+        echo   2. Connect to PostgreSQL 18 server
+        echo   3. Create database: %DB_NAME%
+        echo   4. Re-run this script
+        echo.
+        echo OPTION 3: Skip database creation for now
+        echo   You can create it manually and run migrations later
+        echo.
+        pause
+        echo Skipping database setup...
+        set HAVE_PSQL=false
+    ) else (
+        echo + PostgreSQL connection successful
     )
-    echo + PostgreSQL connection successful
 
     REM Check if database exists
     psql -h %DB_HOST% -p %DB_PORT% -U %DB_USER% -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '%DB_NAME%'" | findstr "1" >nul
