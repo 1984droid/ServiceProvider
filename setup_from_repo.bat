@@ -86,9 +86,33 @@ set HAVE_PSQL=false
 echo [DEBUG] Set HAVE_PSQL=false
 call psql --version >nul 2>&1
 if errorlevel 1 (
-    echo ! psql client not found - database setup will be manual
-    echo   To add psql to PATH: Add C:\Program Files\PostgreSQL\18\bin to system PATH
-    echo [DEBUG] psql not found, continuing without psql...
+    echo ! psql client not found in PATH
+    echo   Searching for PostgreSQL installation...
+
+    REM Try common PostgreSQL installation paths
+    if exist "C:\Program Files\PostgreSQL\18\bin\psql.exe" (
+        echo   Found PostgreSQL 18 at C:\Program Files\PostgreSQL\18\bin
+        echo   Adding to PATH for this session...
+        set "PATH=%PATH%;C:\Program Files\PostgreSQL\18\bin"
+        set HAVE_PSQL=true
+        echo + PostgreSQL client added to PATH
+    ) else if exist "C:\Program Files\PostgreSQL\17\bin\psql.exe" (
+        echo   Found PostgreSQL 17 at C:\Program Files\PostgreSQL\17\bin
+        echo   Adding to PATH for this session...
+        set "PATH=%PATH%;C:\Program Files\PostgreSQL\17\bin"
+        set HAVE_PSQL=true
+        echo + PostgreSQL client added to PATH
+    ) else if exist "C:\Program Files\PostgreSQL\16\bin\psql.exe" (
+        echo   Found PostgreSQL 16 at C:\Program Files\PostgreSQL\16\bin
+        echo   Adding to PATH for this session...
+        set "PATH=%PATH%;C:\Program Files\PostgreSQL\16\bin"
+        set HAVE_PSQL=true
+        echo + PostgreSQL client added to PATH
+    ) else (
+        echo ! PostgreSQL not found - database setup will be manual
+        echo   Please install PostgreSQL 18+ or add to PATH manually
+        echo [DEBUG] psql not found, continuing without psql...
+    )
 ) else (
     echo + PostgreSQL client found
     set HAVE_PSQL=true
