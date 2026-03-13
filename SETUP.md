@@ -18,15 +18,22 @@ chmod +x setup_from_repo.sh
 ```cmd
 git clone <repository-url>
 cd ServiceProvider
+
+REM First, set up PostgreSQL user and database
+scripts\setup_postgres_user.bat
+
+REM Then run the main setup
 setup_from_repo.bat
 ```
+
+**Note:** The `setup_postgres_user.bat` script creates a dedicated database user (`service_provider_user`) with a known password (`dev_password_123`). This requires the PostgreSQL superuser password.
 
 The automated setup script will:
 1. Check all prerequisites
 2. Create Python virtual environment
 3. Install all dependencies (Python + Node.js)
 4. Configure environment variables from `.env.dev`
-5. Set up PostgreSQL database
+5. Set up PostgreSQL database (or skip if not accessible)
 6. Run migrations
 7. Seed sample data
 8. Prepare frontend
