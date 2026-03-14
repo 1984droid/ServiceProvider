@@ -93,6 +93,8 @@ export function InspectionExecutePage({
     inspectionId,
     steps: template?.steps || [],
     existingStepData: inspectionRun?.step_data || {},
+    enumValues: template?.enums || {},
+    measurementSets: template?.measurement_sets || {},
   });
 
   const handleStepClick = (index: number) => {
@@ -120,10 +122,16 @@ export function InspectionExecutePage({
 
   const handleNext = async () => {
     if (template && currentStepIndex < template.steps.length - 1) {
+      // Validate current step before allowing navigation
+      const isValid = stepData.validateCurrentStep();
+      if (!isValid) {
+        return; // Block navigation if validation fails
+      }
+
       // Auto-save current step before moving
       if (stepData.isDirty) {
         try {
-          await stepData.saveCurrentStep(false); // Don't validate on navigation
+          await stepData.saveCurrentStep(false); // Don't validate on navigation (already validated above)
         } catch (err) {
           // Continue navigation even if save fails
           console.error('Failed to auto-save step:', err);
@@ -245,6 +253,7 @@ export function InspectionExecutePage({
             totalSteps={template.steps.length}
             values={stepData.stepValues}
             onChange={stepData.setFieldValue}
+            errors={stepData.validationErrors}
             enumValues={template.enums || {}}
             measurementSets={template.measurement_sets || {}}
           />
@@ -264,6 +273,7 @@ export function InspectionExecutePage({
           isSaving={stepData.isSaving}
           isDirty={stepData.isDirty}
           lastSaved={stepData.lastSaved}
+          canProceed={stepData.isCurrentStepValid}
         />
       </div>
     </div>

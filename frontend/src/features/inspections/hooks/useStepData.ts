@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/axios';
+import { validateStep } from '../utils/validation';
 
 interface TemplateField {
   field_id: string;
@@ -23,12 +24,16 @@ interface UseStepDataOptions {
   inspectionId: string;
   steps: TemplateStep[];
   existingStepData?: Record<string, Record<string, any>>;
+  enumValues?: Record<string, string[]>;
+  measurementSets?: Record<string, { fields: TemplateField[] }>;
 }
 
 interface UseStepDataReturn {
   stepValues: Record<string, any>;
   allStepValues: Record<string, Record<string, any>>;
   completedSteps: Set<number>;
+  validationErrors: Record<string, string>;
+  isCurrentStepValid: boolean;
   isDirty: boolean;
   isSaving: boolean;
   error: string | null;
@@ -38,12 +43,15 @@ interface UseStepDataReturn {
   saveCurrentStep: (validate?: boolean) => Promise<void>;
   saveAllSteps: () => Promise<void>;
   loadStepData: () => Promise<void>;
+  validateCurrentStep: () => boolean;
 }
 
 export function useStepData({
   inspectionId,
   steps,
   existingStepData = {},
+  enumValues = {},
+  measurementSets = {},
 }: UseStepDataOptions): UseStepDataReturn {
   // All step values keyed by step_id -> { field_id: value }
   const [allStepValues, setAllStepValues] = useState<Record<string, Record<string, any>>>(existingStepData);
@@ -62,12 +70,39 @@ export function useStepData({
   const [error, setError] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
+  // Validation errors
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   // Get current step
   const currentStep = steps[currentStepIndex];
   const currentStepId = currentStep?.step_id;
 
   // Get current step values
   const stepValues = allStepValues[currentStepId] || {};
+
+  // Get fields for current step (handle measurement sets)
+  const getCurrentStepFields = (): TemplateField[] => {
+    if (!currentStep) return [];
+
+    if (currentStep.measurement_set_ref && measurementSets[currentStep.measurement_set_ref]) {
+      return measurementSets[currentStep.measurement_set_ref].fields;
+    }
+
+    return currentStep.fields;
+  };
+
+  // Validate current step
+  const validateCurrentStep = (): boolean => {
+    if (!currentStep) return true;
+
+    const fields = getCurrentStepFields();
+    const errors = validateStep(fields, stepValues, enumValues);
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Check if current step is valid
+  const isCurrentStepValid = Object.keys(validationErrors).length === 0;
 
   // Load step data from backend
   const loadStepData = async () => {
@@ -120,12 +155,22 @@ export function useStepData({
       },
     }));
     setIsDirty(true);
+
+    // Clear validation error for this field
+    if (validationErrors[fieldId]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldId];
+        return newErrors;
+      });
+    }
   };
 
   // Change current step
   const setCurrentStep = (stepIndex: number) => {
     setCurrentStepIndex(stepIndex);
     setIsDirty(false);
+    setValidationErrors({}); // Clear validation errors when changing steps
   };
 
   // Save current step to backend
@@ -216,6 +261,8 @@ export function useStepData({
     stepValues,
     allStepValues,
     completedSteps,
+    validationErrors,
+    isCurrentStepValid,
     isDirty,
     isSaving,
     error,
@@ -225,5 +272,6 @@ export function useStepData({
     saveCurrentStep,
     saveAllSteps,
     loadStepData,
+    validateCurrentStep,
   };
 }
