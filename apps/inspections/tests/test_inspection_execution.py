@@ -29,11 +29,13 @@ class InspectionExecutionTestCase(TestCase):
         """Set up test fixtures."""
         self.client = APIClient()
 
-        # Create test user
+        # Create test user (superuser to bypass permission checks in tests)
         self.user = User.objects.create_user(
             username='inspector',
             password='testpass123',
-            email='inspector@test.com'
+            email='inspector@test.com',
+            is_staff=True,
+            is_superuser=True
         )
         self.client.force_authenticate(user=self.user)
 
@@ -81,7 +83,7 @@ class InspectionExecutionTestCase(TestCase):
                 'steps': [
                     # SETUP step with various field types
                     {
-                        'step_id': 'setup_01',
+                        'step_key': 'setup_01',
                         'type': 'SETUP',
                         'title': 'Pre-Inspection Setup',
                         'fields': [
@@ -108,7 +110,7 @@ class InspectionExecutionTestCase(TestCase):
                     },
                     # VISUAL_INSPECTION step
                     {
-                        'step_id': 'visual_01',
+                        'step_key': 'visual_01',
                         'type': 'VISUAL_INSPECTION',
                         'title': 'Visual Inspection',
                         'fields': [
@@ -129,7 +131,7 @@ class InspectionExecutionTestCase(TestCase):
                     },
                     # MEASUREMENT step with NUMBER fields
                     {
-                        'step_id': 'measurement_01',
+                        'step_key': 'measurement_01',
                         'type': 'MEASUREMENT',
                         'title': 'Critical Measurements',
                         'fields': [
@@ -155,7 +157,7 @@ class InspectionExecutionTestCase(TestCase):
                     },
                     # FUNCTION_TEST step
                     {
-                        'step_id': 'function_01',
+                        'step_key': 'function_01',
                         'type': 'FUNCTION_TEST',
                         'title': 'Functional Tests',
                         'fields': [
@@ -175,7 +177,7 @@ class InspectionExecutionTestCase(TestCase):
                     },
                     # DEFECT_CAPTURE step
                     {
-                        'step_id': 'defects_01',
+                        'step_key': 'defects_01',
                         'type': 'DEFECT_CAPTURE',
                         'title': 'Defect Recording',
                         'fields': [
@@ -238,6 +240,13 @@ class StepDataManagementTests(InspectionExecutionTestCase):
             data=step_data,
             format='json'
         )
+
+        # Debug output
+        if response.status_code != status.HTTP_200_OK:
+            print(f"\nDEBUG: Response status: {response.status_code}")
+            print(f"DEBUG: Response data: {response.data}")
+            print(f"DEBUG: Inspection ID: {inspection.id}")
+            print(f"DEBUG: Inspection exists: {InspectionRun.objects.filter(id=inspection.id).exists()}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -366,8 +375,10 @@ class StepDataManagementTests(InspectionExecutionTestCase):
 
     def test_cannot_save_to_completed_inspection(self):
         """Test that completed inspections cannot be modified."""
+        from django.utils import timezone
+
         inspection = self.create_inspection()
-        inspection.status = 'COMPLETED'
+        inspection.finalized_at = timezone.now()
         inspection.save()
 
         step_data = {
