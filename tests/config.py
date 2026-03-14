@@ -87,6 +87,7 @@ EQUIPMENT_DATA = {
         'manufacturer': 'Terex',
         'model': 'HRX55',
         'year': 2020,
+        'engine_hours': 500,
         'capabilities': ['AERIAL_DEVICE'],
     },
     'minimal': {

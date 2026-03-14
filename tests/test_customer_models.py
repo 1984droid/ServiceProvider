@@ -122,8 +122,9 @@ class TestContactModel:
     def test_contact_creation_automated(self):
         """Test automated contact creation."""
         contact = ContactFactory.automated()
+        automated_data = get_test_data('contact', 'automated')
         assert contact.is_automated is True
-        assert contact.first_name == 'API'
+        assert contact.first_name == automated_data['first_name']
 
     def test_contact_str_representation(self, contact):
         """Test string representation."""
@@ -147,11 +148,10 @@ class TestContactModel:
 
     def test_contact_customer_required(self):
         """Test that customer field is required."""
+        minimal_data = get_test_data('contact', 'minimal')
         with pytest.raises(ValidationError):
             Contact.objects.create(
-                first_name='Test',
-                last_name='User',
-                email='test@example.com'
+                **minimal_data
                 # Missing customer FK
             )
 
