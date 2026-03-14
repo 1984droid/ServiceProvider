@@ -201,7 +201,7 @@ class TestEquipmentModel:
         equipment = EquipmentFactory.insulated_aerial()
         aerial_data = get_test_data('equipment', 'insulated_aerial')
         assert equipment.equipment_type == aerial_data['equipment_type']
-        assert equipment.equipment_type == 'AERIAL_DEVICE'
+        assert equipment.equipment_type == 'A92_2_AERIAL'
         assert 'DIELECTRIC' in equipment.capabilities
         assert equipment.equipment_data is not None
 

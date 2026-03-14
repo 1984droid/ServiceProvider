@@ -38,7 +38,7 @@ class WorkOrderMeterUpdateTest(TestCase):
         self.equipment = Equipment.objects.create(
             customer=self.customer,
             serial_number="EQUIP-12345",
-            equipment_type="AERIAL_DEVICE",
+            equipment_type="A92_2_AERIAL",
             manufacturer="JLG",
             model="600AJ",
             engine_hours=500

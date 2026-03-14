@@ -83,7 +83,7 @@ EQUIPMENT_DATA = {
     'default': {
         'serial_number': 'SN-ABC-12345',
         'asset_number': 'EQ-001',
-        'equipment_type': 'AERIAL_DEVICE',
+        'equipment_type': 'A92_2_AERIAL',
         'manufacturer': 'Terex',
         'model': 'HRX55',
         'year': 2020,
@@ -91,12 +91,12 @@ EQUIPMENT_DATA = {
     },
     'minimal': {
         'serial_number': 'SN-MIN-00001',
-        'equipment_type': 'AERIAL_DEVICE',
+        'equipment_type': 'A92_2_AERIAL',
     },
     'insulated_aerial': {
         'serial_number': 'SN-AERIAL-9999',
         'asset_number': 'EQ-100',
-        'equipment_type': 'AERIAL_DEVICE',
+        'equipment_type': 'A92_2_AERIAL',
         'manufacturer': 'Altec',
         'model': 'AT40G',
         'year': 2021,
@@ -341,7 +341,7 @@ WORK_ORDER_DATA = {
 VALID_CHOICES = {
     'states': ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'],
     'safety_ratings': ['SATISFACTORY', 'CONDITIONAL', 'UNSATISFACTORY'],
-    'equipment_types': ['AERIAL_DEVICE', 'CRANE', 'GENERATOR', 'COMPRESSOR', 'DIGGER_DERRICK'],
+    'equipment_types': ['A92_2_AERIAL', 'A92_20_SCISSOR', 'A92_20_BOOM', 'DIGGER_DERRICK', 'FORKLIFT'],
     'vehicle_tags': ['INSULATED_BOOM', 'DIELECTRIC', 'UTILITY_TRUCK', 'BUCKET_TRUCK', 'CRANE', 'HEAVY_DUTY'],
     'equipment_tags': ['AERIAL_DEVICE', 'INSULATED_BOOM', 'DIELECTRIC', 'CRANE', 'HYDRAULIC', 'PNEUMATIC'],
     'asset_types': ['VEHICLE', 'EQUIPMENT'],

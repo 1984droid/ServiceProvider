@@ -147,7 +147,7 @@ class TestTemplateApplicability:
     def test_get_applicable_templates_for_aerial_device(self):
         """Test getting applicable templates for aerial device equipment."""
         equipment = EquipmentFactory(
-            equipment_type='AERIAL_DEVICE',
+            equipment_type='A92_2_AERIAL',
             capabilities=['AERIAL_DEVICE'],
             equipment_data={}
         )
@@ -167,7 +167,7 @@ class TestTemplateApplicability:
     def test_get_applicable_templates_for_insulated_boom(self):
         """Test templates for equipment with insulating system."""
         equipment = EquipmentFactory(
-            equipment_type='AERIAL_DEVICE',
+            equipment_type='A92_2_AERIAL',
             capabilities=['AERIAL_DEVICE', 'INSULATING_SYSTEM'],
             equipment_data={}
         )
@@ -182,7 +182,7 @@ class TestTemplateApplicability:
         """Test that template readiness detects missing capabilities."""
         # Equipment without INSULATING_SYSTEM capability
         equipment = EquipmentFactory(
-            equipment_type='AERIAL_DEVICE',
+            equipment_type='A92_2_AERIAL',
             capabilities=['AERIAL_DEVICE'],
             equipment_data={}
         )
@@ -201,7 +201,7 @@ class TestTemplateApplicability:
     def test_template_readiness_with_all_requirements(self):
         """Test template readiness when all requirements met."""
         equipment = EquipmentFactory(
-            equipment_type='AERIAL_DEVICE',
+            equipment_type='A92_2_AERIAL',
             capabilities=['AERIAL_DEVICE', 'INSULATING_SYSTEM'],
             equipment_data={
                 'placard': {

@@ -122,7 +122,7 @@ class PDFExportTest(TestCase):
             customer=self.customer,
             serial_number='EQ-123456',
             asset_number='AER-001',
-            equipment_type='AERIAL_DEVICE',
+            equipment_type='A92_2_AERIAL',
             manufacturer='Altec',
             model='AT40G'
         )

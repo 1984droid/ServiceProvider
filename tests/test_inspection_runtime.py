@@ -27,7 +27,7 @@ class TestInspectionCreation:
 
     def test_create_inspection_for_equipment(self):
         equipment = EquipmentFactory(
-            equipment_type='AERIAL_DEVICE',
+            equipment_type='A92_2_AERIAL',
             capabilities=['DIELECTRIC']
         )
 
