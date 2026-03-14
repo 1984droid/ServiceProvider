@@ -205,5 +205,5 @@ class SaveStepResponseSerializer(serializers.Serializer):
 class FinalizeInspectionSerializer(serializers.Serializer):
     """Serializer for finalizing inspection."""
 
-    signature_data = serializers.JSONField(required=False, allow_null=True)
+    signature_data = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     force = serializers.BooleanField(default=False)

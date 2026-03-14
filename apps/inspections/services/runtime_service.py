@@ -321,10 +321,17 @@ class InspectionRuntime:
         inspection_run.finalized_at = timezone.now()
 
         if signature_data:
-            inspection_run.inspector_signature = {
-                **signature_data,
-                'signed_at': timezone.now().isoformat()
-            }
+            # Handle both string (base64 image) and dict signature data
+            if isinstance(signature_data, str):
+                inspection_run.inspector_signature = {
+                    'signature': signature_data,
+                    'signed_at': timezone.now().isoformat()
+                }
+            else:
+                inspection_run.inspector_signature = {
+                    **signature_data,
+                    'signed_at': timezone.now().isoformat()
+                }
 
         inspection_run.save()
 

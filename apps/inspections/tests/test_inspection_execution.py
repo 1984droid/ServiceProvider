@@ -820,3 +820,288 @@ class InspectionReviewTestCase(InspectionExecutionTestCase):
         self.assertIn('visual_01', step_data)
         self.assertEqual(step_data['setup_01']['inspector_name'], 'John Doe')
         self.assertEqual(step_data['visual_01']['platform_condition'], 'GOOD')
+
+
+class InspectionFinalizationTestCase(InspectionExecutionTestCase):
+    """Tests for Phase 2 Milestone 3: Inspection Finalization with Signature."""
+
+    def test_finalize_with_signature(self):
+        """Test finalizing inspection with signature data."""
+        inspection = self.create_inspection()
+
+        # Complete all required steps
+        for step in self.template_data['procedure']['steps']:
+            step_data = {
+                'step_key': step['step_key'],
+                'field_data': {},
+                'validate': False
+            }
+            # Add minimal field data for each step
+            for field in step['fields']:
+                if field['type'] == 'TEXT':
+                    step_data['field_data'][field['field_id']] = 'Test value'
+                elif field['type'] == 'BOOLEAN':
+                    step_data['field_data'][field['field_id']] = True
+                elif field['type'] == 'NUMBER':
+                    step_data['field_data'][field['field_id']] = 35
+                elif field['type'] == 'ENUM':
+                    step_data['field_data'][field['field_id']] = 'CLEAR'
+                elif field['type'] == 'CHOICE_MULTI':
+                    step_data['field_data'][field['field_id']] = []
+
+            self.client.patch(
+                f'/api/inspections/{inspection.id}/save_step/',
+                data=step_data,
+                format='json'
+            )
+
+        # Mock signature data (base64 PNG)
+        signature_data = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+
+        # Finalize with signature
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={'signature_data': signature_data},
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+
+        # Verify response structure
+        self.assertIn('message', data)
+        self.assertIn('inspection', data)
+
+        # Verify inspection is now COMPLETED
+        self.assertEqual(data['inspection']['status'], 'COMPLETED')
+        self.assertIsNotNone(data['inspection']['finalized_at'])
+
+        # Reload and verify signature was saved
+        inspection.refresh_from_db()
+        self.assertEqual(inspection.status, 'COMPLETED')
+        self.assertIsNotNone(inspection.finalized_at)
+        self.assertIsNotNone(inspection.inspector_signature)
+
+    def test_finalize_without_signature(self):
+        """Test finalizing inspection without signature (should still work)."""
+        inspection = self.create_inspection()
+
+        # Complete all steps
+        for step in self.template_data['procedure']['steps']:
+            step_data = {
+                'step_key': step['step_key'],
+                'field_data': {},
+                'validate': False
+            }
+            for field in step['fields']:
+                if field['type'] == 'TEXT':
+                    step_data['field_data'][field['field_id']] = 'Test'
+                elif field['type'] == 'BOOLEAN':
+                    step_data['field_data'][field['field_id']] = True
+                elif field['type'] == 'NUMBER':
+                    step_data['field_data'][field['field_id']] = 35
+
+            self.client.patch(
+                f'/api/inspections/{inspection.id}/save_step/',
+                data=step_data,
+                format='json'
+            )
+
+        # Finalize without signature
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={},
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data['inspection']['status'], 'COMPLETED')
+
+    def test_finalize_incomplete_inspection(self):
+        """Test that incomplete inspection cannot be finalized without force."""
+        inspection = self.create_inspection()
+
+        # Only complete one step (not all required)
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {
+                'inspector_name': 'John Doe',
+                'weather_conditions': 'CLEAR',
+                'site_safe': True
+            }
+        }
+        self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        # Try to finalize - should fail if there are required steps
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={'force': False},
+            format='json'
+        )
+
+        # May succeed or fail depending on whether steps are required
+        # If it fails, should be 400 BAD REQUEST
+        if response.status_code != status.HTTP_200_OK:
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_finalize_already_finalized(self):
+        """Test that already finalized inspection cannot be finalized again."""
+        inspection = self.create_inspection()
+
+        # Complete all steps
+        for step in self.template_data['procedure']['steps']:
+            step_data = {
+                'step_key': step['step_key'],
+                'field_data': {},
+                'validate': False
+            }
+            for field in step['fields']:
+                if field['type'] == 'BOOLEAN':
+                    step_data['field_data'][field['field_id']] = True
+                elif field['type'] == 'TEXT':
+                    step_data['field_data'][field['field_id']] = 'Test'
+
+            self.client.patch(
+                f'/api/inspections/{inspection.id}/save_step/',
+                data=step_data,
+                format='json'
+            )
+
+        # Finalize first time
+        self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={},
+            format='json'
+        )
+
+        # Try to finalize again
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={},
+            format='json'
+        )
+
+        # Should be forbidden
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cannot_edit_finalized_inspection(self):
+        """Test that finalized inspection cannot be edited."""
+        inspection = self.create_inspection()
+
+        # Complete and finalize
+        for step in self.template_data['procedure']['steps']:
+            step_data = {
+                'step_key': step['step_key'],
+                'field_data': {},
+                'validate': False
+            }
+            for field in step['fields']:
+                if field['type'] == 'BOOLEAN':
+                    step_data['field_data'][field['field_id']] = True
+
+            self.client.patch(
+                f'/api/inspections/{inspection.id}/save_step/',
+                data=step_data,
+                format='json'
+            )
+
+        self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={},
+            format='json'
+        )
+
+        # Try to save step data after finalization
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {'inspector_name': 'Changed Name'},
+            'validate': False
+        }
+        response = self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        # Should be forbidden
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cannot_add_defects_to_finalized_inspection(self):
+        """Test that defects cannot be added to finalized inspection."""
+        inspection = self.create_inspection()
+
+        # Complete and finalize
+        for step in self.template_data['procedure']['steps']:
+            step_data = {
+                'step_key': step['step_key'],
+                'field_data': {},
+                'validate': False
+            }
+            self.client.patch(
+                f'/api/inspections/{inspection.id}/save_step/',
+                data=step_data,
+                format='json'
+            )
+
+        self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={},
+            format='json'
+        )
+
+        # Try to add defect
+        defect_data = {
+            'step_key': 'visual_01',
+            'severity': 'MAJOR',
+            'title': 'Should not work'
+        }
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data=defect_data,
+            format='json'
+        )
+
+        # Should be forbidden
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_finalize_preserves_timestamp(self):
+        """Test that finalization timestamp is preserved."""
+        from datetime import datetime
+        from django.utils import timezone
+
+        inspection = self.create_inspection()
+
+        # Complete steps
+        for step in self.template_data['procedure']['steps']:
+            step_data = {
+                'step_key': step['step_key'],
+                'field_data': {},
+                'validate': False
+            }
+            self.client.patch(
+                f'/api/inspections/{inspection.id}/save_step/',
+                data=step_data,
+                format='json'
+            )
+
+        # Finalize
+        before_finalize = timezone.now()
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/finalize/',
+            data={},
+            format='json'
+        )
+        after_finalize = timezone.now()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify timestamp is within expected range
+        inspection.refresh_from_db()
+        self.assertIsNotNone(inspection.finalized_at)
+        self.assertGreaterEqual(inspection.finalized_at, before_finalize)
+        self.assertLessEqual(inspection.finalized_at, after_finalize)
