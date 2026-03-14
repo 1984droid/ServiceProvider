@@ -20,8 +20,9 @@ import { EquipmentCreatePage } from '@/features/assets/EquipmentCreatePage';
 import { InspectionsListPage } from '@/features/inspections/InspectionsListPage';
 import { InspectionExecutePage } from '@/features/inspections/InspectionExecutePage';
 import { EmployeeListPage } from '@/features/employees/EmployeeListPage';
+import { EmployeeFormPage } from '@/features/employees/EmployeeFormPage';
 
-type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'employees';
+type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'employees' | 'employees-create' | 'employees-edit';
 
 interface NavigationState {
   customerId?: string;
@@ -29,6 +30,7 @@ interface NavigationState {
   vehicleId?: string;
   equipmentId?: string;
   inspectionId?: string;
+  employeeId?: string;
 }
 
 function App() {
@@ -443,7 +445,26 @@ function App() {
             />
           )}
           {currentPage === 'employees' && (
-            <EmployeeListPage />
+            <EmployeeListPage
+              onNavigateToCreate={() => setCurrentPage('employees-create')}
+              onNavigateToDetail={(employeeId) => {
+                setNavState({ employeeId });
+                setCurrentPage('employees-edit');
+              }}
+            />
+          )}
+          {currentPage === 'employees-create' && (
+            <EmployeeFormPage
+              onSuccess={() => setCurrentPage('employees')}
+              onCancel={() => setCurrentPage('employees')}
+            />
+          )}
+          {currentPage === 'employees-edit' && navState.employeeId && (
+            <EmployeeFormPage
+              employeeId={navState.employeeId}
+              onSuccess={() => setCurrentPage('employees')}
+              onCancel={() => setCurrentPage('employees')}
+            />
           )}
           {currentPage === 'customers' && (
             <CustomerListPage
