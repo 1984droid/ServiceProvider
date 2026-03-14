@@ -3,7 +3,7 @@
  *
  * Main page for executing an inspection
  * Loads inspection run and template, orchestrates step navigation
- * Read-only for now (saving in Milestone 4)
+ * Integrated with useStepData hook for data management
  */
 
 import { useState, useEffect } from 'react';
@@ -12,6 +12,7 @@ import { InspectionHeader } from './InspectionHeader';
 import { InspectionStepper } from './InspectionStepper';
 import { InspectionActions } from './InspectionActions';
 import { StepRenderer } from './steps/StepRenderer';
+import { useStepData } from './hooks/useStepData';
 
 interface InspectionExecutePageProps {
   inspectionId: string;
@@ -63,11 +64,7 @@ export function InspectionExecutePage({
   const [template, setTemplate] = useState<InspectionTemplate | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Step data state (will be enhanced in Milestone 4)
-  const [stepValues, setStepValues] = useState<Record<string, any>>({});
-  const [completedSteps] = useState<Set<number>>(new Set());
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     loadInspectionData();
@@ -75,7 +72,7 @@ export function InspectionExecutePage({
 
   const loadInspectionData = async () => {
     setIsLoading(true);
-    setError(null);
+    setLoadError(null);
     try {
       // Load inspection run
       const runData = await inspectionsApi.get(inspectionId);
@@ -85,44 +82,85 @@ export function InspectionExecutePage({
       const templateData = await inspectionsApi.getTemplate(runData.template_key);
       setTemplate(templateData);
     } catch (err: any) {
-      setError(err.message || 'Failed to load inspection');
+      setLoadError(err.message || 'Failed to load inspection');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Initialize step data hook (only after template is loaded)
+  const stepData = useStepData({
+    inspectionId,
+    steps: template?.steps || [],
+    existingStepData: inspectionRun?.step_data || {},
+  });
+
   const handleStepClick = (index: number) => {
+    stepData.setCurrentStep(index);
     setCurrentStepIndex(index);
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
     if (currentStepIndex > 0) {
-      setCurrentStepIndex(currentStepIndex - 1);
+      // Auto-save current step before moving (Milestone 6 will add auto-save)
+      if (stepData.isDirty) {
+        try {
+          await stepData.saveCurrentStep(false); // Don't validate on navigation
+        } catch (err) {
+          // Continue navigation even if save fails
+          console.error('Failed to auto-save step:', err);
+        }
+      }
+
+      const newIndex = currentStepIndex - 1;
+      stepData.setCurrentStep(newIndex);
+      setCurrentStepIndex(newIndex);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (template && currentStepIndex < template.steps.length - 1) {
-      setCurrentStepIndex(currentStepIndex + 1);
+      // Auto-save current step before moving
+      if (stepData.isDirty) {
+        try {
+          await stepData.saveCurrentStep(false); // Don't validate on navigation
+        } catch (err) {
+          // Continue navigation even if save fails
+          console.error('Failed to auto-save step:', err);
+        }
+      }
+
+      const newIndex = currentStepIndex + 1;
+      stepData.setCurrentStep(newIndex);
+      setCurrentStepIndex(newIndex);
     }
   };
 
-  const handleSaveAndExit = () => {
-    // TODO: Implement in Milestone 4 (manual save)
-    console.log('Save and exit - will implement in Milestone 4');
-    onExit();
+  const handleSaveDraft = async () => {
+    try {
+      await stepData.saveCurrentStep(false);
+    } catch (err: any) {
+      // Error is already set in stepData.error
+      console.error('Failed to save draft:', err);
+    }
   };
 
-  const handleComplete = () => {
-    // TODO: Implement in Milestone 7 (validation + completion)
+  const handleSaveAndExit = async () => {
+    try {
+      // Save current step
+      if (stepData.isDirty) {
+        await stepData.saveCurrentStep(false);
+      }
+      onExit();
+    } catch (err: any) {
+      alert(`Failed to save: ${err.message}`);
+    }
+  };
+
+  const handleComplete = async () => {
+    // TODO: Add validation in Milestone 7
+    // TODO: Add finalize API call in Milestone 7
     console.log('Complete inspection - will implement in Milestone 7');
-  };
-
-  const handleFieldChange = (fieldId: string, value: any) => {
-    setStepValues(prev => ({
-      ...prev,
-      [fieldId]: value,
-    }));
   };
 
   // Loading state
@@ -138,7 +176,7 @@ export function InspectionExecutePage({
   }
 
   // Error state
-  if (error || !inspectionRun || !template) {
+  if (loadError || !inspectionRun || !template) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center max-w-md">
@@ -148,7 +186,7 @@ export function InspectionExecutePage({
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to Load Inspection</h3>
-          <p className="text-sm text-gray-600 mb-4">{error || 'Inspection not found'}</p>
+          <p className="text-sm text-gray-600 mb-4">{loadError || 'Inspection not found'}</p>
           <button
             onClick={onExit}
             className="px-4 py-2 text-sm font-medium text-white rounded"
@@ -190,18 +228,23 @@ export function InspectionExecutePage({
             steps={template.steps}
             currentStepIndex={currentStepIndex}
             onStepClick={handleStepClick}
-            completedSteps={completedSteps}
+            completedSteps={stepData.completedSteps}
           />
         </div>
 
         {/* Center - Current Step Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          {stepData.error && (
+            <div className="mb-4 p-3 rounded" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>
+              <p className="text-sm">{stepData.error}</p>
+            </div>
+          )}
           <StepRenderer
             step={currentStep}
             currentIndex={currentStepIndex}
             totalSteps={template.steps.length}
-            values={stepValues}
-            onChange={handleFieldChange}
+            values={stepData.stepValues}
+            onChange={stepData.setFieldValue}
             enumValues={template.enums || {}}
             measurementSets={template.measurement_sets || {}}
           />
@@ -215,8 +258,12 @@ export function InspectionExecutePage({
           totalSteps={template.steps.length}
           onPrevious={handlePrevious}
           onNext={handleNext}
+          onSaveDraft={handleSaveDraft}
           onSaveAndExit={handleSaveAndExit}
           onComplete={handleComplete}
+          isSaving={stepData.isSaving}
+          isDirty={stepData.isDirty}
+          lastSaved={stepData.lastSaved}
         />
       </div>
     </div>
