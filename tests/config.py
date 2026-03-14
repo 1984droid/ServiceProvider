@@ -1,65 +1,65 @@
 """
 Test Configuration - Single source of truth for all test data.
 
-NO HARDCODED VALUES IN TESTS! All test data comes from this config.
-This allows tests to grow with the application without breaking.
+NO HARDCODED VALUES IN TESTS! All test data comes from seed_config.
+This ensures tests use the SAME data as the running application.
 """
+import sys
+import os
 
-# Customer Test Data
+# Add apps directory to path so we can import seed_config
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from apps.organization.management.commands.seed_config import SeedConfig
+
+# ============================================================================
+# Customer Test Data - From Seed Config
+# ============================================================================
 CUSTOMER_DATA = {
-    'default': {
-        'name': 'Acme Utilities',
-        'legal_name': 'Acme Utilities Corporation',
-        'address_line1': '123 Main Street',
-        'city': 'Springfield',
-        'state': 'IL',
-        'postal_code': '62701',
-        'country': 'US',
-        'usdot_number': '123456',
-        'mc_number': 'MC654321',
-    },
-    'minimal': {
-        'name': 'Simple Co',
-    },
-    'with_usdot': {
-        'name': 'USDOT Carrier',
-        'usdot_number': '999888',
-    },
+    'default': SeedConfig.CUSTOMERS[0],  # Midwest Express Logistics
+    'minimal': {'name': SeedConfig.CUSTOMERS[0]['name']},
+    'with_usdot': SeedConfig.CUSTOMERS[1],  # Northern Freight Solutions
 }
 
-# Contact Test Data
+# ============================================================================
+# Contact Test Data - From Seed Config
+# ============================================================================
 CONTACT_DATA = {
     'default': {
-        'first_name': 'John',
-        'last_name': 'Smith',
-        'title': 'Fleet Manager',
+        'first_name': SeedConfig.CONTACT_TEMPLATES[0]['first_names'][0],
+        'last_name': SeedConfig.CONTACT_TEMPLATES[0]['last_names'][0],
+        'title': SeedConfig.CONTACT_TEMPLATES[0]['role'],
         'email': 'john.smith@example.com',
         'phone': '555-0100',
         'mobile': '555-0101',
-        'receive_invoices': True,
-        'receive_service_updates': True,
+        'receive_invoices': SeedConfig.CONTACT_TEMPLATES[0]['receive_invoices'],
+        'receive_service_updates': SeedConfig.CONTACT_TEMPLATES[0]['receive_service_updates'],
+        'receive_estimates': SeedConfig.CONTACT_TEMPLATES[0]['receive_estimates'],
+        'receive_inspection_reports': SeedConfig.CONTACT_TEMPLATES[0]['receive_inspection_reports'],
     },
     'minimal': {
-        'first_name': 'Jane',
-        'last_name': 'Doe',
+        'first_name': SeedConfig.CONTACT_TEMPLATES[1]['first_names'][0],
+        'last_name': SeedConfig.CONTACT_TEMPLATES[1]['last_names'][0],
         'email': 'jane@example.com',
     },
     'automated': {
-        'first_name': 'API',
-        'last_name': 'System',
+        'first_name': SeedConfig.AUTOMATED_CONTACT['first_name'],
+        'last_name': SeedConfig.AUTOMATED_CONTACT['last_name'],
         'email': 'api@example.com',
-        'is_automated': True,
+        'is_automated': SeedConfig.AUTOMATED_CONTACT['is_automated'],
     },
 }
 
-# Vehicle Test Data
+# ============================================================================
+# Vehicle Test Data - From Seed Config
+# ============================================================================
 VEHICLE_DATA = {
     'default': {
         'vin': '1HGCM82633A123456',
         'unit_number': 'T-001',
-        'year': 2020,
-        'make': 'Ford',
-        'model': 'F-350',
+        'year': SeedConfig.VEHICLE_CONFIG['year_range'][1],  # 2024
+        'make': list(SeedConfig.VEHICLE_CONFIG['makes_models'].keys())[0],  # Freightliner
+        'model': SeedConfig.VEHICLE_CONFIG['makes_models']['Freightliner'][0],  # Cascadia
         'license_plate': 'ABC1234',
         'odometer_miles': 50000,
         'engine_hours': 2500,
@@ -71,36 +71,41 @@ VEHICLE_DATA = {
     'insulated_boom': {
         'vin': '1HGCM82633A111111',
         'unit_number': 'T-100',
-        'year': 2021,
+        'year': SeedConfig.VEHICLE_CONFIG['year_range'][1] - 3,  # 2021
         'make': 'International',
         'model': '4300',
         'capabilities': ['INSULATED_BOOM', 'DIELECTRIC'],
     },
 }
 
-# Equipment Test Data
+# ============================================================================
+# Equipment Test Data - From Seed Config
+# ============================================================================
+_equipment_type = list(SeedConfig.EQUIPMENT_CONFIG['types'].keys())[0]  # A92_2_AERIAL
+_manufacturer = SeedConfig.EQUIPMENT_CONFIG['types'][_equipment_type]['manufacturers'][0]  # Altec
+
 EQUIPMENT_DATA = {
     'default': {
         'serial_number': 'SN-ABC-12345',
         'asset_number': 'EQ-001',
-        'equipment_type': 'A92_2_AERIAL',
-        'manufacturer': 'Terex',
-        'model': 'HRX55',
-        'year': 2020,
+        'equipment_type': _equipment_type,
+        'manufacturer': _manufacturer,
+        'model': SeedConfig.EQUIPMENT_CONFIG['types'][_equipment_type]['models'][_manufacturer][0],
+        'year': SeedConfig.EQUIPMENT_CONFIG['year_range'][1],  # 2023
         'engine_hours': 500,
         'capabilities': ['AERIAL_DEVICE'],
     },
     'minimal': {
         'serial_number': 'SN-MIN-00001',
-        'equipment_type': 'A92_2_AERIAL',
+        'equipment_type': _equipment_type,
     },
     'insulated_aerial': {
         'serial_number': 'SN-AERIAL-9999',
         'asset_number': 'EQ-100',
-        'equipment_type': 'A92_2_AERIAL',
+        'equipment_type': _equipment_type,
         'manufacturer': 'Altec',
         'model': 'AT40G',
-        'year': 2021,
+        'year': SeedConfig.EQUIPMENT_CONFIG['year_range'][1] - 2,  # 2021
         'capabilities': ['DIELECTRIC'],
         'equipment_data': {
             'placard_data': {
@@ -119,7 +124,9 @@ EQUIPMENT_DATA = {
     },
 }
 
+# ============================================================================
 # VIN Decode Test Data
+# ============================================================================
 VIN_DECODE_DATA = {
     'default': {
         'vin': '1HGCM82633A123456',
@@ -145,26 +152,30 @@ VIN_DECODE_DATA = {
     },
 }
 
-# USDOT Profile Test Data
+# ============================================================================
+# USDOT Profile Test Data - From Seed Config
+# ============================================================================
 USDOT_PROFILE_DATA = {
     'default': {
-        'usdot_number': '123456',
-        'mc_number': 'MC654321',
-        'legal_name': 'Acme Utilities Corporation',
-        'dba_name': 'Acme Utilities',
-        'physical_address': '123 Main Street',
-        'physical_city': 'Springfield',
-        'physical_state': 'IL',
-        'physical_zip': '62701',
+        'usdot_number': SeedConfig.CUSTOMERS[0]['usdot_number'],
+        'mc_number': SeedConfig.CUSTOMERS[0]['mc_number'],
+        'legal_name': SeedConfig.CUSTOMERS[0]['legal_name'],
+        'dba_name': SeedConfig.CUSTOMERS[0]['name'],
+        'physical_address': SeedConfig.CUSTOMERS[0]['address_line1'],
+        'physical_city': SeedConfig.CUSTOMERS[0]['city'],
+        'physical_state': SeedConfig.CUSTOMERS[0]['state'],
+        'physical_zip': SeedConfig.CUSTOMERS[0]['postal_code'],
         'phone': '555-0200',
-        'email': 'dispatch@acmeutilities.com',
+        'email': f"info@{SeedConfig.sanitize_for_domain(SeedConfig.CUSTOMERS[0]['name'])}.com",
         'safety_rating': 'SATISFACTORY',
         'total_power_units': 25,
         'total_drivers': 30,
     },
 }
 
+# ============================================================================
 # Inspection Run Test Data
+# ============================================================================
 INSPECTION_RUN_DATA = {
     'default': {
         'asset_type': 'EQUIPMENT',
@@ -172,7 +183,7 @@ INSPECTION_RUN_DATA = {
         'program_key': 'ANSI_A92_2',
         'status': 'DRAFT',
         'started_at': '2025-01-15T08:00:00Z',
-        'inspector_name': 'John Smith',
+        'inspector_name': f"{SeedConfig.EMPLOYEES[0]['first_name']} {SeedConfig.EMPLOYEES[0]['last_name']}",
         'template_snapshot': {
             'template_key': 'ansi_a92_2_periodic',
             'template_version': '1.0',
@@ -199,7 +210,7 @@ INSPECTION_RUN_DATA = {
         'program_key': 'ANSI_A92_2',
         'status': 'IN_PROGRESS',
         'started_at': '2025-01-15T08:00:00Z',
-        'inspector_name': 'Jane Doe',
+        'inspector_name': f"{SeedConfig.EMPLOYEES[1]['first_name']} {SeedConfig.EMPLOYEES[1]['last_name']}",
         'template_snapshot': {
             'template_key': 'ansi_a92_2_periodic',
             'template_version': '1.0',
@@ -219,11 +230,11 @@ INSPECTION_RUN_DATA = {
         'status': 'COMPLETED',
         'started_at': '2025-01-15T08:00:00Z',
         'finalized_at': '2025-01-15T10:30:00Z',
-        'inspector_name': 'Bob Johnson',
+        'inspector_name': f"{SeedConfig.EMPLOYEES[2]['first_name']} {SeedConfig.EMPLOYEES[2]['last_name']}",
         'inspector_signature': {
             'signature_data': 'base64_signature_here',
             'signed_at': '2025-01-15T10:30:00Z',
-            'signed_by': 'Bob Johnson',
+            'signed_by': f"{SeedConfig.EMPLOYEES[2]['first_name']} {SeedConfig.EMPLOYEES[2]['last_name']}",
             'ip_address': '192.168.1.100',
         },
         'template_snapshot': {
@@ -238,7 +249,9 @@ INSPECTION_RUN_DATA = {
     },
 }
 
+# ============================================================================
 # Inspection Defect Test Data
+# ============================================================================
 INSPECTION_DEFECT_DATA = {
     'critical': {
         'module_key': 'visual_inspection',
@@ -296,7 +309,9 @@ INSPECTION_DEFECT_DATA = {
     },
 }
 
+# ============================================================================
 # Work Order Test Data
+# ============================================================================
 WORK_ORDER_DATA = {
     'default': {
         'asset_type': 'EQUIPMENT',
@@ -338,11 +353,13 @@ WORK_ORDER_DATA = {
     },
 }
 
-# Valid Values for Choice Fields
+# ============================================================================
+# Valid Values for Choice Fields - From Seed Config
+# ============================================================================
 VALID_CHOICES = {
     'states': ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'],
-    'safety_ratings': ['SATISFACTORY', 'CONDITIONAL', 'UNSATISFACTORY'],
-    'equipment_types': ['A92_2_AERIAL', 'A92_20_SCISSOR', 'A92_20_BOOM', 'DIGGER_DERRICK', 'FORKLIFT'],
+    'safety_ratings': SeedConfig.USDOT_CONFIG['safety_ratings'],
+    'equipment_types': list(SeedConfig.EQUIPMENT_CONFIG['types'].keys()),
     'vehicle_tags': ['INSULATED_BOOM', 'DIELECTRIC', 'UTILITY_TRUCK', 'BUCKET_TRUCK', 'CRANE', 'HEAVY_DUTY'],
     'equipment_tags': ['AERIAL_DEVICE', 'INSULATED_BOOM', 'DIELECTRIC', 'CRANE', 'HYDRAULIC', 'PNEUMATIC'],
     'asset_types': ['VEHICLE', 'EQUIPMENT'],
@@ -354,7 +371,9 @@ VALID_CHOICES = {
     'work_order_sources': ['INSPECTION', 'CUSTOMER_REQUEST', 'PM_SCHEDULE', 'BREAKDOWN'],
 }
 
+# ============================================================================
 # Test VINs (valid format for testing)
+# ============================================================================
 TEST_VINS = [
     '1HGCM82633A123456',
     '1HGCM82633A654321',
@@ -366,7 +385,9 @@ TEST_VINS = [
     'WBAPH7C51BE123456',
 ]
 
+# ============================================================================
 # Test Serial Numbers
+# ============================================================================
 TEST_SERIAL_NUMBERS = [
     'SN-ABC-12345',
     'SN-MIN-00001',
@@ -376,14 +397,18 @@ TEST_SERIAL_NUMBERS = [
     'SN-TEST-0003',
 ]
 
+# ============================================================================
 # API Test Configuration
+# ============================================================================
 API_CONFIG = {
     'page_size': 10,
     'max_page_size': 100,
     'throttle_rate': '100/hour',
 }
 
+# ============================================================================
 # Validation Rules (for testing constraints)
+# ============================================================================
 VALIDATION_RULES = {
     'vin_length': 17,
     'state_code_length': 2,
@@ -392,7 +417,9 @@ VALIDATION_RULES = {
     'email_regex': r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
 }
 
+# ============================================================================
 # Database Constraints (for testing)
+# ============================================================================
 CONSTRAINTS = {
     'unique_fields': {
         'customer': ['usdot_number', 'mc_number'],
@@ -442,7 +469,9 @@ CONSTRAINTS = {
     },
 }
 
+# ============================================================================
 # Test User Credentials
+# ============================================================================
 TEST_USERS = {
     'admin': {
         'username': 'admin',
@@ -460,7 +489,9 @@ TEST_USERS = {
     },
 }
 
+# ============================================================================
 # Expected Error Messages (for validation testing)
+# ============================================================================
 ERROR_MESSAGES = {
     'vin_length': 'VIN must be exactly 17 characters',
     'vin_unique': 'Vehicle with VIN {vin} already exists',
@@ -470,44 +501,22 @@ ERROR_MESSAGES = {
     'email_required_automated': 'Automated contacts must have an email address',
 }
 
-# Company Test Data
+# ============================================================================
+# Company Test Data - From Seed Config
+# ============================================================================
 COMPANY_DATA = {
-    'default': {
-        'name': 'Test Service Company LLC',
-        'dba_name': 'TestCo Service',
-        'phone': '555-0100',
-        'email': 'info@testco.com',
-        'website': 'https://testco.com',
-        'address_line1': '100 Industrial Parkway',
-        'address_line2': 'Suite 200',
-        'city': 'Springfield',
-        'state': 'IL',
-        'zip_code': '62701',
-        'tax_id': '12-3456789',
-        'usdot_number': '9876543',
-        'settings': {},
-    },
+    'default': SeedConfig.COMPANY,
     'minimal': {
-        'name': 'Minimal Company',
+        'name': SeedConfig.COMPANY['name'],
     },
 }
 
-# Department Test Data
+# ============================================================================
+# Department Test Data - From Seed Config
+# ============================================================================
 DEPARTMENT_DATA = {
-    'default': {
-        'name': 'Service',
-        'code': 'SRV',
-        'description': 'Service and repair department',
-        'is_active': True,
-        'allows_floating': True,
-    },
-    'inspection': {
-        'name': 'Inspection',
-        'code': 'INSP',
-        'description': 'Equipment inspection department',
-        'is_active': True,
-        'allows_floating': True,
-    },
+    'default': SeedConfig.DEPARTMENTS[0],  # Inspections
+    'inspection': SeedConfig.DEPARTMENTS[0],  # Inspections
     'parts': {
         'name': 'Parts',
         'code': 'PART',
@@ -516,35 +525,37 @@ DEPARTMENT_DATA = {
         'allows_floating': False,
     },
     'minimal': {
-        'name': 'Admin',
-        'code': 'ADM',
+        'name': SeedConfig.DEPARTMENTS[3]['name'],  # Administration
+        'code': SeedConfig.DEPARTMENTS[3]['code'],
     },
 }
 
-# Employee Test Data
+# ============================================================================
+# Employee Test Data - From Seed Config
+# ============================================================================
 EMPLOYEE_DATA = {
     'default': {
-        'employee_number': 'E001',
-        'first_name': 'John',
-        'last_name': 'Smith',
-        'email': 'john.smith@testco.com',
-        'phone': '555-0101',
-        'title': 'Lead Technician',
+        'employee_number': SeedConfig.EMPLOYEES[0]['employee_number'],
+        'first_name': SeedConfig.EMPLOYEES[0]['first_name'],
+        'last_name': SeedConfig.EMPLOYEES[0]['last_name'],
+        'email': SeedConfig.EMPLOYEES[0]['email'],
+        'phone': SeedConfig.EMPLOYEES[0]['phone'],
+        'title': SeedConfig.EMPLOYEES[0]['title'],
         'is_active': True,
-        'certifications': ['ASE Master', 'CDL Class A'],
-        'skills': ['Diesel Repair', 'Hydraulics', 'Electrical'],
+        'certifications': [],
+        'skills': SeedConfig.EMPLOYEES[0]['skills'],
         'settings': {},
     },
     'inspector': {
-        'employee_number': 'E002',
-        'first_name': 'Jane',
-        'last_name': 'Doe',
-        'email': 'jane.doe@testco.com',
-        'phone': '555-0102',
-        'title': 'Senior Inspector',
+        'employee_number': SeedConfig.EMPLOYEES[1]['employee_number'],
+        'first_name': SeedConfig.EMPLOYEES[1]['first_name'],
+        'last_name': SeedConfig.EMPLOYEES[1]['last_name'],
+        'email': SeedConfig.EMPLOYEES[1]['email'],
+        'phone': SeedConfig.EMPLOYEES[1]['phone'],
+        'title': SeedConfig.EMPLOYEES[1]['title'],
         'is_active': True,
-        'certifications': ['ANSI A92.2', 'IPAF'],
-        'skills': ['Aerial Inspections', 'Report Writing'],
+        'certifications': [],
+        'skills': SeedConfig.EMPLOYEES[1]['skills'],
         'settings': {},
     },
     'minimal': {
