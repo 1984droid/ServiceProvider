@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { employeesApi, type Employee } from '@/api/employees.api';
+import { EmployeeUserAccessButton } from './EmployeeUserAccessButton';
 
 interface EmployeeListPageProps {
   onNavigateToDetail?: (employeeId: string) => void;
@@ -253,13 +254,19 @@ export function EmployeeListPage({
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => onNavigateToDetail && onNavigateToDetail(employee.id)}
-                        className="text-sm font-medium hover:underline"
-                        style={{ color: '#7ed321' }}
-                      >
-                        View
-                      </button>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => onNavigateToDetail && onNavigateToDetail(employee.id)}
+                          className="text-sm font-medium hover:underline"
+                          style={{ color: '#7ed321' }}
+                        >
+                          Edit
+                        </button>
+                        <EmployeeUserAccessButton
+                          employee={employee}
+                          onSuccess={loadEmployees}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))
