@@ -179,4 +179,15 @@ export const inspectionsApi = {
     const response = await apiClient.get(`/inspections/${id}/review/`);
     return response.data;
   },
+
+  /**
+   * Finalize an inspection (make immutable)
+   */
+  async finalize(id: string, signatureData?: string | null): Promise<{ message: string; inspection: InspectionRun }> {
+    const response = await apiClient.post(`/inspections/${id}/finalize/`, {
+      signature_data: signatureData,
+      force: false,
+    });
+    return response.data;
+  },
 };

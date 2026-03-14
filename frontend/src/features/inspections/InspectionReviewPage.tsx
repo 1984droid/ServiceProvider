@@ -10,6 +10,7 @@ import { inspectionsApi } from '@/api/inspections.api';
 import { InspectionHeader } from './InspectionHeader';
 import { StepRenderer } from './steps/StepRenderer';
 import { DefectBadge } from './defects/DefectBadge';
+import { FinalizeInspectionModal } from './FinalizeInspectionModal';
 
 interface InspectionReviewPageProps {
   inspectionId: string;
@@ -34,6 +35,7 @@ export function InspectionReviewPage({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
 
   useEffect(() => {
     loadReviewData();
@@ -49,6 +51,14 @@ export function InspectionReviewPage({
       setLoadError(err.message || 'Failed to load inspection review');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFinalize = async (signatureData: string | null) => {
+    await inspectionsApi.finalize(inspectionId, signatureData);
+    setShowFinalizeModal(false);
+    if (onFinalize) {
+      onFinalize();
     }
   };
 
@@ -110,9 +120,9 @@ export function InspectionReviewPage({
             </p>
           </div>
           <div className="flex gap-3">
-            {completion.is_ready_to_finalize && onFinalize && (
+            {completion.is_ready_to_finalize && (
               <button
-                onClick={onFinalize}
+                onClick={() => setShowFinalizeModal(true)}
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-medium"
               >
                 Finalize Inspection
@@ -273,6 +283,18 @@ export function InspectionReviewPage({
           </div>
         </div>
       </div>
+
+      {/* Finalize Modal */}
+      {reviewData && (
+        <FinalizeInspectionModal
+          inspectionId={inspectionId}
+          completionStatus={completion}
+          defectSummary={defects.summary}
+          onFinalize={handleFinalize}
+          onCancel={() => setShowFinalizeModal(false)}
+          isOpen={showFinalizeModal}
+        />
+      )}
     </div>
   );
 }
