@@ -22,8 +22,10 @@ import { InspectionExecutePage } from '@/features/inspections/InspectionExecuteP
 import { InspectionReviewPage } from '@/features/inspections/InspectionReviewPage';
 import { EmployeeListPage } from '@/features/employees/EmployeeListPage';
 import { EmployeeFormPage } from '@/features/employees/EmployeeFormPage';
+import { WorkOrdersListPage } from '@/features/work-orders/WorkOrdersListPage';
+import { WorkOrderDetailPage } from '@/features/work-orders/WorkOrderDetailPage';
 
-type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'inspection-review' | 'employees' | 'employees-create' | 'employees-edit';
+type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'inspection-review' | 'work-orders' | 'work-order-detail' | 'employees' | 'employees-create' | 'employees-edit';
 
 interface NavigationState {
   customerId?: string;
@@ -31,6 +33,7 @@ interface NavigationState {
   vehicleId?: string;
   equipmentId?: string;
   inspectionId?: string;
+  workOrderId?: string;
   employeeId?: string;
 }
 
@@ -77,6 +80,11 @@ function App() {
   const navigateToInspectionReview = (inspectionId: string) => {
     setNavState({ inspectionId });
     setCurrentPage('inspection-review');
+  };
+
+  const navigateToWorkOrder = (workOrderId: string) => {
+    setNavState({ workOrderId });
+    setCurrentPage('work-order-detail');
   };
 
   useEffect(() => {
@@ -299,6 +307,20 @@ function App() {
                     {!sidebarCollapsed && <span>Inspections</span>}
                   </button>
                   <button
+                    onClick={() => setCurrentPage('work-orders')}
+                    className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
+                    style={{
+                      backgroundColor: currentPage === 'work-orders' || currentPage === 'work-order-detail' ? '#f0fdf4' : 'transparent',
+                      color: currentPage === 'work-orders' || currentPage === 'work-order-detail' ? '#15803d' : '#6b7280'
+                    }}
+                    title="Work Orders"
+                  >
+                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                    </svg>
+                    {!sidebarCollapsed && <span>Work Orders</span>}
+                  </button>
+                  <button
                     onClick={() => setCurrentPage('employees')}
                     className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
                     style={{
@@ -462,6 +484,15 @@ function App() {
                 setCurrentPage('inspections');
                 setNavState({});
               }}
+            />
+          )}
+          {currentPage === 'work-orders' && (
+            <WorkOrdersListPage onNavigateToDetail={navigateToWorkOrder} />
+          )}
+          {currentPage === 'work-order-detail' && navState.workOrderId && (
+            <WorkOrderDetailPage
+              workOrderId={navState.workOrderId}
+              onBack={() => setCurrentPage('work-orders')}
             />
           )}
           {currentPage === 'employees' && (
