@@ -2,13 +2,15 @@
  * Authentication Hook
  *
  * Custom hook for authentication operations using TanStack Query.
+ *
+ * NOTE: This app uses custom state-based navigation, not React Router.
+ * Navigation callbacks are handled by the caller, not by this hook.
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/auth.api';
 import type { LoginRequest, ChangePasswordRequest, RegisterRequest } from '@/api/auth.api';
 import { useAuthStore } from '@/store/authStore';
-import { useNavigate } from '@tanstack/react-router';
 
 export const AUTH_QUERY_KEYS = {
   currentUser: ['auth', 'currentUser'] as const,
@@ -18,7 +20,6 @@ export const AUTH_QUERY_KEYS = {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const { user, isAuthenticated, setUser, setLoading, logout: clearAuthState } = useAuthStore();
 
   // Query: Get current user
@@ -43,7 +44,7 @@ export function useAuth() {
     onSuccess: (data) => {
       setUser(data.user);
       queryClient.setQueryData(AUTH_QUERY_KEYS.currentUser, data.user);
-      navigate({ to: '/' });
+      // Navigation handled by caller (App.tsx watches isAuthenticated state)
     },
   });
 
@@ -53,7 +54,7 @@ export function useAuth() {
     onSuccess: () => {
       clearAuthState();
       queryClient.clear();
-      navigate({ to: '/login' });
+      // Navigation handled by caller (App.tsx watches isAuthenticated state)
     },
   });
 
