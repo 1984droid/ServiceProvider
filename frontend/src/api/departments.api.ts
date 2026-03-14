@@ -27,10 +27,10 @@ export const departmentsApi = {
     is_active?: boolean;
     search?: string;
   }): Promise<Department[]> {
-    const response = await apiClient.get<Department[]>('/departments/', {
+    const response = await apiClient.get<{ results: Department[] }>('/departments/', {
       params
     });
-    return response.data;
+    return response.data.results;
   },
 
   /**

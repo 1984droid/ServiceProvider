@@ -308,6 +308,141 @@ class ContactViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(contact)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def create_user(self, request, pk=None):
+        """
+        Create a user account for this contact (customer portal access).
+
+        Request body:
+            username (optional): If not provided, auto-generates from email or contact name
+            password (optional): If not provided, generates random password
+            send_email (optional, default=True): Whether to send welcome email
+
+        Returns user account info and temporary password if generated.
+        """
+        from django.contrib.auth import get_user_model
+        from django.db import transaction
+        import secrets
+        import string
+
+        User = get_user_model()
+        contact = self.get_object()
+
+        # Check if contact already has a user
+        if contact.user:
+            return Response(
+                {'error': 'Contact already has a user account'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get or generate username
+        username = request.data.get('username')
+        if not username:
+            # Auto-generate from email or contact name
+            if contact.email:
+                username = contact.email.split('@')[0]
+            else:
+                username = f"{contact.first_name.lower()}{contact.last_name.lower()}"
+
+            # Ensure uniqueness
+            base_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            return Response(
+                {'error': f'Username "{username}" already exists'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get or generate password
+        password = request.data.get('password')
+        temp_password = None
+        if not password:
+            # Generate random password
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(12))
+            temp_password = password
+
+        # Create user and link to contact
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                email=contact.email or '',
+                first_name=contact.first_name,
+                last_name=contact.last_name,
+            )
+
+            contact.user = user
+            contact.save(update_fields=['user', 'updated_at'])
+
+        response_data = {
+            'message': f'User account created for {contact.full_name}',
+            'contact_id': str(contact.id),
+            'username': username,
+        }
+
+        if temp_password:
+            response_data['temporary_password'] = temp_password
+            response_data['password_note'] = 'This password is shown only once. Please save it securely.'
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def revoke_user(self, request, pk=None):
+        """
+        Revoke user account access for this contact (customer portal access).
+
+        This deactivates the user account but preserves the contact record.
+        The user link is removed so a new account could be created later if needed.
+
+        Request body:
+            delete_user (optional, default=False): If true, deletes the user account entirely
+        """
+        from django.contrib.auth import get_user_model
+        from django.db import transaction
+
+        User = get_user_model()
+        contact = self.get_object()
+
+        if not contact.user:
+            return Response(
+                {'error': 'Contact does not have a user account'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = contact.user
+        delete_user = request.data.get('delete_user', False)
+
+        with transaction.atomic():
+            if delete_user:
+                # Completely delete the user account
+                username = user.username
+                contact.user = None
+                contact.save(update_fields=['user', 'updated_at'])
+                user.delete()
+
+                return Response({
+                    'message': f'User account "{username}" has been deleted',
+                    'contact_id': str(contact.id),
+                })
+            else:
+                # Deactivate user and unlink from contact
+                user.is_active = False
+                user.save(update_fields=['is_active'])
+
+                contact.user = None
+                contact.save(update_fields=['user', 'updated_at'])
+
+                return Response({
+                    'message': f'User account "{user.username}" has been revoked (deactivated and unlinked)',
+                    'contact_id': str(contact.id),
+                })
+
 
 class USDOTProfileViewSet(viewsets.ModelViewSet):
     """

@@ -15,6 +15,8 @@ class ContactListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing contacts"""
     is_primary = serializers.BooleanField(read_only=True)
     full_name = serializers.CharField(read_only=True)
+    has_user_account = serializers.SerializerMethodField()
+    user_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Contact
@@ -30,8 +32,25 @@ class ContactListSerializer(serializers.ModelSerializer):
             'is_primary',
             'is_automated',
             'is_active',
+            'has_user_account',
+            'user_info',
         ]
-        read_only_fields = ['id', 'is_primary', 'full_name']
+        read_only_fields = ['id', 'is_primary', 'full_name', 'has_user_account', 'user_info']
+
+    def get_has_user_account(self, obj):
+        """Check if contact has a linked user account"""
+        return obj.user is not None
+
+    def get_user_info(self, obj):
+        """Get user account info if exists"""
+        if obj.user:
+            return {
+                'id': str(obj.user.id),
+                'username': obj.user.username,
+                'is_active': obj.user.is_active,
+                'last_login': obj.user.last_login,
+            }
+        return None
 
 
 class ContactDetailSerializer(serializers.ModelSerializer):
@@ -39,6 +58,8 @@ class ContactDetailSerializer(serializers.ModelSerializer):
     is_primary = serializers.BooleanField(read_only=True)
     full_name = serializers.CharField(read_only=True)
     customer_name = serializers.CharField(source='customer.name', read_only=True)
+    has_user_account = serializers.SerializerMethodField()
+    user_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Contact
@@ -62,10 +83,27 @@ class ContactDetailSerializer(serializers.ModelSerializer):
             'receive_service_updates',
             'receive_inspection_reports',
             'notes',
+            'has_user_account',
+            'user_info',
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'is_primary', 'full_name', 'customer_name', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'is_primary', 'full_name', 'customer_name', 'has_user_account', 'user_info', 'created_at', 'updated_at']
+
+    def get_has_user_account(self, obj):
+        """Check if contact has a linked user account"""
+        return obj.user is not None
+
+    def get_user_info(self, obj):
+        """Get user account info if exists"""
+        if obj.user:
+            return {
+                'id': str(obj.user.id),
+                'username': obj.user.username,
+                'is_active': obj.user.is_active,
+                'last_login': obj.user.last_login,
+            }
+        return None
 
     def validate_email(self, value):
         """Ensure email is valid and lowercase"""

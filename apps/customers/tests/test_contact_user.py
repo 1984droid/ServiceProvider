@@ -237,3 +237,151 @@ class PersonTypeTestCase(TestCase):
         # (though in production this should be prevented by business logic)
         # For now, just verify the employee link works as expected
         self.assertEqual(employee.user, user)
+
+
+class ContactUserManagementTestCase(TestCase):
+    """Test Contact user creation and revocation (customer portal access)."""
+
+    def setUp(self):
+        """Set up test data."""
+        # Clear any existing data (in case of keepdb)
+        Contact.objects.all().delete()
+        Customer.objects.all().delete()
+        User.objects.all().delete()
+
+        # Create customer
+        self.customer = Customer.objects.create(
+            name="Test Customer"
+        )
+
+        # Create contact without user
+        self.contact = Contact.objects.create(
+            customer=self.customer,
+            first_name='Alice',
+            last_name='Johnson',
+            email='alice.johnson@customer.com'
+        )
+
+        # Create admin user for API access
+        self.admin_user = User.objects.create_user(
+            username='admin',
+            password='testpass123',
+            is_staff=True,
+            is_superuser=True
+        )
+
+        # Set up API client
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.admin_user)
+
+    def test_contact_create_user_from_email(self):
+        """Test creating user account from contact with email."""
+        response = self.client.post(f'/api/contacts/{self.contact.id}/create_user/', {})
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('username', response.data)
+        self.assertIn('temporary_password', response.data)
+        self.assertEqual(response.data['username'], 'alice.johnson')
+
+        # Verify contact is linked to user
+        self.contact.refresh_from_db()
+        self.assertIsNotNone(self.contact.user)
+        self.assertEqual(self.contact.user.username, 'alice.johnson')
+        self.assertEqual(self.contact.user.email, 'alice.johnson@customer.com')
+
+    def test_contact_create_user_from_name(self):
+        """Test creating user account from contact without email."""
+        self.contact.email = ''
+        self.contact.save()
+
+        response = self.client.post(f'/api/contacts/{self.contact.id}/create_user/', {})
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['username'], 'alicejohnson')
+
+    def test_contact_create_user_custom_username(self):
+        """Test creating user account with custom username."""
+        data = {
+            'username': 'custom_portal_user',
+            'password': 'custom_pass123'
+        }
+        response = self.client.post(f'/api/contacts/{self.contact.id}/create_user/', data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['username'], 'custom_portal_user')
+        self.assertNotIn('temporary_password', response.data)
+
+        # Verify user can log in
+        user = User.objects.get(username='custom_portal_user')
+        self.assertTrue(user.check_password('custom_pass123'))
+
+    def test_contact_create_user_already_exists(self):
+        """Test cannot create user when contact already has one."""
+        self.client.post(f'/api/contacts/{self.contact.id}/create_user/', {})
+
+        # Try to create again
+        response = self.client.post(f'/api/contacts/{self.contact.id}/create_user/', {})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+
+    def test_contact_revoke_user_deactivate(self):
+        """Test revoking user account (deactivate and unlink)."""
+        # Create user first
+        self.client.post(f'/api/contacts/{self.contact.id}/create_user/', {})
+
+        # Refresh contact to get the user link
+        self.contact.refresh_from_db()
+        user = self.contact.user
+
+        # Revoke access
+        response = self.client.post(f'/api/contacts/{self.contact.id}/revoke_user/', {})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.data)
+
+        # Verify contact no longer linked to user
+        self.contact.refresh_from_db()
+        self.assertIsNone(self.contact.user)
+
+        # Verify user still exists but is inactive
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
+
+    def test_contact_revoke_user_delete(self):
+        """Test deleting user account entirely."""
+        # Create user first
+        self.client.post(f'/api/contacts/{self.contact.id}/create_user/', {})
+
+        # Refresh contact to get the user link
+        self.contact.refresh_from_db()
+        user_id = self.contact.user.id
+
+        # Delete user
+        data = {'delete_user': True}
+        response = self.client.post(f'/api/contacts/{self.contact.id}/revoke_user/', data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify contact no longer linked
+        self.contact.refresh_from_db()
+        self.assertIsNone(self.contact.user)
+
+        # Verify user is deleted
+        self.assertFalse(User.objects.filter(id=user_id).exists())
+
+    def test_contact_has_user_account_serializer(self):
+        """Test has_user_account serializer field."""
+        # Before creating user
+        response = self.client.get(f'/api/contacts/{self.contact.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data['has_user_account'])
+        self.assertIsNone(response.data['user_info'])
+
+        # After creating user
+        self.client.post(f'/api/contacts/{self.contact.id}/create_user/', {})
+        response = self.client.get(f'/api/contacts/{self.contact.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['has_user_account'])
+        self.assertIsNotNone(response.data['user_info'])
+        self.assertIn('username', response.data['user_info'])

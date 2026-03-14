@@ -1,12 +1,21 @@
 /**
- * EmployeeFormPage
+ * EmployeeFormPage - Create or edit employee with tabbed interface
  *
- * Create or edit employee with certification management
+ * Tabs:
+ * - Employee Info: Basic info, contact, department
+ * - Certifications: Manage employee certifications
+ * - User Access: Login, permissions, password management
  */
 
 import { useState, useEffect } from 'react';
 import { employeesApi, type Employee, type CreateEmployeeRequest } from '@/api/employees.api';
 import { departmentsApi, type Department } from '@/api/departments.api';
+import { TabNavigation, type Tab } from '@/components/ui/TabNavigation';
+import { EmployeeInfoTab } from './tabs/EmployeeInfoTab';
+import { EmployeeCertificationsTab } from './tabs/EmployeeCertificationsTab';
+import { EmployeeUserAccessTab } from './tabs/EmployeeUserAccessTab';
+
+type EmployeeTab = 'info' | 'certifications' | 'access';
 
 interface EmployeeFormPageProps {
   employeeId?: string;
@@ -14,32 +23,18 @@ interface EmployeeFormPageProps {
   onCancel: () => void;
 }
 
-interface CertificationForm {
-  standard: string;
-  cert_number: string;
-  expiry: string;
-  issued_by?: string;
-  issued_date?: string;
-}
-
-const COMMON_STANDARDS = [
-  'ANSI/SAIA A92.2',
-  'ANSI/SAIA A92.5',
-  'ANSI/SAIA A92.6',
-  'ANSI/ALOIM A10.31',
-  'ASE',
-  'CDL',
-];
-
 export function EmployeeFormPage({
   employeeId,
   onSuccess,
   onCancel,
 }: EmployeeFormPageProps) {
+  const [activeTab, setActiveTab] = useState<EmployeeTab>('info');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [employee, setEmployee] = useState<Employee | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [contentHeight, setContentHeight] = useState(0);
 
   const [formData, setFormData] = useState<CreateEmployeeRequest>({
     employee_number: '',
@@ -55,16 +50,6 @@ export function EmployeeFormPage({
     skills: [],
   });
 
-  const [certifications, setCertifications] = useState<CertificationForm[]>([]);
-  const [showAddCert, setShowAddCert] = useState(false);
-  const [newCert, setNewCert] = useState<CertificationForm>({
-    standard: '',
-    cert_number: '',
-    expiry: '',
-    issued_by: '',
-    issued_date: '',
-  });
-
   useEffect(() => {
     loadDepartments();
     if (employeeId) {
@@ -72,12 +57,39 @@ export function EmployeeFormPage({
     }
   }, [employeeId]);
 
+  // Calculate available content height
+  useEffect(() => {
+    const calculateHeight = () => {
+      let availableHeight = window.innerHeight - 64; // Main nav height
+
+      const header = document.querySelector('.employee-form-header') as HTMLElement;
+      if (header) availableHeight -= header.offsetHeight;
+
+      const tabNav = document.querySelector('.employee-form-tabs') as HTMLElement;
+      if (tabNav) availableHeight -= tabNav.offsetHeight;
+
+      const footer = document.querySelector('.employee-form-footer') as HTMLElement;
+      if (footer) availableHeight -= footer.offsetHeight;
+
+      availableHeight -= 48; // padding
+      setContentHeight(availableHeight);
+    };
+
+    const timer = setTimeout(calculateHeight, 150);
+    window.addEventListener('resize', calculateHeight);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', calculateHeight);
+    };
+  }, [employee]);
+
   const loadDepartments = async () => {
     try {
       const data = await departmentsApi.list({ is_active: true });
       setDepartments(data);
     } catch (err: any) {
       console.error('Failed to load departments:', err);
+      setError('Failed to load departments');
     }
   };
 
@@ -87,77 +99,51 @@ export function EmployeeFormPage({
     setIsLoading(true);
     setError(null);
     try {
-      const employee = await employeesApi.get(employeeId);
+      const data = await employeesApi.get(employeeId);
+      setEmployee(data);
       setFormData({
-        employee_number: employee.employee_number,
-        first_name: employee.first_name,
-        last_name: employee.last_name,
-        email: employee.email || '',
-        phone: employee.phone || '',
-        base_department: employee.base_department,
-        floating_departments: employee.floating_departments,
-        title: employee.title || '',
-        hire_date: employee.hire_date || '',
-        certifications: employee.certifications || [],
-        skills: employee.skills || [],
+        employee_number: data.employee_number,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email || '',
+        phone: data.phone || '',
+        base_department: data.base_department?.id || '',
+        floating_departments: data.floating_departments?.map(d => d.id) || [],
+        title: data.title || '',
+        hire_date: data.hire_date || '',
+        certifications: data.certifications || [],
+        skills: data.skills || [],
       });
-      setCertifications(employee.certifications || []);
     } catch (err: any) {
-      setError(err.message || 'Failed to load employee');
+      console.error('Failed to load employee:', err);
+      setError(err.response?.data?.detail || 'Failed to load employee');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     setIsSaving(true);
     setError(null);
 
     try {
-      const data = {
-        ...formData,
-        certifications,
-      };
-
       if (employeeId) {
-        await employeesApi.update(employeeId, data);
+        await employeesApi.update(employeeId, formData);
       } else {
-        await employeesApi.create(data);
+        await employeesApi.create(formData);
       }
-
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Failed to save employee');
+      console.error('Failed to save employee:', err);
+      setError(err.response?.data?.detail || 'Failed to save employee');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleAddCertification = () => {
-    if (!newCert.standard || !newCert.cert_number || !newCert.expiry) {
-      alert('Please fill in Standard, Cert Number, and Expiry Date');
-      return;
-    }
-
-    setCertifications([...certifications, newCert]);
-    setNewCert({
-      standard: '',
-      cert_number: '',
-      expiry: '',
-      issued_by: '',
-      issued_date: '',
-    });
-    setShowAddCert(false);
-  };
-
-  const handleRemoveCertification = (index: number) => {
-    setCertifications(certifications.filter((_, i) => i !== index));
-  };
-
   if (isLoading) {
     return (
-      <div className="p-6 flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           <p className="mt-2 text-sm text-gray-600">Loading employee...</p>
@@ -166,314 +152,116 @@ export function EmployeeFormPage({
     );
   }
 
+  const tabs: Tab[] = [
+    { key: 'info', label: 'Employee Info' },
+    { key: 'certifications', label: 'Certifications', count: formData.certifications.length },
+    { key: 'access', label: 'User Access' },
+  ];
+
   return (
-    <div className="p-6">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#111827' }}>
-          {employeeId ? 'Edit Employee' : 'Add Employee'}
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: '#6b7280' }}>
-          {employeeId ? 'Update employee information and certifications' : 'Create a new employee record'}
-        </p>
+    <div className="h-full flex flex-col bg-white overflow-hidden">
+      {/* Header */}
+      <div className="employee-form-header flex-shrink-0 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <button
+              onClick={onCancel}
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors mb-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Team
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {employeeId ? `Edit Employee: ${employee?.full_name}` : 'Create Employee'}
+            </h1>
+            {employeeId && employee && (
+              <p className="mt-1 text-sm text-gray-600">
+                {employee.employee_number} • {employee.base_department?.name}
+                {employee.has_user_account && (
+                  <span className="ml-2 text-green-600">• Portal Access</span>
+                )}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-4 p-3 rounded-lg text-sm" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
-          <p className="font-medium" style={{ color: '#dc2626' }}>
-            {error}
-          </p>
+        <div className="flex-shrink-0 mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded">
+          <div className="flex gap-3">
+            <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-red-900">Error</p>
+              <p className="mt-1 text-sm text-red-800">{error}</p>
+            </div>
+          </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="max-w-4xl">
-        <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-          {/* Basic Information */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#111827' }}>
-              Basic Information
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  Employee Number *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.employee_number}
-                  onChange={(e) => setFormData({ ...formData, employee_number: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  Department *
-                </label>
-                <select
-                  required
-                  value={formData.base_department}
-                  onChange={(e) => setFormData({ ...formData, base_department: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                >
-                  <option value="">Select department...</option>
-                  {departments.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  First Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.first_name}
-                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  Last Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.last_name}
-                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                  placeholder="e.g., Service Technician"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                  Hire Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.hire_date}
-                  onChange={(e) => setFormData({ ...formData, hire_date: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  style={{ borderColor: '#e5e7eb' }}
-                />
-              </div>
-            </div>
-          </div>
+      {/* Tab Navigation */}
+      <div className="employee-form-tabs flex-shrink-0 px-6">
+        <TabNavigation
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(key) => setActiveTab(key as EmployeeTab)}
+        />
+      </div>
 
-          {/* Certifications */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
-                Certifications
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowAddCert(!showAddCert)}
-                className="px-3 py-1.5 text-sm font-medium text-white rounded transition-colors"
-                style={{ backgroundColor: '#7ed321' }}
-              >
-                {showAddCert ? 'Cancel' : '+ Add Certification'}
-              </button>
-            </div>
+      {/* Tab Content */}
+      <div
+        className="flex-1 overflow-y-auto px-6 py-6"
+        style={{ maxHeight: contentHeight > 0 ? `${contentHeight}px` : 'auto' }}
+      >
+        {activeTab === 'info' && (
+          <EmployeeInfoTab
+            formData={formData}
+            setFormData={setFormData}
+            departments={departments}
+            isEditing={!!employeeId}
+            employee={employee}
+          />
+        )}
 
-            {/* Add Certification Form */}
-            {showAddCert && (
-              <div className="mb-4 p-4 rounded-lg border" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }}>
-                <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                      Standard *
-                    </label>
-                    <select
-                      value={newCert.standard}
-                      onChange={(e) => setNewCert({ ...newCert, standard: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      style={{ borderColor: '#e5e7eb' }}
-                    >
-                      <option value="">Select standard...</option>
-                      {COMMON_STANDARDS.map((std) => (
-                        <option key={std} value={std}>
-                          {std}
-                        </option>
-                      ))}
-                      <option value="OTHER">Other (specify below)</option>
-                    </select>
-                  </div>
-                  {newCert.standard === 'OTHER' && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                        Custom Standard
-                      </label>
-                      <input
-                        type="text"
-                        value={newCert.standard === 'OTHER' ? '' : newCert.standard}
-                        onChange={(e) => setNewCert({ ...newCert, standard: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                        style={{ borderColor: '#e5e7eb' }}
-                      />
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                      Cert Number *
-                    </label>
-                    <input
-                      type="text"
-                      value={newCert.cert_number}
-                      onChange={(e) => setNewCert({ ...newCert, cert_number: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      style={{ borderColor: '#e5e7eb' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                      Expiry Date *
-                    </label>
-                    <input
-                      type="date"
-                      value={newCert.expiry}
-                      onChange={(e) => setNewCert({ ...newCert, expiry: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      style={{ borderColor: '#e5e7eb' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                      Issued By
-                    </label>
-                    <input
-                      type="text"
-                      value={newCert.issued_by}
-                      onChange={(e) => setNewCert({ ...newCert, issued_by: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      style={{ borderColor: '#e5e7eb' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: '#374151' }}>
-                      Issued Date
-                    </label>
-                    <input
-                      type="date"
-                      value={newCert.issued_date}
-                      onChange={(e) => setNewCert({ ...newCert, issued_date: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      style={{ borderColor: '#e5e7eb' }}
-                    />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddCertification}
-                  className="px-4 py-2 text-sm font-medium text-white rounded transition-colors"
-                  style={{ backgroundColor: '#7ed321' }}
-                >
-                  Add Certification
-                </button>
-              </div>
-            )}
+        {activeTab === 'certifications' && (
+          <EmployeeCertificationsTab
+            certifications={formData.certifications}
+            onChange={(certs) => setFormData({ ...formData, certifications: certs })}
+          />
+        )}
 
-            {/* Certifications List */}
-            {certifications.length > 0 ? (
-              <div className="space-y-2">
-                {certifications.map((cert, index) => (
-                  <div
-                    key={index}
-                    className="p-3 rounded-lg border flex items-center justify-between"
-                    style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }}
-                  >
-                    <div>
-                      <p className="text-sm font-medium" style={{ color: '#111827' }}>
-                        {cert.standard} - {cert.cert_number}
-                      </p>
-                      <p className="text-xs" style={{ color: '#6b7280' }}>
-                        Expires: {new Date(cert.expiry).toLocaleDateString()}
-                        {cert.issued_by && ` • Issued by: ${cert.issued_by}`}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCertification(index)}
-                      className="text-sm text-red-600 hover:text-red-800"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-center py-4" style={{ color: '#6b7280' }}>
-                No certifications added yet
-              </p>
-            )}
-          </div>
+        {activeTab === 'access' && (
+          <EmployeeUserAccessTab
+            employee={employee}
+            onRefresh={loadEmployee}
+          />
+        )}
+      </div>
 
-          {/* Form Actions */}
-          <div className="flex gap-3 pt-4 border-t" style={{ borderColor: '#e5e7eb' }}>
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isSaving}
-              className="px-4 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="px-4 py-2 text-sm font-medium text-white rounded transition-colors disabled:opacity-50"
-              style={{ backgroundColor: '#7ed321' }}
-            >
-              {isSaving ? 'Saving...' : employeeId ? 'Save Changes' : 'Create Employee'}
-            </button>
-          </div>
+      {/* Footer Actions */}
+      <div className="employee-form-footer flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            disabled={isSaving}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !formData.employee_number || !formData.first_name || !formData.last_name || !formData.base_department}
+            className="px-4 py-2 text-sm font-medium text-white rounded disabled:opacity-50"
+            style={{ backgroundColor: '#7ed321' }}
+          >
+            {isSaving ? 'Saving...' : (employeeId ? 'Save Changes' : 'Create Employee')}
+          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
