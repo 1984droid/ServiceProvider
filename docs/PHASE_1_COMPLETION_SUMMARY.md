@@ -130,14 +130,26 @@ Phase 1 delivered a **fully functional inspection execution workflow** that allo
 
 ---
 
-### ✅ Milestone 8: Photo & Defect Support (Simplified)
-**Status:** Photos work via PhotoField (file upload + preview). Full defect creation UI deferred to Phase 2.
+### ✅ Milestone 8: Photo & Defect Recording (472 lines)
+**Files Created:**
+- `frontend/src/features/inspections/DefectForm.tsx` (191 lines)
 
-**Rationale:**
-- PhotoField already supports file upload and preview
-- Defects are primarily rule-generated (not manually created during inspection)
-- Manual defect creation requires complex UI that belongs in Phase 2
-- Current implementation supports viewing existing defects
+**Files Modified:**
+- `apps/inspections/views.py` - Added POST /api/inspections/{id}/add_defect/ endpoint
+- `frontend/src/features/inspections/steps/DefectCaptureStep.tsx` (280 lines - complete rewrite)
+- `frontend/src/features/inspections/steps/StepRenderer.tsx` - Added inspectionId prop
+- `frontend/src/features/inspections/InspectionExecutePage.tsx` - Pass inspectionId to renderer
+
+**Features:**
+- Manual defect creation during inspection
+- Severity selection (CRITICAL, MAJOR, MINOR, ADVISORY) with color coding
+- Defect form with title, description, location fields
+- Defect list with visual severity indicators
+- Emoji icons for each severity level (⛔ ⚠️ 🔧 ℹ️)
+- Distinction between manual and auto-generated defects
+- Defect filtering by step_key
+- Real-time defect list updates
+- Photo upload via existing PhotoField component
 
 ---
 
@@ -147,7 +159,8 @@ Phase 1 delivered a **fully functional inspection execution workflow** that allo
 - `GET /api/inspections/{id}/` - Load inspection run
 - `GET /api/templates/{key}/` - Load template
 - `PATCH /api/inspections/{id}/save_step/` - Save step data
-- `GET /api/inspections/{id}/defects/` - Get defects (read-only)
+- `GET /api/inspections/{id}/defects/` - Get defects for inspection
+- `POST /api/inspections/{id}/add_defect/` - Add manual defect
 
 **Data Flow:**
 ```
@@ -196,13 +209,14 @@ frontend/src/
 │   │   ├── VisualInspectionStep.tsx (84 lines)
 │   │   ├── FunctionTestStep.tsx  (84 lines)
 │   │   ├── MeasurementStep.tsx   (104 lines)
-│   │   ├── DefectCaptureStep.tsx (84 lines)
+│   │   ├── DefectCaptureStep.tsx (280 lines)
 │   │   └── StepRenderer.tsx      (130 lines)
+│   ├── DefectForm.tsx            (191 lines)
 │   └── utils/
 │       └── validation.ts         (221 lines)
 ```
 
-**Total:** 18 files, ~2,135 lines
+**Total:** 19 files, ~2,600+ lines
 
 ---
 
@@ -253,11 +267,14 @@ Before deployment, test the following scenarios:
 
 ## Commits
 
-All work committed across 5 commits:
-1. `245e36e` - Milestone 3: Inspection Execute Page Shell
-2. `999e1f9` - Milestones 4-6: Step Data Management + Saving
-3. `2b708c0` - Milestone 7: Validation & Blocking Navigation
-4. (Milestones 1-2 were committed earlier)
+All work committed across 7 commits:
+1. `79baef0` - Milestone 1: Atomic field components
+2. `d6edb5a` - Milestone 2: Step components
+3. `245e36e` - Milestone 3: Inspection Execute Page Shell
+4. `999e1f9` - Milestones 4-6: Step Data Management + Saving
+5. `2b708c0` - Milestone 7: Validation & Blocking Navigation
+6. `980e9ef` - Phase 1 Completion Summary Documentation
+7. `1ac1125` - Milestone 8: Photo & Defect Recording (COMPLETE)
 
 ---
 
@@ -271,6 +288,9 @@ All work committed across 5 commits:
 - ✅ Validation blocks invalid steps
 - ✅ Progress tracking works
 - ✅ Save & Exit works
+- ✅ Manual defect creation works
+- ✅ Defect list displays with visual indicators
+- ✅ Photo upload works via PhotoField
 - ✅ No corners cut - code is production-ready
 
 ---
