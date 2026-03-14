@@ -18,8 +18,9 @@ import { AssetsListPage } from '@/features/assets/AssetsListPage';
 import { VehicleCreatePage } from '@/features/assets/VehicleCreatePage';
 import { EquipmentCreatePage } from '@/features/assets/EquipmentCreatePage';
 import { InspectionsListPage } from '@/features/inspections/InspectionsListPage';
+import { InspectionExecutePage } from '@/features/inspections/InspectionExecutePage';
 
-type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections';
+type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute';
 
 interface NavigationState {
   customerId?: string;
@@ -66,7 +67,7 @@ function App() {
 
   const navigateToInspection = (inspectionId: string) => {
     setNavState({ inspectionId });
-    setCurrentPage('inspections');
+    setCurrentPage('inspection-execute');
   };
 
   useEffect(() => {
@@ -390,6 +391,7 @@ function App() {
               initialVehicleId={navState.vehicleId}
               initialEquipmentId={navState.equipmentId}
               onNavigateToCustomer={navigateToCustomer}
+              onNavigateToInspection={navigateToInspection}
               onClearSelection={() => setNavState({})}
               onCreateVehicle={() => setCurrentPage('assets-create-vehicle')}
               onCreateEquipment={() => setCurrentPage('assets-create-equipment')}
@@ -414,12 +416,15 @@ function App() {
             />
           )}
           {currentPage === 'inspections' && (
-            <InspectionsListPage
-              initialInspectionId={navState.inspectionId}
-              onNavigateToCustomer={navigateToCustomer}
-              onNavigateToVehicle={navigateToVehicle}
-              onNavigateToEquipment={navigateToEquipment}
-              onClearSelection={() => setNavState({})}
+            <InspectionsListPage />
+          )}
+          {currentPage === 'inspection-execute' && navState.inspectionId && (
+            <InspectionExecutePage
+              inspectionId={navState.inspectionId}
+              onExit={() => {
+                setCurrentPage('inspections');
+                setNavState({});
+              }}
             />
           )}
           {currentPage === 'customers' && (

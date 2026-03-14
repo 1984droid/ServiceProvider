@@ -596,11 +596,46 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
             )
 
         try:
+            # Default inspector_name to logged-in user's full name if not provided
+            inspector_name = serializer.validated_data.get('inspector_name')
+            if not inspector_name and request.user.is_authenticated:
+                inspector_name = f"{request.user.first_name} {request.user.last_name}".strip()
+                if not inspector_name:  # Fallback to username if no first/last name
+                    inspector_name = request.user.username
+
             inspection = InspectionRuntime.create_inspection(
                 template_key=serializer.validated_data['template_key'],
                 asset=serializer.validated_data['asset'],
-                inspector_name=serializer.validated_data.get('inspector_name', '')
+                inspector_name=inspector_name or ''
             )
+
+            # Auto-populate certification info from user's employee record
+            if request.user.is_authenticated and hasattr(request.user, 'employee'):
+                employee = request.user.employee
+                if employee and employee.certifications:
+                    # Get the standard code from the template
+                    template_standard = inspection.template_snapshot.get('template', {}).get('standard', {}).get('code')
+
+                    if template_standard:
+                        # Find matching certification
+                        # Certifications expected format: [{"standard": "ANSI/SAIA A92.2", "cert_number": "...", "expiry": "..."}]
+                        matching_cert = None
+                        for cert in employee.certifications:
+                            if isinstance(cert, dict) and cert.get('standard') == template_standard:
+                                matching_cert = cert
+                                break
+
+                        # Store certification info in inspection metadata
+                        if matching_cert:
+                            if not inspection.metadata:
+                                inspection.metadata = {}
+                            inspection.metadata['inspector_certification'] = {
+                                'standard': matching_cert.get('standard'),
+                                'cert_number': matching_cert.get('cert_number'),
+                                'expiry_date': matching_cert.get('expiry'),
+                                'inspector_name': inspector_name
+                            }
+                            inspection.save()
 
             detail_serializer = InspectionRunDetailSerializer(inspection)
             return Response(

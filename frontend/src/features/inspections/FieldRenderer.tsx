@@ -5,6 +5,7 @@
  * Handles all 7 field types from inspection templates
  */
 
+import { useEffect } from 'react';
 import { FormField } from '@/components/molecules/FormField';
 import { TextInput } from '@/components/atoms/TextInput';
 import { TextArea } from '@/components/atoms/TextArea';
@@ -128,6 +129,27 @@ export function FieldRenderer({
             onChange={onChange}
             disabled={disabled}
             multiple={true}
+          />
+        );
+
+      case 'DATE':
+        // Auto-default to today's date if no value
+        useEffect(() => {
+          if (!value) {
+            const today = new Date().toISOString().split('T')[0];
+            onChange(today);
+          }
+        }, []);
+
+        return (
+          <input
+            type="date"
+            value={value || new Date().toISOString().split('T')[0]}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              error ? 'border-red-500' : 'border-gray-300'
+            } ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
           />
         );
 

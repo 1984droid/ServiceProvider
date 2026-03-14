@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react';
 import { StepHeader } from './StepHeader';
 import { FieldRenderer } from '../FieldRenderer';
 import { DefectForm } from '../DefectForm';
-import { Button } from '@/components/atoms/Button';
 import { apiClient } from '@/lib/axios';
 
 interface SchemaField {
@@ -163,13 +162,14 @@ export function DefectCaptureStep({
           <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
             Defects Found ({stepDefects.length})
           </h3>
-          <Button
+          <button
             onClick={() => setShowDefectForm(!showDefectForm)}
-            variant="primary"
             disabled={disabled}
+            className="px-4 py-2 text-sm font-medium text-white rounded transition-colors disabled:opacity-50"
+            style={{ backgroundColor: '#7ed321' }}
           >
             {showDefectForm ? 'Cancel' : '+ Add Defect'}
-          </Button>
+          </button>
         </div>
 
         {/* Add Defect Form */}

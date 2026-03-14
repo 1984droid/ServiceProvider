@@ -224,6 +224,16 @@ class Contact(BaseModel):
 
     Primary contact is designated at Customer.primary_contact_id FK (not boolean here).
     """
+    # Django User Link (optional - for customer portal access)
+    user = models.OneToOneField(
+        'auth.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='contact',
+        help_text="Portal user account (if contact has portal access)"
+    )
+
     customer = models.ForeignKey(
         Customer,
         on_delete=models.CASCADE,
@@ -314,6 +324,11 @@ class Contact(BaseModel):
     def full_name(self):
         """Return formatted full name."""
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def has_portal_access(self):
+        """Check if contact has portal access (has linked user account)."""
+        return self.user is not None and self.user.is_active
 
     @property
     def display_name_with_title(self):

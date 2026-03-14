@@ -17,6 +17,7 @@ interface AssetsListPageProps {
   initialVehicleId?: string;
   initialEquipmentId?: string;
   onNavigateToCustomer: (customerId: string) => void;
+  onNavigateToInspection?: (inspectionId: string) => void;
   onClearSelection: () => void;
   onCreateVehicle: () => void;
   onCreateEquipment?: () => void;
@@ -26,6 +27,7 @@ export function AssetsListPage({
   initialVehicleId,
   initialEquipmentId,
   onNavigateToCustomer,
+  onNavigateToInspection,
   onClearSelection,
   onCreateVehicle,
   onCreateEquipment,
@@ -111,6 +113,7 @@ export function AssetsListPage({
         onNavigateBack={handleNavigateBack}
         onNavigateToEquipment={handleEquipmentClick}
         onNavigateToCustomer={onNavigateToCustomer}
+        onNavigateToInspection={onNavigateToInspection}
       />
     );
   }
@@ -122,6 +125,7 @@ export function AssetsListPage({
         onNavigateBack={handleNavigateBack}
         onNavigateToVehicle={handleVehicleClick}
         onNavigateToCustomer={onNavigateToCustomer}
+        onNavigateToInspection={onNavigateToInspection}
       />
     );
   }

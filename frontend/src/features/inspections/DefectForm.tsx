@@ -9,7 +9,6 @@ import { FormField } from '@/components/molecules/FormField';
 import { TextInput } from '@/components/atoms/TextInput';
 import { TextArea } from '@/components/atoms/TextArea';
 import { Select } from '@/components/atoms/Select';
-import { Button } from '@/components/atoms/Button';
 
 interface DefectFormData {
   severity: 'CRITICAL' | 'MAJOR' | 'MINOR' | 'ADVISORY' | '';
@@ -165,21 +164,22 @@ export function DefectForm({
 
       {/* Form Actions */}
       <div className="flex gap-3 pt-4 border-t" style={{ borderColor: '#e5e7eb' }}>
-        <Button
+        <button
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          variant="secondary"
+          className="px-4 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
         >
           Cancel
-        </Button>
-        <Button
+        </button>
+        <button
           type="submit"
           disabled={isSubmitting}
-          variant="primary"
+          className="px-4 py-2 text-sm font-medium text-white rounded transition-colors disabled:opacity-50"
+          style={{ backgroundColor: '#7ed321' }}
         >
           {isSubmitting ? 'Adding Defect...' : 'Add Defect'}
-        </Button>
+        </button>
       </div>
     </form>
   );

@@ -33,6 +33,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'department_code',
             'title',
             'is_active',
+            'certifications',
         ]
 
 
@@ -63,6 +64,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     including all permissions for frontend authorization.
     """
     employee = EmployeeSerializer(read_only=True)
+    contact = serializers.SerializerMethodField()
+    person_type = serializers.SerializerMethodField()
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
 
@@ -77,13 +80,39 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_active',
             'is_staff',
             'is_superuser',
+            'person_type',
             'employee',
+            'contact',
             'roles',
             'permissions',
             'last_login',
             'date_joined',
         ]
         read_only_fields = ['id', 'is_staff', 'is_superuser', 'last_login', 'date_joined']
+
+    def get_person_type(self, obj):
+        """Determine if user is linked to employee or contact."""
+        if hasattr(obj, 'employee') and obj.employee:
+            return 'employee'
+        elif hasattr(obj, 'contact') and obj.contact:
+            return 'contact'
+        return None
+
+    def get_contact(self, obj):
+        """Get contact info if user is a customer portal user."""
+        if hasattr(obj, 'contact') and obj.contact:
+            contact = obj.contact
+            return {
+                'id': str(contact.id),
+                'full_name': contact.full_name,
+                'email': contact.email,
+                'phone': contact.phone,
+                'customer': {
+                    'id': str(contact.customer.id),
+                    'name': contact.customer.name,
+                } if contact.customer else None,
+            }
+        return None
 
     def get_roles(self, obj):
         """Get user's role names (from groups)."""

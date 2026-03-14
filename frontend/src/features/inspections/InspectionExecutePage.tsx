@@ -78,9 +78,21 @@ export function InspectionExecutePage({
       const runData = await inspectionsApi.get(inspectionId);
       setInspectionRun(runData);
 
-      // Load template
-      const templateData = await inspectionsApi.getTemplate(runData.template_key);
-      setTemplate(templateData);
+      // Use template_snapshot from the inspection run (already contains full template)
+      const templateSnapshot = runData.template_snapshot;
+
+      // Transform to expected format: extract procedure.steps to steps
+      const transformedTemplate = {
+        template_key: templateSnapshot.template?.template_key || '',
+        name: templateSnapshot.template?.name || 'Unknown Template',
+        domain: templateSnapshot.template?.intent?.domain,
+        standard_code: templateSnapshot.template?.standard?.code,
+        steps: templateSnapshot.procedure?.steps || [],
+        enums: templateSnapshot.enums || {},
+        measurement_sets: templateSnapshot.measurement_sets || {},
+      };
+
+      setTemplate(transformedTemplate);
     } catch (err: any) {
       setLoadError(err.message || 'Failed to load inspection');
     } finally {
