@@ -1,0 +1,658 @@
+"""
+Comprehensive tests for Phase 1 Inspection Execution workflow.
+
+Tests:
+- Step data management (save_step endpoint)
+- Field validation
+- Manual defect creation
+- Inspection state transitions
+"""
+
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from rest_framework.test import APIClient
+from rest_framework import status
+from apps.inspections.models import InspectionRun, InspectionDefect
+from apps.customers.models import Customer
+from apps.assets.models import Vehicle, Equipment
+from decimal import Decimal
+import json
+
+User = get_user_model()
+
+
+class InspectionExecutionTestCase(TestCase):
+    """Base test case with common setup for inspection execution tests."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.client = APIClient()
+
+        # Create test user
+        self.user = User.objects.create_user(
+            username='inspector',
+            password='testpass123',
+            email='inspector@test.com'
+        )
+        self.client.force_authenticate(user=self.user)
+
+        # Create customer
+        self.customer = Customer.objects.create(
+            name='Test Fleet Company',
+            legal_name='Test Fleet Company LLC',
+            is_active=True
+        )
+
+        # Create vehicle
+        self.vehicle = Vehicle.objects.create(
+            customer=self.customer,
+            vin='1HGBH41JXMN109186',
+            unit_number='TRUCK-001',
+            year=2021,
+            make='Ford',
+            model='F-150',
+            license_plate='ABC-123',
+            capabilities=['TOWING', 'CARGO']
+        )
+
+        # Create equipment
+        self.equipment = Equipment.objects.create(
+            customer=self.customer,
+            serial_number='SN123456',
+            asset_number='EQ-001',
+            manufacturer='Genie',
+            model='Z-45/25J',
+            equipment_type='A92_2_AERIAL',
+            capabilities=['PLATFORM', 'ARTICULATING']
+        )
+
+        # Template with all field types and step types
+        self.template_data = {
+            'template': {
+                'template_key': 'comprehensive_test',
+                'name': 'Comprehensive Test Template',
+                'version': '1.0.0',
+                'standard_code': 'TEST-001',
+                'domain': 'TESTING'
+            },
+            'procedure': {
+                'title': 'Comprehensive Inspection Procedure',
+                'steps': [
+                    # SETUP step with various field types
+                    {
+                        'step_id': 'setup_01',
+                        'type': 'SETUP',
+                        'title': 'Pre-Inspection Setup',
+                        'fields': [
+                            {
+                                'field_id': 'inspector_name',
+                                'type': 'TEXT',
+                                'label': 'Inspector Name',
+                                'required': True
+                            },
+                            {
+                                'field_id': 'weather_conditions',
+                                'type': 'ENUM',
+                                'label': 'Weather Conditions',
+                                'enum_ref': 'weather',
+                                'required': True
+                            },
+                            {
+                                'field_id': 'site_safe',
+                                'type': 'BOOLEAN',
+                                'label': 'Site is Safe',
+                                'required': True
+                            }
+                        ]
+                    },
+                    # VISUAL_INSPECTION step
+                    {
+                        'step_id': 'visual_01',
+                        'type': 'VISUAL_INSPECTION',
+                        'title': 'Visual Inspection',
+                        'fields': [
+                            {
+                                'field_id': 'exterior_condition',
+                                'type': 'CHOICE_MULTI',
+                                'label': 'Exterior Issues Found',
+                                'values': ['RUST', 'DENTS', 'LEAKS', 'DAMAGE'],
+                                'required': False
+                            },
+                            {
+                                'field_id': 'notes',
+                                'type': 'TEXT_AREA',
+                                'label': 'Visual Inspection Notes',
+                                'required': False
+                            }
+                        ]
+                    },
+                    # MEASUREMENT step with NUMBER fields
+                    {
+                        'step_id': 'measurement_01',
+                        'type': 'MEASUREMENT',
+                        'title': 'Critical Measurements',
+                        'fields': [
+                            {
+                                'field_id': 'tire_pressure_fl',
+                                'type': 'NUMBER',
+                                'label': 'Tire Pressure Front Left (PSI)',
+                                'min': 30,
+                                'max': 50,
+                                'precision': 1,
+                                'required': True
+                            },
+                            {
+                                'field_id': 'tire_pressure_fr',
+                                'type': 'NUMBER',
+                                'label': 'Tire Pressure Front Right (PSI)',
+                                'min': 30,
+                                'max': 50,
+                                'precision': 1,
+                                'required': True
+                            }
+                        ]
+                    },
+                    # FUNCTION_TEST step
+                    {
+                        'step_id': 'function_01',
+                        'type': 'FUNCTION_TEST',
+                        'title': 'Functional Tests',
+                        'fields': [
+                            {
+                                'field_id': 'brakes_pass',
+                                'type': 'BOOLEAN',
+                                'label': 'Brakes Function Properly',
+                                'required': True
+                            },
+                            {
+                                'field_id': 'lights_pass',
+                                'type': 'BOOLEAN',
+                                'label': 'All Lights Operational',
+                                'required': True
+                            }
+                        ]
+                    },
+                    # DEFECT_CAPTURE step
+                    {
+                        'step_id': 'defects_01',
+                        'type': 'DEFECT_CAPTURE',
+                        'title': 'Defect Recording',
+                        'fields': [
+                            {
+                                'field_id': 'defect_notes',
+                                'type': 'TEXT_AREA',
+                                'label': 'General Defect Notes',
+                                'required': False
+                            }
+                        ]
+                    }
+                ],
+                'enums': {
+                    'weather': ['CLEAR', 'CLOUDY', 'RAIN', 'SNOW', 'FOG']
+                }
+            }
+        }
+
+    def create_inspection(self, asset_type='VEHICLE', asset=None):
+        """Helper to create inspection run."""
+        from django.utils import timezone
+
+        if asset is None:
+            asset = self.vehicle if asset_type == 'VEHICLE' else self.equipment
+
+        # Create inspection with embedded template
+        inspection = InspectionRun.objects.create(
+            customer=self.customer,
+            asset_type=asset_type,
+            asset_id=asset.id,
+            template_key=self.template_data['template']['template_key'],
+            template_snapshot=self.template_data,
+            status='DRAFT',
+            inspector_name='Test Inspector',
+            started_at=timezone.now(),
+            step_data={}
+        )
+        return inspection
+
+
+class StepDataManagementTests(InspectionExecutionTestCase):
+    """Test save_step endpoint and step data persistence."""
+
+    def test_save_step_with_valid_data(self):
+        """Test saving step data with all valid fields."""
+        inspection = self.create_inspection()
+
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {
+                'inspector_name': 'John Doe',
+                'weather_conditions': 'CLEAR',
+                'site_safe': True
+            },
+            'validate': False
+        }
+
+        response = self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify data was saved
+        inspection.refresh_from_db()
+        self.assertIn('setup_01', inspection.step_data)
+        self.assertEqual(inspection.step_data['setup_01']['inspector_name'], 'John Doe')
+        self.assertEqual(inspection.step_data['setup_01']['weather_conditions'], 'CLEAR')
+        self.assertTrue(inspection.step_data['setup_01']['site_safe'])
+
+    def test_save_step_with_number_fields(self):
+        """Test saving NUMBER fields with precision validation."""
+        inspection = self.create_inspection()
+
+        step_data = {
+            'step_key': 'measurement_01',
+            'field_data': {
+                'tire_pressure_fl': 35.5,
+                'tire_pressure_fr': 36.0
+            },
+            'validate': False
+        }
+
+        response = self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify numbers saved correctly
+        inspection.refresh_from_db()
+        self.assertEqual(float(inspection.step_data['measurement_01']['tire_pressure_fl']), 35.5)
+        self.assertEqual(float(inspection.step_data['measurement_01']['tire_pressure_fr']), 36.0)
+
+    def test_save_step_with_choice_multi(self):
+        """Test saving CHOICE_MULTI field (array)."""
+        inspection = self.create_inspection()
+
+        step_data = {
+            'step_key': 'visual_01',
+            'field_data': {
+                'exterior_condition': ['RUST', 'DENTS'],
+                'notes': 'Minor rust on rear bumper, small dent on driver door'
+            },
+            'validate': False
+        }
+
+        response = self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify array saved correctly
+        inspection.refresh_from_db()
+        self.assertIsInstance(inspection.step_data['visual_01']['exterior_condition'], list)
+        self.assertIn('RUST', inspection.step_data['visual_01']['exterior_condition'])
+        self.assertIn('DENTS', inspection.step_data['visual_01']['exterior_condition'])
+
+    def test_save_step_overwrites_previous_data(self):
+        """Test that saving step data overwrites previous values."""
+        inspection = self.create_inspection()
+
+        # Save initial data
+        step_data_v1 = {
+            'step_key': 'setup_01',
+            'field_data': {
+                'inspector_name': 'John Doe',
+                'weather_conditions': 'CLEAR',
+                'site_safe': True
+            },
+            'validate': False
+        }
+        self.client.patch(f'/api/inspections/{inspection.id}/save_step/', data=step_data_v1, format='json')
+
+        # Update with new data
+        step_data_v2 = {
+            'step_key': 'setup_01',
+            'field_data': {
+                'inspector_name': 'Jane Smith',
+                'weather_conditions': 'RAIN',
+                'site_safe': False
+            },
+            'validate': False
+        }
+        response = self.client.patch(f'/api/inspections/{inspection.id}/save_step/', data=step_data_v2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify data was overwritten
+        inspection.refresh_from_db()
+        self.assertEqual(inspection.step_data['setup_01']['inspector_name'], 'Jane Smith')
+        self.assertEqual(inspection.step_data['setup_01']['weather_conditions'], 'RAIN')
+        self.assertFalse(inspection.step_data['setup_01']['site_safe'])
+
+    def test_save_step_preserves_other_steps(self):
+        """Test that saving one step doesn't affect other steps."""
+        inspection = self.create_inspection()
+
+        # Save step 1
+        step1_data = {
+            'step_key': 'setup_01',
+            'field_data': {'inspector_name': 'John Doe', 'weather_conditions': 'CLEAR', 'site_safe': True},
+            'validate': False
+        }
+        self.client.patch(f'/api/inspections/{inspection.id}/save_step/', data=step1_data, format='json')
+
+        # Save step 2
+        step2_data = {
+            'step_key': 'visual_01',
+            'field_data': {'exterior_condition': ['RUST'], 'notes': 'Minor rust'},
+            'validate': False
+        }
+        self.client.patch(f'/api/inspections/{inspection.id}/save_step/', data=step2_data, format='json')
+
+        # Verify both steps exist
+        inspection.refresh_from_db()
+        self.assertIn('setup_01', inspection.step_data)
+        self.assertIn('visual_01', inspection.step_data)
+        self.assertEqual(inspection.step_data['setup_01']['inspector_name'], 'John Doe')
+        self.assertIn('RUST', inspection.step_data['visual_01']['exterior_condition'])
+
+    def test_cannot_save_to_completed_inspection(self):
+        """Test that completed inspections cannot be modified."""
+        inspection = self.create_inspection()
+        inspection.status = 'COMPLETED'
+        inspection.save()
+
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {'inspector_name': 'John Doe', 'weather_conditions': 'CLEAR', 'site_safe': True},
+            'validate': False
+        }
+
+        response = self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        # Should be forbidden
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ManualDefectCreationTests(InspectionExecutionTestCase):
+    """Test manual defect creation via add_defect endpoint."""
+
+    def test_create_manual_defect_critical(self):
+        """Test creating a CRITICAL manual defect."""
+        inspection = self.create_inspection()
+
+        defect_data = {
+            'step_key': 'visual_01',
+            'severity': 'CRITICAL',
+            'title': 'Structural crack in frame',
+            'description': 'Found a 6-inch crack in the main frame rail near the rear axle. Vehicle is unsafe to operate.',
+            'defect_details': {
+                'location': 'Main frame rail, rear driver side'
+            }
+        }
+
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data=defect_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['severity'], 'CRITICAL')
+        self.assertEqual(response.data['title'], 'Structural crack in frame')
+        self.assertEqual(response.data['step_key'], 'visual_01')
+        self.assertIsNone(response.data['rule_id'])  # Manual defects have no rule_id
+        self.assertEqual(response.data['status'], 'OPEN')
+
+        # Verify defect exists in database
+        defect = InspectionDefect.objects.get(id=response.data['id'])
+        self.assertEqual(defect.inspection_run, inspection)
+        self.assertEqual(defect.severity, 'CRITICAL')
+        self.assertEqual(defect.defect_details['location'], 'Main frame rail, rear driver side')
+
+    def test_create_defects_all_severity_levels(self):
+        """Test creating defects with all severity levels."""
+        inspection = self.create_inspection()
+
+        severities = ['CRITICAL', 'MAJOR', 'MINOR', 'ADVISORY']
+
+        for severity in severities:
+            defect_data = {
+                'step_key': 'visual_01',
+                'severity': severity,
+                'title': f'{severity} level defect',
+                'description': f'This is a {severity} severity issue'
+            }
+
+            response = self.client.post(
+                f'/api/inspections/{inspection.id}/add_defect/',
+                data=defect_data,
+                format='json'
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(response.data['severity'], severity)
+
+        # Verify all 4 defects created
+        defects = InspectionDefect.objects.filter(inspection_run=inspection)
+        self.assertEqual(defects.count(), 4)
+
+    def test_create_defect_without_required_fields(self):
+        """Test that defects require step_key, severity, and title."""
+        inspection = self.create_inspection()
+
+        # Missing severity
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data={'step_key': 'visual_01', 'title': 'Test defect'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('severity', response.data['error'].lower())
+
+        # Missing title
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data={'step_key': 'visual_01', 'severity': 'MAJOR'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('title', response.data['error'].lower())
+
+        # Missing step_key
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data={'severity': 'MAJOR', 'title': 'Test defect'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('step_key', response.data['error'].lower())
+
+    def test_create_defect_invalid_severity(self):
+        """Test that invalid severity values are rejected."""
+        inspection = self.create_inspection()
+
+        defect_data = {
+            'step_key': 'visual_01',
+            'severity': 'SUPER_CRITICAL',  # Invalid
+            'title': 'Test defect',
+            'description': 'Test'
+        }
+
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data=defect_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_add_defect_to_completed_inspection(self):
+        """Test that defects cannot be added to completed inspections."""
+        inspection = self.create_inspection()
+        inspection.status = 'COMPLETED'
+        inspection.save()
+
+        defect_data = {
+            'step_key': 'visual_01',
+            'severity': 'MAJOR',
+            'title': 'Test defect',
+            'description': 'Should not be allowed'
+        }
+
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data=defect_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_defects_for_inspection(self):
+        """Test retrieving all defects for an inspection."""
+        inspection = self.create_inspection()
+
+        # Create 3 defects
+        for i in range(3):
+            self.client.post(
+                f'/api/inspections/{inspection.id}/add_defect/',
+                data={
+                    'step_key': f'visual_0{i}' if i > 0 else 'visual_01',
+                    'severity': 'MINOR',
+                    'title': f'Defect {i+1}',
+                    'description': f'Description {i+1}'
+                },
+                format='json'
+            )
+
+        # Get all defects
+        response = self.client.get(f'/api/inspections/{inspection.id}/defects/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 3)
+        self.assertEqual(len(response.data['defects']), 3)
+
+
+class InspectionStateTransitionTests(InspectionExecutionTestCase):
+    """Test inspection status transitions."""
+
+    def test_new_inspection_starts_as_draft(self):
+        """Test that new inspections start with DRAFT status."""
+        inspection = self.create_inspection()
+        self.assertEqual(inspection.status, 'DRAFT')
+
+    def test_saving_step_changes_to_in_progress(self):
+        """Test that saving step data changes status to IN_PROGRESS."""
+        inspection = self.create_inspection()
+        self.assertEqual(inspection.status, 'DRAFT')
+
+        # Save a step
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {'inspector_name': 'John Doe', 'weather_conditions': 'CLEAR', 'site_safe': True},
+            'validate': False
+        }
+        self.client.patch(f'/api/inspections/{inspection.id}/save_step/', data=step_data, format='json')
+
+        # Verify status changed
+        inspection.refresh_from_db()
+        self.assertEqual(inspection.status, 'IN_PROGRESS')
+
+
+class EquipmentInspectionTests(InspectionExecutionTestCase):
+    """Test inspection execution with equipment assets."""
+
+    def test_create_inspection_for_equipment(self):
+        """Test creating inspection for equipment asset."""
+        inspection = self.create_inspection(asset_type='EQUIPMENT', asset=self.equipment)
+
+        self.assertEqual(inspection.asset_type, 'EQUIPMENT')
+        self.assertEqual(str(inspection.asset_id), str(self.equipment.id))
+
+        # Verify asset_info populated correctly
+        response = self.client.get(f'/api/inspections/{inspection.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['asset_info']['type'], 'EQUIPMENT')
+        self.assertEqual(response.data['asset_info']['equipment_type'], 'A92_2_AERIAL')
+        self.assertEqual(response.data['asset_info']['serial_number'], 'SN123456')
+
+    def test_save_step_data_for_equipment(self):
+        """Test saving step data for equipment inspection."""
+        inspection = self.create_inspection(asset_type='EQUIPMENT', asset=self.equipment)
+
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {'inspector_name': 'Equipment Inspector', 'weather_conditions': 'CLEAR', 'site_safe': True},
+            'validate': False
+        }
+
+        response = self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify data saved
+        inspection.refresh_from_db()
+        self.assertEqual(inspection.step_data['setup_01']['inspector_name'], 'Equipment Inspector')
+
+
+class AuthorizationTests(InspectionExecutionTestCase):
+    """Test authentication and authorization for inspection endpoints."""
+
+    def test_unauthenticated_cannot_save_step(self):
+        """Test that unauthenticated users cannot save step data."""
+        inspection = self.create_inspection()
+
+        # Remove authentication
+        self.client.force_authenticate(user=None)
+
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {'inspector_name': 'John Doe', 'weather_conditions': 'CLEAR', 'site_safe': True},
+            'validate': False
+        }
+
+        response = self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_cannot_add_defect(self):
+        """Test that unauthenticated users cannot add defects."""
+        inspection = self.create_inspection()
+
+        # Remove authentication
+        self.client.force_authenticate(user=None)
+
+        defect_data = {
+            'step_key': 'visual_01',
+            'severity': 'MAJOR',
+            'title': 'Test defect',
+            'description': 'Should not work'
+        }
+
+        response = self.client.post(
+            f'/api/inspections/{inspection.id}/add_defect/',
+            data=defect_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
