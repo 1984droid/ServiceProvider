@@ -163,4 +163,20 @@ export const inspectionsApi = {
   async delete(id: string): Promise<void> {
     await apiClient.delete(`/inspections/${id}/`);
   },
+
+  /**
+   * Get inspection review data (read-only view with defects)
+   */
+  async getReview(id: string): Promise<{
+    inspection: InspectionRun & { template_snapshot: any; step_responses: any };
+    completion: any;
+    defects: {
+      count: number;
+      items: any[];
+      summary: any;
+    };
+  }> {
+    const response = await apiClient.get(`/inspections/${id}/review/`);
+    return response.data;
+  },
 };

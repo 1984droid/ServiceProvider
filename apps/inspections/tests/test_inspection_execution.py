@@ -667,3 +667,156 @@ class AuthorizationTests(InspectionExecutionTestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class InspectionReviewTestCase(InspectionExecutionTestCase):
+    """Tests for Phase 2 Milestone 1: Inspection Review endpoint."""
+
+    def test_get_inspection_review(self):
+        """Test GET /api/inspections/{id}/review/ returns all review data."""
+        inspection = self.create_inspection()
+
+        # Fill in some step data
+        step_data = {
+            'step_key': 'setup_01',
+            'field_data': {
+                'inspector_name': 'John Doe',
+                'weather_conditions': 'CLEAR',
+                'site_safe': True
+            },
+            'validate': False
+        }
+        self.client.patch(
+            f'/api/inspections/{inspection.id}/save_step/',
+            data=step_data,
+            format='json'
+        )
+
+        # Evaluate rules to generate defects
+        self.client.post(f'/api/inspections/{inspection.id}/evaluate_rules/')
+
+        # Get review data
+        response = self.client.get(f'/api/inspections/{inspection.id}/review/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+
+        # Verify structure
+        self.assertIn('inspection', data)
+        self.assertIn('completion', data)
+        self.assertIn('defects', data)
+
+        # Verify inspection data
+        self.assertEqual(data['inspection']['id'], str(inspection.id))
+        self.assertIn('template_snapshot', data['inspection'])
+        self.assertIn('step_data', data['inspection'])
+
+        # Verify completion data
+        self.assertIn('total_steps', data['completion'])
+        self.assertIn('completed_steps', data['completion'])
+        self.assertIn('completion_percentage', data['completion'])
+        self.assertIn('ready_to_finalize', data['completion'])
+
+        # Verify defects data
+        self.assertIn('count', data['defects'])
+        self.assertIn('items', data['defects'])
+        self.assertIn('summary', data['defects'])
+        self.assertIsInstance(data['defects']['items'], list)
+
+    def test_review_with_no_defects(self):
+        """Test review endpoint when inspection has no defects."""
+        inspection = self.create_inspection()
+
+        response = self.client.get(f'/api/inspections/{inspection.id}/review/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+
+        # Should have 0 defects
+        self.assertEqual(data['defects']['count'], 0)
+        self.assertEqual(len(data['defects']['items']), 0)
+        self.assertEqual(data['defects']['summary']['total_defects'], 0)
+
+    def test_review_with_multiple_defects(self):
+        """Test review endpoint aggregates defects correctly."""
+        inspection = self.create_inspection()
+
+        # Add defects at different severity levels
+        defects = [
+            {'step_key': 'visual_01', 'severity': 'CRITICAL', 'title': 'Critical defect'},
+            {'step_key': 'visual_01', 'severity': 'MAJOR', 'title': 'Major defect'},
+            {'step_key': 'function_01', 'severity': 'MINOR', 'title': 'Minor defect'},
+            {'step_key': 'function_01', 'severity': 'ADVISORY', 'title': 'Advisory defect'},
+        ]
+
+        for defect_data in defects:
+            self.client.post(
+                f'/api/inspections/{inspection.id}/add_defect/',
+                data=defect_data,
+                format='json'
+            )
+
+        response = self.client.get(f'/api/inspections/{inspection.id}/review/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+
+        # Verify defect count
+        self.assertEqual(data['defects']['count'], 4)
+        self.assertEqual(len(data['defects']['items']), 4)
+
+        # Verify summary
+        summary = data['defects']['summary']
+        self.assertEqual(summary['total_defects'], 4)
+        self.assertEqual(summary['by_severity']['CRITICAL'], 1)
+        self.assertEqual(summary['by_severity']['MAJOR'], 1)
+        self.assertEqual(summary['by_severity']['MINOR'], 1)
+        self.assertEqual(summary['by_severity']['ADVISORY'], 1)
+
+    def test_review_not_found(self):
+        """Test review endpoint returns 404 for non-existent inspection."""
+        response = self.client.get('/api/inspections/00000000-0000-0000-0000-000000000000/review/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_review_includes_step_responses(self):
+        """Test review endpoint includes all saved step responses."""
+        inspection = self.create_inspection()
+
+        # Save multiple steps
+        steps_to_save = [
+            {
+                'step_key': 'setup_01',
+                'field_data': {
+                    'inspector_name': 'John Doe',
+                    'weather_conditions': 'CLEAR',
+                    'site_safe': True
+                }
+            },
+            {
+                'step_key': 'visual_01',
+                'field_data': {
+                    'platform_condition': 'GOOD',
+                    'controls_operational': 'YES'
+                }
+            },
+        ]
+
+        for step_data in steps_to_save:
+            self.client.patch(
+                f'/api/inspections/{inspection.id}/save_step/',
+                data={**step_data, 'validate': False},
+                format='json'
+            )
+
+        response = self.client.get(f'/api/inspections/{inspection.id}/review/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+
+        # Verify step responses are present
+        step_data = data['inspection']['step_data']
+        self.assertIn('setup_01', step_data)
+        self.assertIn('visual_01', step_data)
+        self.assertEqual(step_data['setup_01']['inspector_name'], 'John Doe')
+        self.assertEqual(step_data['visual_01']['platform_condition'], 'GOOD')

@@ -494,6 +494,7 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
     - GET /api/inspections/{id}/ - Get inspection details
     - PATCH /api/inspections/{id}/save_step/ - Save step response
     - GET /api/inspections/{id}/completion/ - Get completion status
+    - GET /api/inspections/{id}/review/ - Get inspection review (read-only with defects)
     - POST /api/inspections/{id}/finalize/ - Finalize inspection
     - GET /api/inspections/{id}/step/{step_key}/ - Get step response
     - DELETE /api/inspections/{id}/clear_step/ - Clear step response
@@ -1081,6 +1082,52 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
 
         serializer = InspectionDefectSerializer(defect)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'])
+    def review(self, request, pk=None):
+        """
+        Get inspection review data (read-only view of completed inspection).
+
+        GET /api/inspections/{id}/review/
+
+        Returns inspection with all step responses formatted for display.
+        Intended for review after completion before finalization.
+
+        Returns:
+            200: Inspection review data
+            404: Inspection not found
+        """
+        try:
+            inspection = self.get_queryset().get(pk=pk)
+        except InspectionRun.DoesNotExist:
+            return Response(
+                {'error': 'Inspection not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Get full inspection details
+        serializer = InspectionRunDetailSerializer(inspection)
+        inspection_data = serializer.data
+
+        # Get completion status
+        completion_status = InspectionRuntime.calculate_completion_status(inspection)
+
+        # Get defects with summary
+        defects = inspection.defects.all()
+        defect_serializer = InspectionDefectSerializer(defects, many=True)
+
+        from apps.inspections.services.defect_generator import DefectGenerator
+        defect_summary = DefectGenerator.get_defect_summary(inspection)
+
+        return Response({
+            'inspection': inspection_data,
+            'completion': completion_status.to_dict(),
+            'defects': {
+                'count': defects.count(),
+                'items': defect_serializer.data,
+                'summary': defect_summary
+            }
+        })
 
     @action(detail=True, methods=['get'])
     def export_pdf(self, request, pk=None):

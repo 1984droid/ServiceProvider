@@ -344,6 +344,8 @@ class InspectionDefect(BaseModel):
         help_text="Short description of defect"
     )
     description = models.TextField(
+        blank=True,
+        default='',
         help_text="Detailed description of defect"
     )
     defect_details = models.JSONField(

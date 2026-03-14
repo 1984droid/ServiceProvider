@@ -19,10 +19,11 @@ import { VehicleCreatePage } from '@/features/assets/VehicleCreatePage';
 import { EquipmentCreatePage } from '@/features/assets/EquipmentCreatePage';
 import { InspectionsListPage } from '@/features/inspections/InspectionsListPage';
 import { InspectionExecutePage } from '@/features/inspections/InspectionExecutePage';
+import { InspectionReviewPage } from '@/features/inspections/InspectionReviewPage';
 import { EmployeeListPage } from '@/features/employees/EmployeeListPage';
 import { EmployeeFormPage } from '@/features/employees/EmployeeFormPage';
 
-type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'employees' | 'employees-create' | 'employees-edit';
+type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'inspection-review' | 'employees' | 'employees-create' | 'employees-edit';
 
 interface NavigationState {
   customerId?: string;
@@ -71,6 +72,11 @@ function App() {
   const navigateToInspection = (inspectionId: string) => {
     setNavState({ inspectionId });
     setCurrentPage('inspection-execute');
+  };
+
+  const navigateToInspectionReview = (inspectionId: string) => {
+    setNavState({ inspectionId });
+    setCurrentPage('inspection-review');
   };
 
   useEffect(() => {
@@ -439,6 +445,20 @@ function App() {
             <InspectionExecutePage
               inspectionId={navState.inspectionId}
               onExit={() => {
+                setCurrentPage('inspections');
+                setNavState({});
+              }}
+            />
+          )}
+          {currentPage === 'inspection-review' && navState.inspectionId && (
+            <InspectionReviewPage
+              inspectionId={navState.inspectionId}
+              onExit={() => {
+                setCurrentPage('inspections');
+                setNavState({});
+              }}
+              onFinalize={() => {
+                // TODO: Implement finalization flow
                 setCurrentPage('inspections');
                 setNavState({});
               }}
