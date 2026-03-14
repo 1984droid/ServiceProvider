@@ -11,6 +11,7 @@ import { InspectionHeader } from './InspectionHeader';
 import { StepRenderer } from './steps/StepRenderer';
 import { DefectBadge } from './defects/DefectBadge';
 import { FinalizeInspectionModal } from './FinalizeInspectionModal';
+import { CreateWorkOrderModal } from './CreateWorkOrderModal';
 
 interface InspectionReviewPageProps {
   inspectionId: string;
@@ -36,6 +37,7 @@ export function InspectionReviewPage({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [showWorkOrderModal, setShowWorkOrderModal] = useState(false);
 
   useEffect(() => {
     loadReviewData();
@@ -60,6 +62,12 @@ export function InspectionReviewPage({
     if (onFinalize) {
       onFinalize();
     }
+  };
+
+  const handleWorkOrderSuccess = (workOrders: any[]) => {
+    // Show success message and reload review data to update defect statuses
+    alert(`Successfully created ${workOrders.length} work order(s)`);
+    loadReviewData();
   };
 
   if (isLoading) {
@@ -142,9 +150,17 @@ export function InspectionReviewPage({
       {defects.count > 0 && (
         <div className="bg-yellow-50 border-b border-yellow-200 px-6 py-4">
           <div className="max-w-6xl mx-auto">
-            <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-              {defects.count} Defect{defects.count !== 1 ? 's' : ''} Found
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-yellow-900">
+                {defects.count} Defect{defects.count !== 1 ? 's' : ''} Found
+              </h3>
+              <button
+                onClick={() => setShowWorkOrderModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium text-sm"
+              >
+                Create Work Order
+              </button>
+            </div>
             <div className="flex gap-6">
               {defects.summary.critical > 0 && (
                 <div className="flex items-center gap-2">
@@ -293,6 +309,17 @@ export function InspectionReviewPage({
           onFinalize={handleFinalize}
           onCancel={() => setShowFinalizeModal(false)}
           isOpen={showFinalizeModal}
+        />
+      )}
+
+      {/* Create Work Order Modal */}
+      {reviewData && (
+        <CreateWorkOrderModal
+          inspectionId={inspectionId}
+          defects={defects.items}
+          isOpen={showWorkOrderModal}
+          onClose={() => setShowWorkOrderModal(false)}
+          onSuccess={handleWorkOrderSuccess}
         />
       )}
     </div>
