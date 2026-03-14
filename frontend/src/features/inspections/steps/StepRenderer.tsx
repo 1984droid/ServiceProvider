@@ -49,6 +49,7 @@ interface StepRendererProps {
   disabled?: boolean;
   enumValues?: Record<string, string[]>;
   measurementSets?: Record<string, MeasurementSet>;
+  inspectionId?: string;
 }
 
 export function StepRenderer({
@@ -60,7 +61,8 @@ export function StepRenderer({
   errors = {},
   disabled = false,
   enumValues = {},
-  measurementSets = {}
+  measurementSets = {},
+  inspectionId = ''
 }: StepRendererProps) {
 
   const stepType = step.type.toUpperCase();
@@ -135,6 +137,7 @@ export function StepRenderer({
           errors={errors}
           disabled={disabled}
           enumValues={enumValues}
+          inspectionId={inspectionId}
         />
       );
 

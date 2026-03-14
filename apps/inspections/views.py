@@ -4,6 +4,7 @@ Inspection API Views
 ViewSets for inspection templates and inspection execution.
 """
 
+from datetime import datetime
 from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -961,6 +962,90 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
             'defects': serializer.data,
             'summary': summary
         })
+
+    @action(detail=True, methods=['post'])
+    def add_defect(self, request, pk=None):
+        """
+        Add a manual defect to inspection.
+
+        POST /api/inspections/{id}/add_defect/
+
+        Request body:
+        {
+            "step_key": "step_id",
+            "severity": "CRITICAL|MAJOR|MINOR|ADVISORY",
+            "title": "Defect title",
+            "description": "Defect description",
+            "defect_details": {"location": "...", "photos": [...]}
+        }
+
+        Returns:
+            201: Defect created
+            400: Invalid data
+            403: Inspection finalized (cannot add defects)
+            404: Inspection not found
+        """
+        try:
+            inspection = self.get_queryset().get(pk=pk)
+        except InspectionRun.DoesNotExist:
+            return Response(
+                {'error': 'Inspection not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check if inspection is finalized
+        if inspection.status == 'COMPLETED':
+            return Response(
+                {'error': 'Cannot add defects to completed inspection'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Validate required fields
+        step_key = request.data.get('step_key')
+        severity = request.data.get('severity')
+        title = request.data.get('title')
+        description = request.data.get('description', '')
+
+        if not step_key:
+            return Response(
+                {'error': 'step_key is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not severity or severity not in ['CRITICAL', 'MAJOR', 'MINOR', 'ADVISORY']:
+            return Response(
+                {'error': 'severity must be CRITICAL, MAJOR, MINOR, or ADVISORY'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not title:
+            return Response(
+                {'error': 'title is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Generate defect_identity for manual defects
+        import hashlib
+        identity_string = f"{inspection.id}_{step_key}_manual_{title}_{datetime.now().isoformat()}"
+        defect_identity = hashlib.sha256(identity_string.encode()).hexdigest()
+
+        # Create defect
+        defect = InspectionDefect.objects.create(
+            inspection_run=inspection,
+            defect_identity=defect_identity,
+            module_key='',
+            step_key=step_key,
+            rule_id=None,  # None indicates manual defect
+            severity=severity,
+            status='OPEN',
+            title=title,
+            description=description,
+            defect_details=request.data.get('defect_details', {}),
+            evaluation_trace={}
+        )
+
+        serializer = InspectionDefectSerializer(defect)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['get'])
     def export_pdf(self, request, pk=None):

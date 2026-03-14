@@ -256,6 +256,7 @@ export function InspectionExecutePage({
             errors={stepData.validationErrors}
             enumValues={template.enums || {}}
             measurementSets={template.measurement_sets || {}}
+            inspectionId={inspectionId}
           />
         </div>
       </div>
