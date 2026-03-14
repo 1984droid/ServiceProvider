@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { inspectionsApi } from '@/api/inspections.api';
 import { InspectionHeader } from './InspectionHeader';
 import { StepRenderer } from './steps/StepRenderer';
+import { DefectBadge } from './defects/DefectBadge';
 
 interface InspectionReviewPageProps {
   inspectionId: string;
@@ -137,9 +138,7 @@ export function InspectionReviewPage({
             <div className="flex gap-6">
               {defects.summary.critical > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">
-                    CRITICAL
-                  </span>
+                  <DefectBadge severity="CRITICAL" />
                   <span className="text-sm font-medium text-gray-700">
                     {defects.summary.critical}
                   </span>
@@ -147,9 +146,7 @@ export function InspectionReviewPage({
               )}
               {defects.summary.major > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 bg-orange-600 text-white text-xs font-bold rounded">
-                    MAJOR
-                  </span>
+                  <DefectBadge severity="MAJOR" />
                   <span className="text-sm font-medium text-gray-700">
                     {defects.summary.major}
                   </span>
@@ -157,9 +154,7 @@ export function InspectionReviewPage({
               )}
               {defects.summary.minor > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 bg-yellow-600 text-white text-xs font-bold rounded">
-                    MINOR
-                  </span>
+                  <DefectBadge severity="MINOR" />
                   <span className="text-sm font-medium text-gray-700">
                     {defects.summary.minor}
                   </span>
@@ -167,9 +162,7 @@ export function InspectionReviewPage({
               )}
               {defects.summary.advisory > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded">
-                    ADVISORY
-                  </span>
+                  <DefectBadge severity="ADVISORY" />
                   <span className="text-sm font-medium text-gray-700">
                     {defects.summary.advisory}
                   </span>
@@ -251,19 +244,7 @@ export function InspectionReviewPage({
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span
-                                    className={`px-2 py-1 text-xs font-bold rounded ${
-                                      defect.severity === 'CRITICAL'
-                                        ? 'bg-red-600 text-white'
-                                        : defect.severity === 'MAJOR'
-                                        ? 'bg-orange-600 text-white'
-                                        : defect.severity === 'MINOR'
-                                        ? 'bg-yellow-600 text-white'
-                                        : 'bg-blue-600 text-white'
-                                    }`}
-                                  >
-                                    {defect.severity}
-                                  </span>
+                                  <DefectBadge severity={defect.severity} />
                                   <span className="text-xs text-gray-500">
                                     {defect.status}
                                   </span>
