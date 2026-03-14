@@ -31,8 +31,20 @@
 ## Entity Relationship Overview
 
 ```
+Company (1 singleton)
+      │
+      └────── (N) Department
+                 │
+                 └────── (N) Employee (base_department)
+                         │     ↑
+                         │     └──── (M2M) Department (floating)
+                         │
+                         └────── (1:1 optional) User (auth.User)
+
+
 Customer (1) ──────┬────── (N) Contact
-      ↑            │          ↑
+      ↑            │          ↑           ↑
+      │            │          │           └────── (1:1 optional) User (auth.User)
       │            │          │ (primary_contact)
       └────────────┴──────────┘
       │
@@ -50,6 +62,8 @@ Vehicle/Equipment ─── (N) InspectionRun
 
 Customer ──────────────── (N) WorkOrder
 Vehicle/Equipment ──────── (N) WorkOrder
+
+Note: User can link to EITHER Employee OR Contact (not both)
 ```
 
 ---
@@ -93,6 +107,7 @@ Vehicle/Equipment ──────── (N) WorkOrder
 
 **Key Fields:**
 - `id` (UUID, PK)
+- `user_id` (UUID, FK → auth.User, nullable, unique) - **Portal user account (customer portal access)**
 - `customer_id` (UUID, FK → Customer, required, indexed)
 - `first_name`, `last_name` (string, required)
 - `title` (string, optional)
@@ -118,6 +133,9 @@ Vehicle/Equipment ──────── (N) WorkOrder
 **Business Rules:**
 - Primary contact is set via `Customer.primary_contact_id` FK (NOT a boolean on Contact)
 - This prevents race conditions and ensures single source of truth
+- **Contact.user links to auth.User for customer portal access**
+- User accounts created on-demand for portal access (not all contacts need accounts)
+- A User can link to EITHER Contact OR Employee, NEVER both
 - `is_automated=True` contacts are for system-generated communications only
 - Automated contacts MUST have an email address
 - Deactivating a contact does NOT deactivate the customer
@@ -365,7 +383,124 @@ Example equipment_data structure:
 
 ---
 
-### 5. InspectionRun
+### 7. Company
+
+**Purpose:** The service provider company (single-tenant).
+
+**Key Fields:**
+- `id` (UUID, PK)
+- `name` (string, required) - Company name
+- `dba_name` (string, optional) - Doing Business As name
+- `address_line1`, `address_line2` (string, optional)
+- `city`, `state`, `zip_code` (string, optional)
+- `phone`, `email`, `website` (string, optional)
+- `created_at`, `updated_at` (timestamps)
+
+**Constraints:**
+- Only ONE company record should exist (single-tenant application)
+- Name required
+
+**Business Rules:**
+- Single-tenant: All data belongs to this one company
+- Company information displayed on reports, invoices, inspection forms
+- Cannot be deleted (singleton record)
+- Created during initial setup
+
+---
+
+### 8. Department
+
+**Purpose:** Organizational departments within the company.
+
+**Key Fields:**
+- `id` (UUID, PK)
+- `name` (string, required) - Department name
+- `code` (string, required, unique) - Short code (e.g., 'INSP', 'SVCRPR')
+- `description` (text, optional)
+- `is_active` (boolean, default=True, indexed)
+- `allows_floating` (boolean, default=False) - Can employees from other departments float here?
+- `created_at`, `updated_at` (timestamps)
+
+**Constraints:**
+- Name and code required
+- Code must be unique
+- Cannot delete department with employees
+
+**Business Rules:**
+- Employees have a base_department (required)
+- Employees can have floating_departments (many-to-many) if allows_floating=True
+- Deactivating department does NOT deactivate employees
+- Used for scheduling, reporting, labor tracking
+
+---
+
+### 9. Employee
+
+**Purpose:** Company employee with authentication and department assignments.
+
+**Key Fields:**
+- `id` (UUID, PK)
+- `user_id` (UUID, FK → auth.User, nullable, unique) - **System user account (for application access)**
+- `employee_number` (string, required, unique, indexed) - Unique employee ID
+- `first_name`, `last_name` (string, required)
+- `email` (email, optional)
+- `phone` (string, optional)
+- `title` (string, optional) - Job title
+- `base_department_id` (UUID, FK → Department, required) - Primary department
+- `floating_departments` (M2M → Department) - Additional departments employee can work in
+- `hire_date` (date, nullable)
+- `is_active` (boolean, default=True, indexed)
+- `certifications` (JSON array, default=[]) - Employee certifications with expiry dates
+- `skills` (JSON array, default=[]) - Employee skills/competencies
+- `settings` (JSON object, default={}) - Employee-specific settings
+- `notes` (text)
+- `created_at`, `updated_at` (timestamps)
+
+**Constraints:**
+- Employee number must be unique
+- Base department FK required (protect on delete)
+- User FK nullable (not all employees need system access)
+- If user set, must be unique (one user per employee)
+
+**Business Rules:**
+- **Employee.user links to auth.User for system access (inspectors, technicians, admins)**
+- User accounts created on-demand (not all employees need access)
+- A User can link to EITHER Employee OR Contact, NEVER both
+- Employee number is primary identifier (cannot be changed)
+- Base department required (cannot be null)
+- Floating departments allow cross-department work if department allows_floating=True
+- Certifications stored as JSON with structure: `[{standard, cert_number, expiry_date}, ...]`
+- Skills are simple string array: `['Aerial Lifts', 'USDOT Inspections', ...]`
+- Deactivating employee does NOT delete user account or history
+- Cannot delete employee with inspection runs or work orders assigned
+
+**Certifications Structure:**
+```json
+{
+  "certifications": [
+    {
+      "standard": "ANSI A92.2-2021",
+      "cert_number": "A92-2021-001",
+      "expiry_date": "2025-12-31"
+    },
+    {
+      "standard": "ANSI A92.5-2021",
+      "cert_number": "A92-5-2021-003",
+      "expiry_date": "2027-06-15"
+    }
+  ],
+  "skills": [
+    "Aerial Lifts",
+    "Forklifts",
+    "USDOT Inspections",
+    "Hydraulics"
+  ]
+}
+```
+
+---
+
+### 10. InspectionRun
 
 **Purpose:** Instance of an inspection performed on an asset.
 
@@ -411,7 +546,7 @@ IF finalized_at IS NOT NULL:
 
 ---
 
-### 6. InspectionDefect
+### 11. InspectionDefect
 
 **Purpose:** Defect/finding identified during inspection.
 
@@ -452,7 +587,7 @@ ADVISORY: Recommendation, informational
 
 ---
 
-### 7. WorkOrder
+### 12. WorkOrder
 
 **Purpose:** Service work to be performed on an asset.
 
@@ -584,6 +719,12 @@ WorkOrder.work_order_number → Unique (always)
 ### 2. Referential Integrity
 
 ```
+# Company & Organization
+Department.company_id      → Company.id (PROTECT) - Implicit single company
+Employee.base_department_id→ Department.id (PROTECT)
+Employee.user_id           → auth.User.id (SET NULL) - System access
+Contact.user_id            → auth.User.id (SET NULL) - Portal access
+
 # Customer & Contacts
 Contact.customer_id        → Customer.id (CASCADE DELETE)
 Customer.primary_contact_id→ Contact.id (SET NULL) - Must belong to same customer
@@ -605,6 +746,10 @@ InspectionDefect.inspection_run_id → InspectionRun.id (CASCADE)
 WorkOrder.customer_id      → Customer.id (PROTECT)
 WorkOrder.asset_id         → Vehicle.id OR Equipment.id (PROTECT)
 WorkOrder.source_inspection_run_id → InspectionRun.id (SET NULL)
+
+# Person-Type Architecture Constraint
+# A User can link to EITHER Employee.user OR Contact.user, NEVER both
+# Enforced at application level (not DB constraint)
 ```
 
 ### 3. Validation Rules
@@ -1525,3 +1670,4 @@ customer = CustomerFactory(**get_test_data('customer', 'new_customer'))
 - v1.0 (2025-01-XX): Initial data contract for clean rebuild
 - v1.1 (2025-01-XX): Added port configuration (8100) and database name (service_provider_new)
 - v1.2 (2026-03-14): Added Seed Config ↔ Test Config contract enforcement
+- v1.3 (2026-03-14): **MAJOR UPDATE** - Added missing entities (Company, Department, Employee), documented User relationships, fixed entity numbering
