@@ -14,8 +14,11 @@ from apps.customers.models import Customer, Contact, USDOTProfile
 from apps.assets.models import Vehicle, Equipment
 from apps.organization.models import Company, Department, Employee
 from apps.inspections.models import InspectionRun
-from datetime import datetime, timedelta, date
+from datetime import datetime
 import random
+import secrets
+import string
+from .seed_config import SeedConfig
 
 
 class Command(BaseCommand):
@@ -44,6 +47,7 @@ class Command(BaseCommand):
         customers = self._create_customers()
         self._create_usdot_profiles(customers)
         contacts = self._create_contacts(customers)
+        contact_users = self._create_contact_users(contacts)
         vehicles = self._create_vehicles(customers)
         equipment = self._create_equipment(customers, vehicles)
 
@@ -51,9 +55,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'  - Company: 1'))
         self.stdout.write(self.style.SUCCESS(f'  - Departments: {len(departments)}'))
         self.stdout.write(self.style.SUCCESS(f'  - Employees: {len(employees)}'))
-        self.stdout.write(self.style.SUCCESS(f'  - Users: {len(users)}'))
+        self.stdout.write(self.style.SUCCESS(f'  - Employee Users: {len(users)}'))
         self.stdout.write(self.style.SUCCESS(f'  - Customers: {len(customers)}'))
         self.stdout.write(self.style.SUCCESS(f'  - Contacts: {len(contacts)}'))
+        self.stdout.write(self.style.SUCCESS(f'  - Contact Portal Users: {len(contact_users)}'))
         self.stdout.write(self.style.SUCCESS(f'  - Vehicles: {len(vehicles)}'))
         self.stdout.write(self.style.SUCCESS(f'  - Equipment: {len(equipment)}'))
 
@@ -74,30 +79,17 @@ class Command(BaseCommand):
     def _create_company(self):
         """Create the single company record."""
         company, created = Company.objects.get_or_create(
-            name='Advantage Fleet Services',
-            defaults={
-                'dba_name': 'Advantage Fleet',
-                'address_line1': '2450 Industrial Parkway',
-                'city': 'Springfield',
-                'state': 'IL',
-                'zip_code': '62701',
-            }
+            name=SeedConfig.COMPANY['name'],
+            defaults=SeedConfig.COMPANY
         )
         if created:
             self.stdout.write('  [OK] Created company')
         return company
 
     def _create_departments(self, company):
-        """Create departments."""
-        departments_data = [
-            {'name': 'Inspections', 'code': 'INSP', 'allows_floating': False},
-            {'name': 'Service & Repair', 'code': 'SVCRPR', 'allows_floating': True},
-            {'name': 'Customer Service', 'code': 'CUSTSVC', 'allows_floating': False},
-            {'name': 'Administration', 'code': 'ADMIN', 'allows_floating': False},
-        ]
-
+        """Create departments from config."""
         departments = []
-        for data in departments_data:
+        for data in SeedConfig.DEPARTMENTS:
             dept, created = Department.objects.get_or_create(
                 code=data['code'],
                 defaults=data
@@ -109,55 +101,59 @@ class Command(BaseCommand):
         return departments
 
     def _create_employees(self, departments):
-        """Create employees across departments."""
-        employees_data = [
-            # Inspections
-            {'first_name': 'John', 'last_name': 'Ramirez', 'employee_number': 'EMP001', 'dept': 0},
-            {'first_name': 'Jane', 'last_name': 'Martinez', 'employee_number': 'EMP002', 'dept': 0},
-            # Service & Repair
-            {'first_name': 'Robert', 'last_name': 'Chen', 'employee_number': 'EMP003', 'dept': 1},
-            {'first_name': 'Alice', 'last_name': 'Johnson', 'employee_number': 'EMP004', 'dept': 1},
-            # Customer Service
-            {'first_name': 'Carol', 'last_name': 'Williams', 'employee_number': 'EMP005', 'dept': 2},
-            # Administration
-            {'first_name': 'David', 'last_name': 'Anderson', 'employee_number': 'EMP006', 'dept': 3},
-        ]
+        """Create employees with certifications and skills from config."""
+        # Build department lookup
+        dept_lookup = {d.code: d for d in departments}
 
         employees = []
-        for data in employees_data:
-            dept_index = data.pop('dept')
+        for emp_data in SeedConfig.EMPLOYEES:
+            dept = dept_lookup[emp_data['dept_code']]
+
+            # Build certifications from config
+            certifications = []
+            for cert_key in emp_data.get('certifications', []):
+                certs_for_standard = SeedConfig.CERTIFICATIONS.get(cert_key, [])
+                for cert in certs_for_standard:
+                    certifications.append({
+                        'standard': cert['standard'],
+                        'cert_number': cert['cert_number'],
+                        'expiry_date': SeedConfig.get_cert_expiry_date(cert['expiry_months']).isoformat(),
+                    })
+
             emp, created = Employee.objects.get_or_create(
-                employee_number=data['employee_number'],
+                employee_number=emp_data['employee_number'],
                 defaults={
-                    **data,
-                    'base_department': departments[dept_index],
-                    'hire_date': datetime.now().date() - timedelta(days=random.randint(30, 1000)),
+                    'first_name': emp_data['first_name'],
+                    'last_name': emp_data['last_name'],
+                    'email': emp_data.get('email', ''),
+                    'phone': emp_data.get('phone', ''),
+                    'title': emp_data.get('title', ''),
+                    'base_department': dept,
+                    'hire_date': SeedConfig.get_random_hire_date(),
+                    'certifications': certifications,
+                    'skills': emp_data.get('skills', []),
                 }
             )
             employees.append(emp)
             if created:
-                self.stdout.write(f'  [OK] Created employee: {emp.full_name}')
+                cert_count = len(certifications)
+                cert_info = f' ({cert_count} certs)' if cert_count > 0 else ''
+                self.stdout.write(f'  [OK] Created employee: {emp.full_name}{cert_info}')
 
         return employees
 
     def _create_users(self, employees):
-        """Create users linked to employees with different roles."""
-        users_data = [
-            {'username': 'admin', 'role': 'ADMIN', 'emp_index': 5},  # David Anderson
-            {'username': 'inspector1', 'role': 'INSPECTOR', 'emp_index': 0},  # John Ramirez
-            {'username': 'inspector2', 'role': 'INSPECTOR', 'emp_index': 1},  # Jane Martinez
-            {'username': 'service1', 'role': 'SERVICE_TECH', 'emp_index': 2},  # Robert Chen
-            {'username': 'service2', 'role': 'SERVICE_TECH', 'emp_index': 3},  # Alice Johnson
-            {'username': 'support1', 'role': 'CUSTOMER_SERVICE', 'emp_index': 4},  # Carol Williams
-        ]
+        """Create users linked to employees with different roles from config."""
+        # Build employee lookup
+        emp_lookup = {e.employee_number: e for e in employees}
 
         users = []
-        for data in users_data:
-            emp = employees[data['emp_index']]
+        for user_data in SeedConfig.USERS:
+            emp = emp_lookup[user_data['emp_number']]
             user, created = User.objects.get_or_create(
-                username=data['username'],
+                username=user_data['username'],
                 defaults={
-                    'email': f"{data['username']}@advantagefleet.com",
+                    'email': emp.email or f"{user_data['username']}@advantagefleet.com",
                     'first_name': emp.first_name,
                     'last_name': emp.last_name,
                     'is_active': True,
@@ -165,94 +161,31 @@ class Command(BaseCommand):
             )
 
             if created:
-                # Set password (all users have 'admin' as password for testing)
-                user.set_password('admin')
+                # Set password from config
+                user.set_password(user_data['password'])
                 user.save()
 
                 # Assign role
                 try:
-                    role_group = Group.objects.get(name=data['role'])
+                    role_group = Group.objects.get(name=user_data['role'])
                     user.groups.add(role_group)
                 except Group.DoesNotExist:
-                    self.stdout.write(self.style.WARNING(f'  ! Role {data["role"]} not found. Run create_roles first.'))
+                    self.stdout.write(self.style.WARNING(f'  ! Role {user_data["role"]} not found. Run create_roles first.'))
 
                 # Link to employee
                 emp.user = user
                 emp.save()
 
-                self.stdout.write(f'  [OK] Created user: {user.username} (role: {data["role"]})')
+                self.stdout.write(f'  [OK] Created user: {user.username} (role: {user_data["role"]})')
 
             users.append(user)
 
         return users
 
     def _create_customers(self):
-        """Create customers with comprehensive data."""
-        customers_data = [
-            {
-                'name': 'Midwest Express Logistics',
-                'legal_name': 'Midwest Express Logistics, LLC',
-                'usdot_number': '2847291',
-                'mc_number': 'MC938472',
-                'address_line1': '4820 Commerce Drive',
-                'address_line2': 'Suite 200',
-                'city': 'Chicago',
-                'state': 'IL',
-                'postal_code': '60607',
-                'country': 'US',
-                'notes': 'Preferred customer. Monthly inspections required. Contact 24 hours in advance for scheduling.',
-            },
-            {
-                'name': 'Northern Freight Solutions',
-                'legal_name': 'Northern Freight Solutions Corporation',
-                'usdot_number': '1947382',
-                'mc_number': 'MC847392',
-                'address_line1': '1567 Industrial Boulevard',
-                'city': 'Milwaukee',
-                'state': 'WI',
-                'postal_code': '53204',
-                'country': 'US',
-                'notes': 'Large fleet customer. Quarterly inspections for entire fleet. Invoices NET 30.',
-            },
-            {
-                'name': 'Metro Delivery Services',
-                'legal_name': 'Metro Delivery Services Inc',
-                'usdot_number': '3928471',
-                'mc_number': 'MC102938',
-                'address_line1': '892 Warehouse Row',
-                'city': 'Indianapolis',
-                'state': 'IN',
-                'postal_code': '46225',
-                'country': 'US',
-                'notes': 'Weekly maintenance schedule. Emergency service available 24/7.',
-            },
-            {
-                'name': 'Prairie Hauling Co',
-                'legal_name': 'Prairie Hauling Company',
-                'address_line1': '2301 County Road 15',
-                'city': 'Peoria',
-                'state': 'IL',
-                'postal_code': '61615',
-                'country': 'US',
-                'notes': 'Small fleet. Bi-annual inspection schedule.',
-            },
-            {
-                'name': 'Great Lakes Transport',
-                'legal_name': 'Great Lakes Transport Holdings LLC',
-                'usdot_number': '2103847',
-                'mc_number': 'MC847201',
-                'address_line1': '7450 Lakeshore Drive',
-                'address_line2': 'Building C',
-                'city': 'Gary',
-                'state': 'IN',
-                'postal_code': '46402',
-                'country': 'US',
-                'notes': 'Multiple locations. Corporate account with centralized billing.',
-            },
-        ]
-
+        """Create customers from config."""
         customers = []
-        for data in customers_data:
+        for data in SeedConfig.CUSTOMERS:
             customer, created = Customer.objects.get_or_create(
                 name=data['name'],
                 defaults=data
@@ -274,7 +207,7 @@ class Command(BaseCommand):
                         'mc_number': customer.mc_number or '',
                         'legal_name': customer.legal_name or customer.name,
                         'dba_name': customer.name,
-                        'entity_type': random.choice(['LLC', 'Corporation', 'Partnership', 'Sole Proprietorship']),
+                        'entity_type': random.choice(SeedConfig.USDOT_CONFIG['entity_types']),
                         'physical_address': customer.address_line1,
                         'physical_city': customer.city,
                         'physical_state': customer.state,
@@ -284,25 +217,14 @@ class Command(BaseCommand):
                         'mailing_state': customer.state,
                         'mailing_zip': customer.postal_code,
                         'phone': '555-0000',
-                        'email': f'info@{customer.name.lower().replace(" ", "").replace(",", "")}.com',
-                        'carrier_operation': random.choice(['Interstate', 'Intrastate', 'Interstate and Intrastate']),
-                        'cargo_carried': random.choice([
-                            'General Freight',
-                            'Household Goods',
-                            'Building Materials, Commodities, Dry Van',
-                            'Refrigerated Food, Beverages',
-                            'Metal: Sheets, Coils, Rolls',
-                            'Machinery, Large Objects',
-                        ]),
-                        'operation_classification': random.choice([
-                            ['Authorized For Hire', 'Motor Carrier'],
-                            ['Private (Property)', 'Motor Carrier'],
-                            ['Authorized For Hire', 'Motor Carrier', 'Broker'],
-                        ]),
-                        'safety_rating': random.choice(['Satisfactory', 'Conditional', 'None', 'Unsatisfactory']),
+                        'email': f'info@{SeedConfig.sanitize_for_domain(customer.name)}.com',
+                        'carrier_operation': random.choice(SeedConfig.USDOT_CONFIG['carrier_operations']),
+                        'cargo_carried': random.choice(SeedConfig.USDOT_CONFIG['cargo_types']),
+                        'operation_classification': random.choice(SeedConfig.USDOT_CONFIG['operation_classifications']),
+                        'safety_rating': random.choice(SeedConfig.USDOT_CONFIG['safety_ratings']),
                         'out_of_service_date': None,
-                        'total_power_units': random.randint(8, 85),
-                        'total_drivers': random.randint(5, 65),
+                        'total_power_units': random.randint(*SeedConfig.USDOT_CONFIG['power_units_range']),
+                        'total_drivers': random.randint(*SeedConfig.USDOT_CONFIG['drivers_range']),
                         'raw_fmcsa_data': {},
                     }
                 )
@@ -310,73 +232,17 @@ class Command(BaseCommand):
                     self.stdout.write(f'    [OK] Created USDOT profile for {customer.name}')
 
     def _create_contacts(self, customers):
-        """Create diverse contacts for customers with varied correspondence preferences."""
-        # Contact templates with different roles and preferences
-        contact_templates = [
-            {
-                'role': 'Fleet Manager',
-                'first_names': ['Michael', 'Jennifer', 'David', 'Lisa', 'Christopher'],
-                'last_names': ['Thompson', 'Garcia', 'Rodriguez', 'Wilson', 'Martinez'],
-                'receive_invoices': True,
-                'receive_estimates': True,
-                'receive_service_updates': True,
-                'receive_inspection_reports': True,
-                'is_primary_template': True,
-            },
-            {
-                'role': 'Accounting Manager',
-                'first_names': ['Sarah', 'James', 'Patricia', 'Robert', 'Linda'],
-                'last_names': ['Anderson', 'Taylor', 'Moore', 'Jackson', 'White'],
-                'receive_invoices': True,
-                'receive_estimates': True,
-                'receive_service_updates': False,
-                'receive_inspection_reports': False,
-                'is_primary_template': False,
-            },
-            {
-                'role': 'Operations Director',
-                'first_names': ['William', 'Mary', 'Richard', 'Barbara', 'Thomas'],
-                'last_names': ['Harris', 'Martin', 'Brown', 'Davis', 'Miller'],
-                'receive_invoices': False,
-                'receive_estimates': True,
-                'receive_service_updates': True,
-                'receive_inspection_reports': True,
-                'is_primary_template': False,
-            },
-            {
-                'role': 'Safety Coordinator',
-                'first_names': ['Charles', 'Susan', 'Joseph', 'Jessica', 'Daniel'],
-                'last_names': ['Wilson', 'Lee', 'Walker', 'Hall', 'Allen'],
-                'receive_invoices': False,
-                'receive_estimates': False,
-                'receive_service_updates': True,
-                'receive_inspection_reports': True,
-                'is_primary_template': False,
-            },
-        ]
-
-        # Add an automated email system for some customers
-        automated_contact_template = {
-            'first_name': 'Maintenance',
-            'last_name': 'Alerts',
-            'title': 'Automated System',
-            'receive_invoices': False,
-            'receive_estimates': False,
-            'receive_service_updates': True,
-            'receive_inspection_reports': True,
-            'is_automated': True,
-        }
-
+        """Create diverse contacts for customers with varied correspondence preferences from config."""
         all_contacts = []
         for customer in customers:
             # Create 3-4 regular contacts per customer
             num_contacts = random.randint(3, 4)
-            templates_to_use = random.sample(contact_templates, num_contacts)
+            templates_to_use = random.sample(SeedConfig.CONTACT_TEMPLATES, num_contacts)
 
             for idx, template in enumerate(templates_to_use):
                 first_name = random.choice(template['first_names'])
                 last_name = random.choice(template['last_names'])
-                email = f'{first_name.lower()}.{last_name.lower()}@{customer.name.lower().replace(" ", "").replace(",", "")}.com'
+                email = f'{first_name.lower()}.{last_name.lower()}@{SeedConfig.sanitize_for_domain(customer.name)}.com'
 
                 contact, created = Contact.objects.get_or_create(
                     customer=customer,
@@ -410,11 +276,13 @@ class Command(BaseCommand):
 
             # 50% chance to add automated system contact
             if random.random() > 0.5:
-                auto_email = f'alerts@{customer.name.lower().replace(" ", "").replace(",", "")}.com'
+                auto_email = f'alerts@{SeedConfig.sanitize_for_domain(customer.name)}.com'
+                # Filter out has_portal_access since it's not a Contact field
+                auto_defaults = {k: v for k, v in SeedConfig.AUTOMATED_CONTACT.items() if k != 'has_portal_access'}
                 auto_contact, created = Contact.objects.get_or_create(
                     customer=customer,
                     email=auto_email,
-                    defaults=automated_contact_template
+                    defaults=auto_defaults
                 )
                 all_contacts.append(auto_contact)
                 if created:
@@ -422,32 +290,77 @@ class Command(BaseCommand):
 
         return all_contacts
 
-    def _create_vehicles(self, customers):
-        """Create vehicles with comprehensive data."""
-        truck_makes = ['Freightliner', 'Peterbilt', 'Kenworth', 'Volvo', 'International', 'Mack']
-        truck_models = {
-            'Freightliner': ['Cascadia', 'M2 106', 'Columbia', 'Coronado'],
-            'Peterbilt': ['579', '389', '567', '520'],
-            'Kenworth': ['T680', 'W900', 'T880', 'T370'],
-            'Volvo': ['VNL', 'VNR', 'VHD', 'VAH'],
-            'International': ['LT', 'RH', 'HX', 'MV'],
-            'Mack': ['Anthem', 'Pinnacle', 'Granite', 'TerraPro'],
-        }
-        # Valid body types from Vehicle model
-        body_types = ['', 'SERVICE', 'FLATBED', 'STAKE', 'DUMP', 'VAN', 'BOX']
-        states = ['IL', 'IN', 'WI', 'MI', 'OH', 'IA']
+    def _create_contact_users(self, contacts):
+        """Create portal user accounts for contacts based on config."""
+        contact_users = []
 
+        for contact in contacts:
+            # Skip automated contacts
+            if contact.is_automated:
+                continue
+
+            # Find template to check if should have portal access
+            has_portal_access = False
+            for template in SeedConfig.CONTACT_TEMPLATES:
+                if contact.title == template['role']:
+                    has_portal_access = template.get('has_portal_access', False)
+                    break
+
+            if not has_portal_access:
+                continue
+
+            # Generate username from email
+            username = contact.email.split('@')[0] if contact.email else f"{contact.first_name.lower()}{contact.last_name.lower()}"
+
+            # Ensure uniqueness
+            base_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+            # Generate temporary password
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(12))
+
+            # Create user and link to contact
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    'email': contact.email or '',
+                    'first_name': contact.first_name,
+                    'last_name': contact.last_name,
+                    'is_active': True,
+                }
+            )
+
+            if created:
+                user.set_password(password)
+                user.save()
+
+                contact.user = user
+                contact.save(update_fields=['user', 'updated_at'])
+
+                contact_users.append(user)
+                self.stdout.write(f'    [OK] Created portal user: {username} for {contact.full_name}')
+
+        return contact_users
+
+    def _create_vehicles(self, customers):
+        """Create vehicles with comprehensive data from config."""
         vehicles = []
         for customer in customers:
-            # 3-7 vehicles per customer based on fleet size
-            num_vehicles = random.randint(3, 7)
+            # Get count range from config
+            num_vehicles = random.randint(
+                SeedConfig.VEHICLE_CONFIG['min_per_customer'],
+                SeedConfig.VEHICLE_CONFIG['max_per_customer']
+            )
 
             for i in range(num_vehicles):
-                make = random.choice(truck_makes)
-                model = random.choice(truck_models[make])
-                year = random.randint(2016, 2024)
-                # 40% have no special body, 60% have various body types
-                body_type = random.choice(body_types)
+                make = random.choice(list(SeedConfig.VEHICLE_CONFIG['makes_models'].keys()))
+                model = random.choice(SeedConfig.VEHICLE_CONFIG['makes_models'][make])
+                year = random.randint(*SeedConfig.VEHICLE_CONFIG['year_range'])
+                body_type = random.choice(SeedConfig.VEHICLE_CONFIG['body_types'])
 
                 vehicle, created = Vehicle.objects.get_or_create(
                     customer=customer,
@@ -458,10 +371,10 @@ class Command(BaseCommand):
                         'make': make,
                         'model': model,
                         'body_type': body_type,
-                        'license_plate': f'{random.choice(states)}{random.choice(["T", "K", "F"])}{random.randint(10000, 99999)}',
+                        'license_plate': f'{random.choice(SeedConfig.VEHICLE_CONFIG["states"])}{random.choice(["T", "K", "F"])}{random.randint(10000, 99999)}',
                         'odometer_miles': random.randint(50000, 450000),
                         'engine_hours': random.randint(2000, 15000),
-                        'is_active': random.random() > 0.1,  # 90% active
+                        'is_active': random.random() < SeedConfig.VEHICLE_CONFIG['active_rate'],
                         'notes': f'{year} {make} {model}. Regular maintenance schedule.' if random.random() > 0.7 else '',
                     }
                 )
@@ -472,38 +385,27 @@ class Command(BaseCommand):
         return vehicles
 
     def _create_equipment(self, customers, vehicles):
-        """Create equipment with comprehensive data, some mounted on vehicles."""
-        # Standards-based equipment types
-        equipment_types = {
-            'A92_2_AERIAL': {
-                'manufacturers': ['Altec', 'Terex', 'Versalift', 'Elliott', 'Manitex'],
-                'models': {
-                    'Altec': ['AT40G', 'AT37G', 'L42A', 'LRV-55'],
-                    'Terex': ['Hi-Ranger TL50', 'TC60', 'TL40M', 'Telelect Commander'],
-                    'Versalift': ['VST-240', 'SST-37', 'VO-255', 'VST-47'],
-                    'Elliott': ['G85', 'G105', 'H110R', 'E120'],
-                    'Manitex': ['2892C', '30112S', '22101S', '1970C'],
-                },
-            },
-        }
-
+        """Create equipment with comprehensive data from config, some mounted on vehicles."""
         equipment_list = []
         for customer in customers:
             # Get customer's vehicles for potential mounting
             customer_vehicles = [v for v in vehicles if v.customer == customer]
 
-            # 2-5 equipment pieces per customer
-            num_equipment = random.randint(2, 5)
+            # Get count range from config
+            num_equipment = random.randint(
+                SeedConfig.EQUIPMENT_CONFIG['min_per_customer'],
+                SeedConfig.EQUIPMENT_CONFIG['max_per_customer']
+            )
 
             for i in range(num_equipment):
-                equip_type = random.choice(list(equipment_types.keys()))
-                manufacturer = random.choice(equipment_types[equip_type]['manufacturers'])
-                model = random.choice(equipment_types[equip_type]['models'][manufacturer])
-                year = random.randint(2014, 2023)
+                equip_type = random.choice(list(SeedConfig.EQUIPMENT_CONFIG['types'].keys()))
+                manufacturer = random.choice(SeedConfig.EQUIPMENT_CONFIG['types'][equip_type]['manufacturers'])
+                model = random.choice(SeedConfig.EQUIPMENT_CONFIG['types'][equip_type]['models'][manufacturer])
+                year = random.randint(*SeedConfig.EQUIPMENT_CONFIG['year_range'])
 
-                # 60% chance to mount on a vehicle if vehicles available
+                # Check if should mount on vehicle based on config mount_rate
                 mounted_vehicle = None
-                if customer_vehicles and random.random() > 0.4:
+                if customer_vehicles and random.random() < SeedConfig.EQUIPMENT_CONFIG['mount_rate']:
                     mounted_vehicle = random.choice(customer_vehicles)
 
                 equipment, created = Equipment.objects.get_or_create(
@@ -517,7 +419,7 @@ class Command(BaseCommand):
                         'serial_number': f'{manufacturer[:3].upper()}{year}{random.randint(10000, 99999)}',
                         'mounted_on_vehicle': mounted_vehicle,
                         'engine_hours': random.randint(500, 8000),
-                        'is_active': random.random() > 0.15,  # 85% active
+                        'is_active': random.random() < SeedConfig.EQUIPMENT_CONFIG['active_rate'],
                         'notes': f'{year} {manufacturer} {model}. {"Mounted on " + mounted_vehicle.unit_number if mounted_vehicle else "Portable unit"}.' if random.random() > 0.6 else '',
                     }
                 )

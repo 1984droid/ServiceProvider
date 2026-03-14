@@ -7,17 +7,20 @@
  * - Contact information
  */
 
+import { useState } from 'react';
 import type { CustomerDetail } from '@/api/customers.api';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Badge } from '@/components/ui/Badge';
 import { CorrespondenceIndicator } from '@/components/ui/CorrespondenceIndicator';
+import { ContactUserAccessButton } from '../ContactUserAccessButton';
 
 interface CustomerContactsTabProps {
   customer: CustomerDetail;
   onNavigateToContact?: (contactId: string) => void;
+  onRefresh?: () => void;
 }
 
-export function CustomerContactsTab({ customer, onNavigateToContact }: CustomerContactsTabProps) {
+export function CustomerContactsTab({ customer, onNavigateToContact, onRefresh }: CustomerContactsTabProps) {
   const activeContacts = customer.contacts.filter(c => c.is_active);
   const inactiveContacts = customer.contacts.filter(c => !c.is_active);
 
@@ -61,6 +64,9 @@ export function CustomerContactsTab({ customer, onNavigateToContact }: CustomerC
                   </th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Type
+                  </th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Portal Access
                   </th>
                 </tr>
               </thead>
@@ -132,6 +138,12 @@ export function CustomerContactsTab({ customer, onNavigateToContact }: CustomerC
                         <span className="text-xs text-gray-500">Person</span>
                       )}
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <ContactUserAccessButton
+                        contact={contact}
+                        onSuccess={() => onRefresh?.()}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -159,6 +171,9 @@ export function CustomerContactsTab({ customer, onNavigateToContact }: CustomerC
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Contact Info
                   </th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Portal Access
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -179,6 +194,12 @@ export function CustomerContactsTab({ customer, onNavigateToContact }: CustomerC
                         {contact.email && <div>{contact.email}</div>}
                         {contact.phone && <div>{contact.phone}</div>}
                       </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <ContactUserAccessButton
+                        contact={contact}
+                        onSuccess={() => onRefresh?.()}
+                      />
                     </td>
                   </tr>
                 ))}

@@ -200,6 +200,7 @@ export function CustomerDetailPage({
             <CustomerContactsTab
               customer={customer}
               onNavigateToContact={onNavigateToContact}
+              onRefresh={loadCustomerData}
             />
           )}
           {activeTab === 'assets' && (
