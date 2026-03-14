@@ -1330,6 +1330,198 @@ python manage.py runserver 8101
 
 ---
 
+## Seed Config ↔ Test Config Contract (v1.2)
+
+### Single Source of Truth Enforcement
+
+**CRITICAL RULE:** `tests/config.py` **MUST** import and reference `seed_config.py` as the single source of truth for all test data.
+
+### Architecture
+
+```
+apps/organization/management/commands/seed_config.py  ← SOURCE OF TRUTH
+                            ↓
+                    tests/config.py  ← References seed config
+                            ↓
+                    All test files  ← Use get_test_data()
+```
+
+### Contract Requirements
+
+**1. Import Statement (REQUIRED):**
+```python
+# tests/config.py MUST include:
+from apps.organization.management.commands.seed_config import SeedConfig
+```
+
+**2. Data References (REQUIRED):**
+```python
+# Customer data MUST reference SeedConfig.CUSTOMERS
+CUSTOMER_DATA = {
+    'default': SeedConfig.CUSTOMERS[0],  # Midwest Express Logistics
+    'with_usdot': SeedConfig.CUSTOMERS[1],  # Northern Freight Solutions
+}
+
+# Contact data MUST reference SeedConfig.CONTACT_TEMPLATES
+CONTACT_DATA = {
+    'default': {
+        'first_name': SeedConfig.CONTACT_TEMPLATES[0]['first_names'][0],
+        'last_name': SeedConfig.CONTACT_TEMPLATES[0]['last_names'][0],
+        'title': SeedConfig.CONTACT_TEMPLATES[0]['role'],
+        ...
+    },
+}
+
+# Employee data MUST reference SeedConfig.EMPLOYEES
+EMPLOYEE_DATA = {
+    'default': {
+        'first_name': SeedConfig.EMPLOYEES[0]['first_name'],
+        'employee_number': SeedConfig.EMPLOYEES[0]['employee_number'],
+        ...
+    },
+}
+
+# Equipment types MUST reference SeedConfig.EQUIPMENT_CONFIG
+VALID_CHOICES = {
+    'equipment_types': list(SeedConfig.EQUIPMENT_CONFIG['types'].keys()),
+    'safety_ratings': SeedConfig.USDOT_CONFIG['safety_ratings'],
+}
+```
+
+**3. Prohibited Practices (FORBIDDEN):**
+```python
+# ❌ NEVER hardcode customer names
+CUSTOMER_DATA = {'name': 'Test Customer'}  # WRONG!
+
+# ❌ NEVER hardcode employee data
+first_name = 'John'  # WRONG!
+
+# ❌ NEVER duplicate data between configs
+DEPARTMENTS = [...]  # WRONG! Use SeedConfig.DEPARTMENTS
+
+# ✅ ALWAYS reference seed config
+CUSTOMER_DATA = SeedConfig.CUSTOMERS[0]  # CORRECT!
+```
+
+### Enforcement Mechanisms
+
+**1. Code Review Checklist:**
+- [ ] No hardcoded customer/contact/employee names in test files
+- [ ] All test data uses `get_test_data()` or `SeedConfig` directly
+- [ ] New test data added to `seed_config.py` first
+- [ ] `tests/config.py` imports and references `seed_config.py`
+
+**2. Pre-Commit Validation (Future):**
+```python
+# tests/test_data_contract.py
+def test_customer_data_references_seed_config():
+    """Verify customer test data references seed config."""
+    assert CUSTOMER_DATA['default'] == SeedConfig.CUSTOMERS[0]
+
+def test_no_hardcoded_values_in_config():
+    """Verify no hardcoded customer names in test config."""
+    config_source = open('tests/config.py').read()
+    assert 'Acme Utilities' not in config_source
+    assert 'Test Customer' not in config_source
+```
+
+### Benefits
+
+**Consistency:**
+- Tests validate against the same data users see in the application
+- No discrepancies between test and production data
+
+**Maintainability:**
+- Update `seed_config.py` once, tests automatically update
+- Zero duplication between configs
+
+**Scalability:**
+- Add new customers/employees/equipment to seed config
+- Tests automatically use new data
+
+**Reliability:**
+- Impossible to have mismatches between test and real data
+- Tests always reflect current data model
+
+### Data Mapping Contract
+
+| Seed Config | Test Config | Usage |
+|-------------|-------------|-------|
+| `SeedConfig.CUSTOMERS` | `CUSTOMER_DATA['default']` | Customer test instances |
+| `SeedConfig.CONTACT_TEMPLATES` | `CONTACT_DATA['default']` | Contact test instances |
+| `SeedConfig.EMPLOYEES` | `EMPLOYEE_DATA['default']` | Employee test instances |
+| `SeedConfig.DEPARTMENTS` | `DEPARTMENT_DATA['default']` | Department test instances |
+| `SeedConfig.COMPANY` | `COMPANY_DATA['default']` | Company test instance |
+| `SeedConfig.VEHICLE_CONFIG` | `VEHICLE_DATA['default']` | Makes/models/years |
+| `SeedConfig.EQUIPMENT_CONFIG` | `EQUIPMENT_DATA['default']` | Types/manufacturers |
+| `SeedConfig.USDOT_CONFIG` | `VALID_CHOICES['safety_ratings']` | USDOT validation |
+| `SeedConfig.CERTIFICATIONS` | Used in employee data | Certification standards |
+
+### Migration from Hardcoded to Config-Based
+
+**Before (Hardcoded - WRONG):**
+```python
+# tests/test_work_orders.py
+customer = Customer.objects.create(
+    name="Test Customer",  # ❌ Hardcoded!
+    city="Chicago",       # ❌ Hardcoded!
+    state="IL"           # ❌ Hardcoded!
+)
+```
+
+**After (Config-Based - CORRECT):**
+```python
+# tests/test_work_orders.py
+customer_data = get_test_data('customer', 'default')
+customer = Customer.objects.create(**customer_data)
+# Now uses "Midwest Express Logistics" from seed config
+```
+
+### Test Data Growth Strategy
+
+**Adding New Data:**
+1. Add to `seed_config.py` first
+2. Reference in `tests/config.py`
+3. Use in tests via `get_test_data()`
+
+**Example:**
+```python
+# 1. Add to seed_config.py
+SeedConfig.CUSTOMERS.append({
+    'name': 'ABC Transport Corp',
+    'city': 'Detroit',
+    'state': 'MI',
+    ...
+})
+
+# 2. Reference in tests/config.py
+CUSTOMER_DATA = {
+    'new_customer': SeedConfig.CUSTOMERS[5],
+}
+
+# 3. Use in tests
+customer = CustomerFactory(**get_test_data('customer', 'new_customer'))
+```
+
+### Contract Validation
+
+**Status:** ✅ **Active & Enforced** (as of v1.2)
+
+**Current Compliance:**
+- All 175 tests passing
+- Zero hardcoded values in `tests/config.py`
+- All customer/employee/department data from `SeedConfig`
+- Equipment types dynamically generated from config
+
+**Future Enhancements:**
+- Automated contract validation in CI/CD
+- Pre-commit hooks to reject hardcoded values
+- TypeScript type generation from seed config
+- Auto-generated API documentation from seed data
+
+---
+
 **Version History:**
 - v1.0 (2025-01-XX): Initial data contract for clean rebuild
 - v1.1 (2025-01-XX): Added port configuration (8100) and database name (service_provider_new)
+- v1.2 (2026-03-14): Added Seed Config ↔ Test Config contract enforcement
