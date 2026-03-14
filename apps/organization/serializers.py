@@ -39,6 +39,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
     base_department_name = serializers.CharField(source='base_department.name', read_only=True)
     floating_department_names = serializers.SerializerMethodField()
     all_departments = serializers.SerializerMethodField()
+    has_user_account = serializers.SerializerMethodField()
+    user_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Employee
@@ -48,9 +50,10 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'floating_departments', 'floating_department_names', 'all_departments',
             'title', 'hire_date', 'termination_date', 'is_active',
             'certifications', 'skills', 'settings',
+            'has_user_account', 'user_info',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'full_name', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'full_name', 'has_user_account', 'user_info', 'created_at', 'updated_at']
 
     def get_floating_department_names(self, obj):
         """Get names of floating departments."""
@@ -62,6 +65,21 @@ class EmployeeSerializer(serializers.ModelSerializer):
             {'id': str(dept.id), 'name': dept.name, 'code': dept.code}
             for dept in obj.all_departments
         ]
+
+    def get_has_user_account(self, obj):
+        """Check if employee has a linked user account."""
+        return obj.user is not None
+
+    def get_user_info(self, obj):
+        """Get basic user account info if exists."""
+        if obj.user:
+            return {
+                'id': str(obj.user.id),
+                'username': obj.user.username,
+                'is_active': obj.user.is_active,
+                'last_login': obj.user.last_login,
+            }
+        return None
 
 
 class EmployeeMinimalSerializer(serializers.ModelSerializer):
