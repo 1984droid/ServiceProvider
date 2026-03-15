@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { workOrdersApi, WorkOrder } from '@/api/workOrders.api';
+import { workOrdersApi, type WorkOrder } from '@/api/workOrders.api';
 
 interface WorkOrdersListPageProps {
   onNavigateToDetail?: (workOrderId: string) => void;
