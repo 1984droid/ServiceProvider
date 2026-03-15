@@ -4,7 +4,7 @@
  * API methods for work order management
  */
 
-import { apiClient } from './client';
+import { apiClient } from '@/lib/axios';
 
 export interface WorkOrder {
   id: string;
