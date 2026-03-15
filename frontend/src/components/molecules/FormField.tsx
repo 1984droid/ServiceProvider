@@ -16,8 +16,8 @@ interface FormFieldProps {
 
 export function FormField({ label, required, error, children, htmlFor }: FormFieldProps) {
   return (
-    <div className="mb-5">
-      <label htmlFor={htmlFor} className="block text-sm font-semibold mb-2" style={{ color: '#111827' }}>
+    <div className="mb-3">
+      <label htmlFor={htmlFor} className="block text-sm font-semibold mb-1.5" style={{ color: '#111827' }}>
         {label}
         {required && <span style={{ color: '#ef4444' }}> *</span>}
       </label>

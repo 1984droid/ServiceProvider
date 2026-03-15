@@ -48,6 +48,9 @@ export function FieldRenderer({
 
   const fieldType = field.type.toUpperCase();
 
+  // Wide fields span 2 columns in grid layout
+  const isWideField = fieldType === 'TEXT_AREA' || fieldType === 'TEXTAREA' || fieldType === 'PHOTO' || fieldType === 'ATTACHMENTS';
+
   // Render the appropriate input based on field type
   const renderInput = () => {
     switch (fieldType) {
@@ -165,18 +168,20 @@ export function FieldRenderer({
   };
 
   return (
-    <FormField
-      label={field.label || field.field_id}
-      required={field.required}
-      error={error}
-      htmlFor={field.field_id}
-    >
-      {renderInput()}
-      {field.help_text && !error && (
-        <p className="mt-1 text-xs" style={{ color: '#6b7280' }}>
-          {field.help_text}
-        </p>
-      )}
-    </FormField>
+    <div className={isWideField ? 'col-span-2' : ''}>
+      <FormField
+        label={field.label || field.field_id}
+        required={field.required}
+        error={error}
+        htmlFor={field.field_id}
+      >
+        {renderInput()}
+        {field.help_text && !error && (
+          <p className="mt-1 text-xs" style={{ color: '#6b7280' }}>
+            {field.help_text}
+          </p>
+        )}
+      </FormField>
+    </div>
   );
 }

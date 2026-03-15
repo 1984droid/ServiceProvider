@@ -253,7 +253,7 @@ export function InspectionExecutePage({
         </div>
 
         {/* Center - Current Step Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4">
           {stepData.error && (
             <div className="mb-4 p-3 rounded" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>
               <p className="text-sm">{stepData.error}</p>

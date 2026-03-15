@@ -52,8 +52,8 @@ export function InspectionActions({
   };
 
   return (
-    <div className="border-t p-1.5" style={{ borderColor: '#e5e7eb', backgroundColor: 'white' }}>
-      <div className="flex items-center justify-between">
+    <div className="border-t" style={{ borderColor: '#e5e7eb', backgroundColor: 'white', height: '48px' }}>
+      <div className="h-full flex items-center justify-between px-1.5">
         {/* Left Side - Previous Button */}
         <div>
           {!isFirstStep && (

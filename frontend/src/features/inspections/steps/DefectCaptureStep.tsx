@@ -157,9 +157,9 @@ export function DefectCaptureStep({
       )}
 
       {/* Defects Section */}
-      <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
+      <div className="mb-4 p-3 rounded-lg border" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold" style={{ color: '#111827' }}>
             Defects Found ({stepDefects.length})
           </h3>
           <button
@@ -174,8 +174,8 @@ export function DefectCaptureStep({
 
         {/* Add Defect Form */}
         {showDefectForm && (
-          <div className="mb-4 p-4 rounded-lg border" style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}>
-            <h4 className="text-md font-semibold mb-3" style={{ color: '#111827' }}>
+          <div className="mb-4 p-3 rounded-lg border" style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}>
+            <h4 className="text-sm font-semibold mb-2" style={{ color: '#111827' }}>
               New Defect
             </h4>
             <DefectForm
@@ -201,11 +201,11 @@ export function DefectCaptureStep({
             <p className="text-sm mt-1">Click "Add Defect" to record any issues found during inspection</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {stepDefects.map((defect) => (
               <div
                 key={defect.id}
-                className="p-4 rounded-lg border"
+                className="p-3 rounded-lg border"
                 style={{
                   borderColor: '#e5e7eb',
                   backgroundColor: 'white',
@@ -257,8 +257,8 @@ export function DefectCaptureStep({
 
       {/* Step Fields */}
       {step.fields.length > 0 && (
-        <div className="space-y-6">
-          <h3 className="text-md font-semibold" style={{ color: '#111827' }}>
+        <div className="grid grid-cols-2 gap-4">
+          <h3 className="text-sm font-semibold" style={{ color: '#111827' }}>
             Additional Information
           </h3>
           {step.fields.map((field) => (

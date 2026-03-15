@@ -60,7 +60,7 @@ export function VisualInspectionStep({
         stepType={step.type}
       />
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
         {step.fields.map((field) => (
           <FieldRenderer
             key={field.field_id}

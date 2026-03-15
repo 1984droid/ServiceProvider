@@ -149,12 +149,12 @@ export function SetupStep({
       />
 
       {hasInspectorFields && !disabled && (
-        <div className="mb-4">
+        <div className="mb-3">
           <button
             type="button"
             onClick={handleAutoFill}
             disabled={isAutoFilling}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {isAutoFilling ? 'Loading...' : 'Auto-fill Inspector Info'}
           </button>
@@ -164,7 +164,7 @@ export function SetupStep({
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
         {step.fields.map((field) => (
           <FieldRenderer
             key={field.field_id}

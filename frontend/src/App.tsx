@@ -282,13 +282,13 @@ function App() {
         <aside
           className="bg-white border-r flex flex-col transition-all duration-200"
           style={{
-            width: sidebarCollapsed ? '60px' : '220px',
+            width: sidebarCollapsed ? '60px' : '160px',
             borderColor: '#e5e7eb',
             height: '100%'
           }}
         >
           {/* Collapse Button */}
-          <div className="p-2 border-b" style={{ borderColor: '#e5e7eb' }}>
+          <div className="flex-shrink-0 p-2 border-b" style={{ borderColor: '#e5e7eb' }}>
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="w-full flex items-center justify-center p-1.5 rounded hover:bg-gray-50 transition-colors"
@@ -471,19 +471,21 @@ function App() {
           </nav>
 
           {/* Settings at Bottom */}
-          <div className="border-t p-1.5" style={{ borderColor: '#e5e7eb' }}>
-            <a
-              href="#"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
-              style={{ color: '#6b7280' }}
-              title="Settings"
-            >
-              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {!sidebarCollapsed && <span>Settings</span>}
-            </a>
+          <div className="flex-shrink-0 border-t" style={{ borderColor: '#e5e7eb', height: '48px' }}>
+            <div className="h-full flex items-center px-1.5">
+              <a
+                href="#"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
+                style={{ color: '#6b7280' }}
+                title="Settings"
+              >
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {!sidebarCollapsed && <span>Settings</span>}
+              </a>
+            </div>
           </div>
         </aside>
 

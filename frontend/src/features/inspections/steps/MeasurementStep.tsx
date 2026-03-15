@@ -75,14 +75,14 @@ export function MeasurementStep({
       />
 
       {measurementSet && (
-        <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: '#eff6ff' }}>
-          <p className="text-sm font-medium" style={{ color: '#1e40af' }}>
+        <div className="mb-3 p-2 rounded-lg" style={{ backgroundColor: '#eff6ff' }}>
+          <p className="text-xs font-medium" style={{ color: '#1e40af' }}>
             {measurementSet.title}
           </p>
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
         {fieldsToRender.map((field) => (
           <FieldRenderer
             key={field.field_id}
