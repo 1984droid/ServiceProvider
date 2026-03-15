@@ -102,8 +102,8 @@ export function InspectionReviewPage({
   const steps = inspection.template_snapshot?.procedure?.steps || [];
   const currentStep = steps[selectedStepIndex];
 
-  // Get step response for current step
-  const stepResponse = inspection.step_responses?.[currentStep?.step_id] || {};
+  // Get step response for current step (step_data is the field name from backend)
+  const stepResponse = inspection.step_data?.[currentStep?.step_key] || {};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -208,12 +208,12 @@ export function InspectionReviewPage({
               <h3 className="font-semibold text-gray-900 mb-3">Steps</h3>
               <div className="space-y-1">
                 {steps.map((step: any, index: number) => {
-                  const isCompleted = inspection.step_responses?.[step.step_id];
+                  const isCompleted = inspection.step_data?.[step.step_key];
                   const isSelected = index === selectedStepIndex;
 
                   return (
                     <button
-                      key={step.step_id}
+                      key={step.step_key}
                       onClick={() => setSelectedStepIndex(index)}
                       className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                         isSelected
@@ -254,14 +254,14 @@ export function InspectionReviewPage({
                 />
 
                 {/* Step Defects */}
-                {defects.items.filter((d: any) => d.step_key === currentStep.step_id).length > 0 && (
+                {defects.items.filter((d: any) => d.step_key === currentStep.step_key).length > 0 && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <h4 className="font-semibold text-gray-900 mb-3">
                       Defects Found in This Step
                     </h4>
                     <div className="space-y-3">
                       {defects.items
-                        .filter((d: any) => d.step_key === currentStep.step_id)
+                        .filter((d: any) => d.step_key === currentStep.step_key)
                         .map((defect: any) => (
                           <div
                             key={defect.id}
