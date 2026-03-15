@@ -16,7 +16,7 @@ interface TemplateField {
 }
 
 interface TemplateStep {
-  step_id: string;
+  step_key: string;
   fields: TemplateField[];
 }
 
@@ -53,7 +53,7 @@ export function useStepData({
   enumValues = {},
   measurementSets = {},
 }: UseStepDataOptions): UseStepDataReturn {
-  // All step values keyed by step_id -> { field_id: value }
+  // All step values keyed by step_key -> { field_id: value }
   const [allStepValues, setAllStepValues] = useState<Record<string, Record<string, any>>>(existingStepData);
 
   // Current step index
@@ -75,10 +75,10 @@ export function useStepData({
 
   // Get current step
   const currentStep = steps[currentStepIndex];
-  const currentStepId = currentStep?.step_id;
+  const currentStepKey = currentStep?.step_key;
 
   // Get current step values
-  const stepValues = allStepValues[currentStepId] || {};
+  const stepValues = allStepValues[currentStepKey] || {};
 
   // Get fields for current step (handle measurement sets)
   const getCurrentStepFields = (): TemplateField[] => {
@@ -124,7 +124,7 @@ export function useStepData({
     const completed = new Set<number>();
 
     steps.forEach((step, index) => {
-      const values = stepData[step.step_id] || {};
+      const values = stepData[step.step_key] || {};
       const isComplete = step.fields.every(field => {
         if (!field.required) return true;
         const value = values[field.field_id];
@@ -149,8 +149,8 @@ export function useStepData({
   const setFieldValue = (fieldId: string, value: any) => {
     setAllStepValues(prev => ({
       ...prev,
-      [currentStepId]: {
-        ...(prev[currentStepId] || {}),
+      [currentStepKey]: {
+        ...(prev[currentStepKey] || {}),
         [fieldId]: value,
       },
     }));
@@ -182,7 +182,7 @@ export function useStepData({
 
     try {
       await apiClient.patch(`/inspections/${inspectionId}/save_step/`, {
-        step_key: currentStep.step_id,
+        step_key: currentStep.step_key,
         field_data: stepValues,
         validate,
       });
@@ -209,10 +209,10 @@ export function useStepData({
     try {
       // Save each step sequentially
       for (const step of steps) {
-        const values = allStepValues[step.step_id] || {};
+        const values = allStepValues[step.step_key] || {};
         if (Object.keys(values).length > 0) {
           await apiClient.patch(`/inspections/${inspectionId}/save_step/`, {
-            step_key: step.step_id,
+            step_key: step.step_key,
             field_data: values,
             validate: false, // Don't validate when bulk saving
           });
