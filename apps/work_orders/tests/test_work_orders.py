@@ -132,7 +132,9 @@ class WorkOrderCreationTests(WorkOrderTestCase):
 
         wo = WorkOrder.objects.get(id=data['id'])
         self.assertEqual(wo.priority, 'EMERGENCY')
-        self.assertEqual(wo.defect_links.count(), 1)
+        # Work order links to defect via source_id
+        self.assertEqual(wo.source_type, 'INSPECTION_DEFECT')
+        self.assertEqual(str(wo.source_id), str(defect.id))
 
     def test_create_work_order_with_normal_priority(self):
         """Test creating work order with normal priority."""
@@ -184,8 +186,10 @@ class WorkOrderCreationTests(WorkOrderTestCase):
 
         wo = WorkOrder.objects.get(id=response.json()['id'])
 
-        # Verify work order created from defect
-        self.assertEqual(wo.defect_links.first().defect.inspection_run, inspection)
+        # Verify work order created from defect via source_id
+        from apps.inspections.models import InspectionDefect
+        source_defect = InspectionDefect.objects.get(id=wo.source_id)
+        self.assertEqual(source_defect.inspection_run, inspection)
         self.assertEqual(wo.customer, inspection.customer)
         self.assertEqual(wo.asset_type, inspection.asset_type)
 
@@ -245,11 +249,13 @@ class WorkOrderManagementTests(WorkOrderTestCase):
         inspection = self.create_inspection()
         defect = self.create_defect(inspection, 'MAJOR', 'Repair needed')
 
+        # Create work order with auto_approve
         create_response = self.client.post(
             '/api/work-orders/from_defect/',
             data={
                 'defect_id': str(defect.id),
-                'department_id': str(self.dept.id)
+                'department_id': str(self.dept.id),
+                'auto_approve': True
             },
             format='json'
         )
@@ -264,27 +270,43 @@ class WorkOrderManagementTests(WorkOrderTestCase):
         self.assertIsNotNone(wo.started_at)
 
     def test_complete_work_order(self):
-        """Test completing a work order."""
+        """Test that work order auto-completes when all lines are completed."""
+        from apps.work_orders.models import WorkOrderLine
+
         inspection = self.create_inspection()
         defect = self.create_defect(inspection, 'MAJOR', 'Repair completed')
 
+        # Create work order with auto_approve
         create_response = self.client.post(
             '/api/work-orders/from_defect/',
             data={
                 'defect_id': str(defect.id),
-                'department_id': str(self.dept.id)
+                'department_id': str(self.dept.id),
+                'auto_approve': True
             },
             format='json'
         )
 
         wo_id = create_response.json()['id']
 
-        # Start then complete
-        self.client.post(f'/api/work-orders/{wo_id}/start/')
-        response = self.client.post(f'/api/work-orders/{wo_id}/complete/')
+        # Start work order
+        start_response = self.client.post(f'/api/work-orders/{wo_id}/start/')
+        self.assertEqual(start_response.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
+        # Verify it's in progress
         wo = WorkOrder.objects.get(id=wo_id)
+        self.assertEqual(wo.status, 'IN_PROGRESS')
+
+        # Complete all work order lines - this should auto-complete the work order via signal
+        for line in wo.lines.all():
+            line.status = 'COMPLETED'
+            line.save()
+
+        # Verify work order was auto-completed by the signal
+        wo.refresh_from_db()
         self.assertEqual(wo.status, 'COMPLETED')
         self.assertIsNotNone(wo.completed_at)
+
+        # Verify defect status was updated to RESOLVED
+        defect.refresh_from_db()
+        self.assertEqual(defect.status, 'RESOLVED')
