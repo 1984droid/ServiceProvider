@@ -39,6 +39,11 @@
     }
   },
   "enums": {
+    "inspection_interval": [
+      "Daily",
+      "Weekly",
+      "Monthly"
+    ],
     "severity": [
       "SAFE",
       "MINOR",
@@ -156,18 +161,18 @@
             "field_id": "inspection_interval",
             "label": "Inspection Interval",
             "type": "ENUM",
-            "enum_ref": "pass_fail",
+            "enum_ref": "inspection_interval",
             "required": true,
-            "help_text": "Daily, Weekly, Monthly - per your facility's schedule"
+            "help_text": "Select the maintenance schedule interval for this equipment"
           },
           {
             "field_id": "equipment_hours",
             "label": "Equipment Hour Meter Reading",
             "type": "NUMBER",
-            "required": false,
+            "required": true,
             "precision": 1,
             "min": 0,
-            "help_text": "Record current hour meter reading if equipped"
+            "help_text": "Record current hour meter reading"
           },
           {
             "field_id": "location",

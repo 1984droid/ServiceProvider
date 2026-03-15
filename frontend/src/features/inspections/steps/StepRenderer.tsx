@@ -50,6 +50,7 @@ interface StepRendererProps {
   enumValues?: Record<string, string[]>;
   measurementSets?: Record<string, MeasurementSet>;
   inspectionId?: string;
+  templateKey?: string;
 }
 
 export function StepRenderer({
@@ -62,7 +63,8 @@ export function StepRenderer({
   disabled = false,
   enumValues = {},
   measurementSets = {},
-  inspectionId = ''
+  inspectionId = '',
+  templateKey = ''
 }: StepRendererProps) {
 
   const stepType = step.type.toUpperCase();
@@ -80,6 +82,7 @@ export function StepRenderer({
           errors={errors}
           disabled={disabled}
           enumValues={enumValues}
+          templateKey={templateKey}
         />
       );
 

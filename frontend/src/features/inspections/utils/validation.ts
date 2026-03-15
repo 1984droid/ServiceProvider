@@ -82,16 +82,16 @@ function validateNumber(field: TemplateField, value: any): string | null {
     return `${field.label} must be a valid number`;
   }
 
-  if (field.min !== undefined && num < field.min) {
+  if (field.min != null && num < field.min) {
     return `${field.label} must be at least ${field.min}`;
   }
 
-  if (field.max !== undefined && num > field.max) {
+  if (field.max != null && num > field.max) {
     return `${field.label} must be at most ${field.max}`;
   }
 
   // Check precision
-  if (field.precision !== undefined) {
+  if (field.precision != null) {
     const decimalPlaces = (value.toString().split('.')[1] || '').length;
     if (decimalPlaces > field.precision) {
       return `${field.label} can have at most ${field.precision} decimal places`;
@@ -107,11 +107,11 @@ function validateText(field: TemplateField, value: any): string | null {
   }
 
   // Could add min/max length if needed
-  if (field.min !== undefined && value.length < field.min) {
+  if (field.min != null && value.length < field.min) {
     return `${field.label} must be at least ${field.min} characters`;
   }
 
-  if (field.max !== undefined && value.length > field.max) {
+  if (field.max != null && value.length > field.max) {
     return `${field.label} must be at most ${field.max} characters`;
   }
 

@@ -32,14 +32,13 @@ class SeedConfig:
     # Employee certifications by standard
     CERTIFICATIONS = {
         'ANSI_A92_2': [
-            {'standard': 'ANSI A92.2-2021', 'cert_number': 'A92-2021-001', 'expiry_months': 12},
-            {'standard': 'ANSI A92.2-2021', 'cert_number': 'A92-2021-002', 'expiry_months': 6},
+            {'standard': 'ANSI A92.2-2021', 'cert_number': 'A92-2-12345', 'expiry_months': 12},
         ],
         'ANSI_A92_5': [
-            {'standard': 'ANSI A92.5-2021', 'cert_number': 'A92-5-2021-003', 'expiry_months': 24},
+            {'standard': 'ANSI A92.5-2021', 'cert_number': 'A92-5-67890', 'expiry_months': 24},
         ],
         'ANSI_A92_6': [
-            {'standard': 'ANSI A92.6-2020', 'cert_number': 'A92-6-2020-004', 'expiry_months': 18},
+            {'standard': 'ANSI A92.6-2020', 'cert_number': 'A92-6-54321', 'expiry_months': 18},
         ],
     }
 
@@ -112,7 +111,7 @@ class SeedConfig:
             'email': 'david.anderson@advantagefleet.com',
             'phone': '217-555-0106',
             'title': 'Operations Manager',
-            'certifications': [],
+            'certifications': ['ANSI_A92_2', 'ANSI_A92_5', 'ANSI_A92_6'],
             'skills': ['Management', 'Operations', 'Compliance'],
         },
     ]

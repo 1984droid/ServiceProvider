@@ -50,41 +50,49 @@ function App() {
   const navigateToCustomer = (customerId: string) => {
     setNavState({ customerId });
     setCurrentPage('customers-detail');
+    window.history.pushState({}, '', `/customers/${customerId}`);
   };
 
   const navigateToContact = (contactId: string) => {
     setNavState({ contactId });
     setCurrentPage('contacts-detail');
+    window.history.pushState({}, '', `/contacts/${contactId}`);
   };
 
   const navigateToContactEdit = (contactId: string) => {
     setNavState({ contactId });
     setCurrentPage('contacts-edit');
+    window.history.pushState({}, '', `/contacts/${contactId}/edit`);
   };
 
   const navigateToVehicle = (vehicleId: string) => {
     setNavState({ vehicleId });
     setCurrentPage('assets');
+    window.history.pushState({}, '', `/vehicles/${vehicleId}`);
   };
 
   const navigateToEquipment = (equipmentId: string) => {
     setNavState({ equipmentId });
     setCurrentPage('assets');
+    window.history.pushState({}, '', `/equipment/${equipmentId}`);
   };
 
   const navigateToInspection = (inspectionId: string) => {
     setNavState({ inspectionId });
     setCurrentPage('inspection-execute');
+    window.history.pushState({}, '', `/inspections/${inspectionId}`);
   };
 
   const navigateToInspectionReview = (inspectionId: string) => {
     setNavState({ inspectionId });
     setCurrentPage('inspection-review');
+    window.history.pushState({}, '', `/inspections/${inspectionId}/review`);
   };
 
   const navigateToWorkOrder = (workOrderId: string) => {
     setNavState({ workOrderId });
     setCurrentPage('work-order-detail');
+    window.history.pushState({}, '', `/work-orders/${workOrderId}`);
   };
 
   useEffect(() => {
@@ -103,6 +111,62 @@ function App() {
     };
     initAuth();
   }, [setUser, setLoading]);
+
+  // Restore navigation state from URL on mount
+  useEffect(() => {
+    const path = window.location.pathname;
+
+    // Parse URL and restore state
+    if (path.startsWith('/customers/')) {
+      const customerId = path.replace('/customers/', '');
+      if (customerId && customerId !== 'create') {
+        setNavState({ customerId });
+        setCurrentPage('customers-detail');
+      } else if (customerId === 'create') {
+        setCurrentPage('customers-create');
+      }
+    } else if (path.startsWith('/contacts/')) {
+      const parts = path.replace('/contacts/', '').split('/');
+      const contactId = parts[0];
+      if (parts[1] === 'edit') {
+        setNavState({ contactId });
+        setCurrentPage('contacts-edit');
+      } else {
+        setNavState({ contactId });
+        setCurrentPage('contacts-detail');
+      }
+    } else if (path.startsWith('/vehicles/')) {
+      const vehicleId = path.replace('/vehicles/', '');
+      setNavState({ vehicleId });
+      setCurrentPage('assets');
+    } else if (path.startsWith('/equipment/')) {
+      const equipmentId = path.replace('/equipment/', '');
+      setNavState({ equipmentId });
+      setCurrentPage('assets');
+    } else if (path === '/inspections') {
+      setCurrentPage('inspections');
+    } else if (path.startsWith('/inspections/')) {
+      const parts = path.replace('/inspections/', '').split('/');
+      const inspectionId = parts[0];
+      if (parts[1] === 'review') {
+        setNavState({ inspectionId });
+        setCurrentPage('inspection-review');
+      } else {
+        setNavState({ inspectionId });
+        setCurrentPage('inspection-execute');
+      }
+    } else if (path.startsWith('/work-orders/')) {
+      const workOrderId = path.replace('/work-orders/', '');
+      setNavState({ workOrderId });
+      setCurrentPage('work-order-detail');
+    } else if (path.startsWith('/employees')) {
+      setCurrentPage('employees');
+    } else if (path.startsWith('/assets')) {
+      setCurrentPage('assets');
+    } else if (path === '/' || path === '/customers') {
+      setCurrentPage('customers');
+    }
+  }, []);
 
   // Handle hash-based URL routing
   useEffect(() => {
@@ -243,8 +307,8 @@ function App() {
           <nav className="flex-1 overflow-y-auto p-1.5">
             {/* Dashboard */}
             <button
-              onClick={() => setCurrentPage('dashboard')}
-              className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs transition-colors"
+              onClick={() => { setCurrentPage('dashboard'); window.history.pushState({}, '', '/'); }}
+              className={`w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs transition-colors ${sidebarCollapsed ? 'justify-center' : ''}`}
               style={{
                 backgroundColor: currentPage === 'dashboard' ? '#f0fdf4' : 'transparent',
                 color: currentPage === 'dashboard' ? '#15803d' : '#6b7280'
@@ -279,7 +343,7 @@ function App() {
                 {operationsOpen && (
                 <div className="mt-0.5 space-y-0.5">
                   <button
-                    onClick={() => setCurrentPage('assets')}
+                    onClick={() => { setCurrentPage('assets'); window.history.pushState({}, '', '/assets'); }}
                     className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
                     style={{
                       backgroundColor: currentPage === 'assets' ? '#f0fdf4' : 'transparent',
@@ -293,7 +357,7 @@ function App() {
                     {!sidebarCollapsed && <span>Assets</span>}
                   </button>
                   <button
-                    onClick={() => setCurrentPage('inspections')}
+                    onClick={() => { setCurrentPage('inspections'); window.history.pushState({}, '', '/inspections'); }}
                     className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
                     style={{
                       backgroundColor: currentPage === 'inspections' ? '#f0fdf4' : 'transparent',
@@ -307,7 +371,7 @@ function App() {
                     {!sidebarCollapsed && <span>Inspections</span>}
                   </button>
                   <button
-                    onClick={() => setCurrentPage('work-orders')}
+                    onClick={() => { setCurrentPage('work-orders'); window.history.pushState({}, '', '/work-orders'); }}
                     className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
                     style={{
                       backgroundColor: currentPage === 'work-orders' || currentPage === 'work-order-detail' ? '#f0fdf4' : 'transparent',
@@ -321,7 +385,7 @@ function App() {
                     {!sidebarCollapsed && <span>Work Orders</span>}
                   </button>
                   <button
-                    onClick={() => setCurrentPage('employees')}
+                    onClick={() => { setCurrentPage('employees'); window.history.pushState({}, '', '/employees'); }}
                     className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
                     style={{
                       backgroundColor: currentPage === 'employees' ? '#f0fdf4' : 'transparent',
@@ -342,23 +406,23 @@ function App() {
             {/* Collapsed view - show all menu items as icons */}
             {sidebarCollapsed && (
               <div className="mt-2 space-y-1">
-                <a href="#" className="flex justify-center p-2.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Assets">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="#" className="flex justify-center items-center px-2.5 py-1.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Assets">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </a>
-                <a href="#" className="flex justify-center p-2.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Work Orders">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="#" className="flex justify-center items-center px-2.5 py-1.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Work Orders">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                   </svg>
                 </a>
-                <a href="#" className="flex justify-center p-2.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Inspections">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="#" className="flex justify-center items-center px-2.5 py-1.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Inspections">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </a>
-                <a href="#" className="flex justify-center p-2.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Customers">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="#" className="flex justify-center items-center px-2.5 py-1.5 rounded hover:bg-gray-50 transition-colors" style={{ color: '#6b7280' }} title="Customers">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </a>
@@ -387,7 +451,7 @@ function App() {
               {managementOpen && (
                 <div className="mt-0.5 space-y-0.5">
                   <button
-                    onClick={() => setCurrentPage('customers')}
+                    onClick={() => { setCurrentPage('customers'); window.history.pushState({}, '', '/customers'); }}
                     className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs hover:bg-gray-50 transition-colors"
                     style={{
                       backgroundColor: currentPage.startsWith('customers') ? '#f0fdf4' : 'transparent',
@@ -461,7 +525,7 @@ function App() {
             />
           )}
           {currentPage === 'inspections' && (
-            <InspectionsListPage />
+            <InspectionsListPage onViewInspection={navigateToInspection} />
           )}
           {currentPage === 'inspection-execute' && navState.inspectionId && (
             <InspectionExecutePage

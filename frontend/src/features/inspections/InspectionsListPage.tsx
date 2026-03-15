@@ -8,7 +8,11 @@
 import { useEffect, useState } from 'react';
 import { inspectionsApi, type InspectionRun } from '@/api/inspections.api';
 
-export function InspectionsListPage() {
+interface InspectionsListPageProps {
+  onViewInspection: (inspectionId: string) => void;
+}
+
+export function InspectionsListPage({ onViewInspection }: InspectionsListPageProps) {
   const [inspections, setInspections] = useState<InspectionRun[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +28,7 @@ export function InspectionsListPage() {
     setError(null);
     try {
       const data = await inspectionsApi.list();
-      setInspections(data.results);
+      setInspections(data.inspections);
     } catch (err: any) {
       setError(err.message || 'Failed to load inspections');
     } finally {
@@ -210,13 +214,13 @@ export function InspectionsListPage() {
                         {getPassFailBadge(inspection.pass_fail)}
                       </td>
                       <td className="px-4 py-3">
-                        <a
-                          href={`#/inspections/${inspection.id}`}
+                        <button
+                          onClick={() => onViewInspection(inspection.id)}
                           className="text-sm font-medium hover:underline"
                           style={{ color: '#7ed321' }}
                         >
                           View
-                        </a>
+                        </button>
                       </td>
                     </tr>
                   );

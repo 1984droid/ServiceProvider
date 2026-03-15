@@ -117,6 +117,14 @@ export const employeesApi = {
   },
 
   /**
+   * Get the current user's employee record
+   */
+  async me(): Promise<Employee> {
+    const response = await apiClient.get<Employee>('/employees/me/');
+    return response.data;
+  },
+
+  /**
    * Get a single employee by ID
    */
   async get(id: string): Promise<Employee> {

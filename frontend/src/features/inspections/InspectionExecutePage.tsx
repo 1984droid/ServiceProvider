@@ -269,6 +269,7 @@ export function InspectionExecutePage({
             enumValues={template.enums || {}}
             measurementSets={template.measurement_sets || {}}
             inspectionId={inspectionId}
+            templateKey={inspectionRun?.template_key}
           />
         </div>
       </div>

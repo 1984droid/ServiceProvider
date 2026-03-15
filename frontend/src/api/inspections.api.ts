@@ -136,8 +136,8 @@ export const inspectionsApi = {
     status?: string;
     limit?: number;
     offset?: number;
-  }): Promise<{ count: number; results: InspectionRun[] }> {
-    const response = await apiClient.get<{ count: number; results: InspectionRun[] }>('/inspections/', { params });
+  }): Promise<{ count: number; inspections: InspectionRun[] }> {
+    const response = await apiClient.get<{ count: number; inspections: InspectionRun[] }>('/inspections/', { params });
     return response.data;
   },
 

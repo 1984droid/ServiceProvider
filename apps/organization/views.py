@@ -94,6 +94,19 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(employees, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        """Get the current user's employee record with certifications."""
+        try:
+            employee = Employee.objects.get(user=request.user, is_active=True)
+            serializer = self.get_serializer(employee)
+            return Response(serializer.data)
+        except Employee.DoesNotExist:
+            return Response(
+                {'detail': 'No employee record found for current user'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
     @action(detail=True, methods=['get'])
     def can_work_in(self, request, pk=None):
         """Check if employee can work in specified department."""

@@ -5,7 +5,7 @@
  * Handles loading existing step data and saving to backend
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/lib/axios';
 import { validateStep } from '../utils/validation';
 
@@ -26,6 +26,8 @@ interface UseStepDataOptions {
   existingStepData?: Record<string, Record<string, any>>;
   enumValues?: Record<string, string[]>;
   measurementSets?: Record<string, { fields: TemplateField[] }>;
+  inspectorName?: string;
+  inspectionDate?: string;
 }
 
 interface UseStepDataReturn {
@@ -120,7 +122,7 @@ export function useStepData({
   };
 
   // Update which steps are completed
-  const updateCompletedSteps = (stepData: Record<string, Record<string, any>>) => {
+  const updateCompletedSteps = useCallback((stepData: Record<string, Record<string, any>>) => {
     const completed = new Set<number>();
 
     steps.forEach((step, index) => {
@@ -142,8 +144,15 @@ export function useStepData({
       }
     });
 
-    setCompletedSteps(completed);
-  };
+    // Only update state if the completed set actually changed
+    setCompletedSteps(prev => {
+      if (prev.size !== completed.size) return completed;
+      for (const item of completed) {
+        if (!prev.has(item)) return completed;
+      }
+      return prev;
+    });
+  }, [steps]);
 
   // Set field value
   const setFieldValue = (fieldId: string, value: any) => {
@@ -239,7 +248,7 @@ export function useStepData({
   // Update completed steps when values change
   useEffect(() => {
     updateCompletedSteps(allStepValues);
-  }, [allStepValues, steps]);
+  }, [allStepValues, updateCompletedSteps]);
 
   // Auto-save every 30 seconds if dirty
   useEffect(() => {
