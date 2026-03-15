@@ -27,10 +27,10 @@ interface AddDefectModalProps {
 
 const SEVERITY_OPTIONS = [
   { value: '', label: 'Select severity...' },
-  { value: 'SAFE', label: 'SAFE - No safety impact' },
-  { value: 'MINOR', label: 'MINOR - Plan for next maintenance' },
-  { value: 'SERVICE_REQUIRED', label: 'SERVICE REQUIRED - Schedule repair' },
-  { value: 'UNSAFE_OUT_OF_SERVICE', label: 'UNSAFE / OUT OF SERVICE - Tag out equipment' },
+  { value: 'SAFE', label: 'Safe - No safety impact' },
+  { value: 'MINOR', label: 'Minor - Monitor for next inspection' },
+  { value: 'SERVICE_REQUIRED', label: 'Service Required - Schedule repair' },
+  { value: 'UNSAFE_OUT_OF_SERVICE', label: 'Unsafe / Out of Service - Tag out equipment' },
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {

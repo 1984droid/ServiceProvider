@@ -21,7 +21,7 @@ interface SchemaField {
   type: string;
   required?: boolean;
   enum_ref?: string;
-  values?: string[];
+  values?: string[] | Array<{ value: string; label: string }>;
   min?: number;
   max?: number;
   precision?: number;
@@ -34,7 +34,7 @@ interface FieldRendererProps {
   onChange: (value: any) => void;
   error?: string;
   disabled?: boolean;
-  enumValues?: Record<string, string[]>; // enum_ref -> values lookup
+  enumValues?: Record<string, string[] | Array<{ value: string; label: string }>>; // enum_ref -> values lookup
 }
 
 export function FieldRenderer({

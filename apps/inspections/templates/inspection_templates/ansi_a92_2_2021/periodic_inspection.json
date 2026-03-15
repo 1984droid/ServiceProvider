@@ -45,58 +45,178 @@
   },
   "enums": {
     "inspection_interval": [
-      "Monthly",
-      "Quarterly",
-      "Semi-Annual",
-      "Annual"
+      {
+        "value": "Monthly",
+        "label": "Monthly"
+      },
+      {
+        "value": "Quarterly",
+        "label": "Quarterly"
+      },
+      {
+        "value": "Semi-Annual",
+        "label": "Semi-Annual"
+      },
+      {
+        "value": "Annual",
+        "label": "Annual"
+      }
     ],
     "severity": [
-      "SAFE",
-      "MINOR",
-      "SERVICE_REQUIRED",
-      "UNSAFE_OUT_OF_SERVICE"
+      {
+        "value": "SAFE",
+        "label": "Safe - No safety impact"
+      },
+      {
+        "value": "MINOR",
+        "label": "Minor - Monitor for next inspection"
+      },
+      {
+        "value": "SERVICE_REQUIRED",
+        "label": "Service Required - Schedule repair"
+      },
+      {
+        "value": "UNSAFE_OUT_OF_SERVICE",
+        "label": "Unsafe / Out of Service - Tag out equipment"
+      }
     ],
     "pass_fail": [
-      "PASS",
-      "FAIL",
-      "NOT_APPLICABLE"
+      {
+        "value": "PASS",
+        "label": "Pass"
+      },
+      {
+        "value": "FAIL",
+        "label": "Fail"
+      },
+      {
+        "value": "NOT_APPLICABLE",
+        "label": "Not Applicable"
+      }
     ],
     "weld_defect_type": [
-      "CRACK",
-      "POROSITY",
-      "INCOMPLETE_PENETRATION",
-      "UNDERCUT",
-      "OVERLAP",
-      "CORROSION",
-      "SLAG_INCLUSION",
-      "OTHER"
+      {
+        "value": "CRACK",
+        "label": "Crack"
+      },
+      {
+        "value": "POROSITY",
+        "label": "Porosity"
+      },
+      {
+        "value": "INCOMPLETE_PENETRATION",
+        "label": "Incomplete Penetration"
+      },
+      {
+        "value": "UNDERCUT",
+        "label": "Undercut"
+      },
+      {
+        "value": "OVERLAP",
+        "label": "Overlap"
+      },
+      {
+        "value": "CORROSION",
+        "label": "Corrosion"
+      },
+      {
+        "value": "SLAG_INCLUSION",
+        "label": "Slag Inclusion"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "hydraulic_symptom": [
-      "LEAK",
-      "SLOW_OPERATION",
-      "ERRATIC_OPERATION",
-      "NOISE",
-      "CONTAMINATION",
-      "LOW_PRESSURE",
-      "DRIFT",
-      "OTHER"
+      {
+        "value": "LEAK",
+        "label": "Leak"
+      },
+      {
+        "value": "SLOW_OPERATION",
+        "label": "Slow Operation"
+      },
+      {
+        "value": "ERRATIC_OPERATION",
+        "label": "Erratic Operation"
+      },
+      {
+        "value": "NOISE",
+        "label": "Noise"
+      },
+      {
+        "value": "CONTAMINATION",
+        "label": "Contamination"
+      },
+      {
+        "value": "LOW_PRESSURE",
+        "label": "Low Pressure"
+      },
+      {
+        "value": "DRIFT",
+        "label": "Drift"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "structural_symptom": [
-      "CRACK",
-      "DEFORMATION",
-      "CORROSION",
-      "WEAR",
-      "DAMAGE",
-      "MISALIGNMENT",
-      "LOOSE",
-      "OTHER"
+      {
+        "value": "CRACK",
+        "label": "Crack"
+      },
+      {
+        "value": "DEFORMATION",
+        "label": "Deformation"
+      },
+      {
+        "value": "CORROSION",
+        "label": "Corrosion"
+      },
+      {
+        "value": "WEAR",
+        "label": "Wear"
+      },
+      {
+        "value": "DAMAGE",
+        "label": "Damage"
+      },
+      {
+        "value": "MISALIGNMENT",
+        "label": "Misalignment"
+      },
+      {
+        "value": "LOOSE",
+        "label": "Loose"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "wear_level": [
-      "NONE",
-      "MINOR",
-      "MODERATE",
-      "EXCESSIVE",
-      "REQUIRES_REPLACEMENT"
+      {
+        "value": "NONE",
+        "label": "None - Excellent condition"
+      },
+      {
+        "value": "MINOR",
+        "label": "Minor - Light wear, no action needed"
+      },
+      {
+        "value": "MODERATE",
+        "label": "Moderate - Monitor closely"
+      },
+      {
+        "value": "EXCESSIVE",
+        "label": "Excessive - Requires attention"
+      },
+      {
+        "value": "REQUIRES_REPLACEMENT",
+        "label": "Requires Replacement - Replace before next inspection"
+      }
     ]
   },
   "schemas": {

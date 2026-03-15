@@ -10,7 +10,7 @@ import { Select } from './Select';
 interface EnumFieldProps {
   value: string;
   onChange: (value: string) => void;
-  options: string[];
+  options: string[] | Array<{ value: string; label: string }>;
   error?: boolean;
   disabled?: boolean;
   placeholder?: string;
@@ -25,9 +25,14 @@ export function EnumField({
   placeholder = 'Select...'
 }: EnumFieldProps) {
 
+  // Handle both string[] and {value, label}[] formats
   const selectOptions = [
     { value: '', label: placeholder },
-    ...options.map(opt => ({ value: opt, label: opt }))
+    ...options.map(opt =>
+      typeof opt === 'string'
+        ? { value: opt, label: opt }
+        : { value: opt.value, label: opt.label }
+    )
   ];
 
   return (

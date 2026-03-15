@@ -44,63 +44,192 @@
   },
   "enums": {
     "inspection_interval": [
-      "Daily",
-      "Weekly",
-      "Monthly"
+      {
+        "value": "Daily",
+        "label": "Daily"
+      },
+      {
+        "value": "Weekly",
+        "label": "Weekly"
+      },
+      {
+        "value": "Monthly",
+        "label": "Monthly"
+      }
     ],
     "severity": [
-      "SAFE",
-      "MINOR",
-      "SERVICE_REQUIRED",
-      "UNSAFE_OUT_OF_SERVICE"
+      {
+        "value": "SAFE",
+        "label": "Safe"
+      },
+      {
+        "value": "MINOR",
+        "label": "Minor"
+      },
+      {
+        "value": "SERVICE_REQUIRED",
+        "label": "Service Required"
+      },
+      {
+        "value": "UNSAFE_OUT_OF_SERVICE",
+        "label": "Unsafe Out Of Service"
+      }
     ],
     "pass_fail": [
-      "PASS",
-      "FAIL",
-      "NOT_APPLICABLE"
+      {
+        "value": "PASS",
+        "label": "Pass"
+      },
+      {
+        "value": "FAIL",
+        "label": "Fail"
+      },
+      {
+        "value": "NOT_APPLICABLE",
+        "label": "Not Applicable"
+      }
     ],
     "control_symptom": [
-      "INOPERATIVE",
-      "BINDING",
-      "INTERMITTENT",
-      "SLOW_RESPONSE",
-      "REVERSED",
-      "NO_RESPONSE",
-      "OTHER"
+      {
+        "value": "INOPERATIVE",
+        "label": "Inoperative"
+      },
+      {
+        "value": "BINDING",
+        "label": "Binding"
+      },
+      {
+        "value": "INTERMITTENT",
+        "label": "Intermittent"
+      },
+      {
+        "value": "SLOW_RESPONSE",
+        "label": "Slow Response"
+      },
+      {
+        "value": "REVERSED",
+        "label": "Reversed"
+      },
+      {
+        "value": "NO_RESPONSE",
+        "label": "No Response"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "safety_device_symptom": [
-      "INOPERATIVE",
-      "DAMAGED",
-      "MISSING",
-      "OUT_OF_CALIBRATION",
-      "INTERMITTENT",
-      "OTHER"
+      {
+        "value": "INOPERATIVE",
+        "label": "Inoperative"
+      },
+      {
+        "value": "DAMAGED",
+        "label": "Damaged"
+      },
+      {
+        "value": "MISSING",
+        "label": "Missing"
+      },
+      {
+        "value": "OUT_OF_CALIBRATION",
+        "label": "Out Of Calibration"
+      },
+      {
+        "value": "INTERMITTENT",
+        "label": "Intermittent"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "structural_symptom": [
-      "CRACK",
-      "DEFORMATION",
-      "CORROSION",
-      "WEAR",
-      "DAMAGE",
-      "LOOSE",
-      "MISSING",
-      "OTHER"
+      {
+        "value": "CRACK",
+        "label": "Crack"
+      },
+      {
+        "value": "DEFORMATION",
+        "label": "Deformation"
+      },
+      {
+        "value": "CORROSION",
+        "label": "Corrosion"
+      },
+      {
+        "value": "WEAR",
+        "label": "Wear"
+      },
+      {
+        "value": "DAMAGE",
+        "label": "Damage"
+      },
+      {
+        "value": "LOOSE",
+        "label": "Loose"
+      },
+      {
+        "value": "MISSING",
+        "label": "Missing"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "hydraulic_symptom": [
-      "LEAK",
-      "CRACK",
-      "BULGE",
-      "CHAFING",
-      "DETERIORATION",
-      "CONTAMINATION",
-      "OTHER"
+      {
+        "value": "LEAK",
+        "label": "Leak"
+      },
+      {
+        "value": "CRACK",
+        "label": "Crack"
+      },
+      {
+        "value": "BULGE",
+        "label": "Bulge"
+      },
+      {
+        "value": "CHAFING",
+        "label": "Chafing"
+      },
+      {
+        "value": "DETERIORATION",
+        "label": "Deterioration"
+      },
+      {
+        "value": "CONTAMINATION",
+        "label": "Contamination"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "wear_level": [
-      "NONE",
-      "MINOR",
-      "MODERATE",
-      "EXCESSIVE",
-      "REQUIRES_REPLACEMENT"
+      {
+        "value": "NONE",
+        "label": "None - Excellent condition"
+      },
+      {
+        "value": "MINOR",
+        "label": "Minor - Light wear, no action needed"
+      },
+      {
+        "value": "MODERATE",
+        "label": "Moderate - Monitor closely"
+      },
+      {
+        "value": "EXCESSIVE",
+        "label": "Excessive - Requires attention"
+      },
+      {
+        "value": "REQUIRES_REPLACEMENT",
+        "label": "Requires Replacement - Replace before next inspection"
+      }
     ]
   },
   "schemas": {
