@@ -11,6 +11,7 @@ import { FormField } from '@/components/molecules/FormField';
 import { TextInput } from '@/components/atoms/TextInput';
 import { TextArea } from '@/components/atoms/TextArea';
 import { Select } from '@/components/atoms/Select';
+import { EnumField } from '@/components/atoms/EnumField';
 import { PhotoField } from '@/components/atoms/PhotoField';
 import type { DefectData, DefectSchema, DefectContext } from './defectTypes';
 
@@ -321,13 +322,26 @@ export function AddDefectModal({
           <FormField
             label="Location"
             error={errors.location}
-            helpText="Specific physical location on equipment (max 200 characters)"
+            helpText={
+              defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref
+                ? "Select equipment location from dropdown"
+                : "Specific physical location on equipment (max 200 characters)"
+            }
           >
-            <TextInput
-              value={formData.location || ''}
-              onChange={(e) => handleChange('location', e.target.value)}
-              placeholder="e.g., Driver side, lower boom section, second pivot pin from base"
-            />
+            {defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref ? (
+              <EnumField
+                value={formData.location || ''}
+                onChange={(value) => handleChange('location', value)}
+                options={enumValues[defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref!] || []}
+                placeholder="Select location..."
+              />
+            ) : (
+              <TextInput
+                value={formData.location || ''}
+                onChange={(e) => handleChange('location', e.target.value)}
+                placeholder="e.g., Driver side, lower boom section, second pivot pin from base"
+              />
+            )}
           </FormField>
 
           {/* Photo Evidence */}
@@ -351,7 +365,7 @@ export function AddDefectModal({
                     : 'bg-yellow-50 border border-yellow-300 text-yellow-800'
                 }`}
               >
-                {isPhotoRequired ? '⚠️ Photos REQUIRED for SERVICE_REQUIRED and UNSAFE_OUT_OF_SERVICE' : '📷 Photos strongly recommended'}
+                {isPhotoRequired ? '⚠️ Photos REQUIRED for Service Required and Unsafe / Out of Service severities' : '📷 Photos strongly recommended'}
               </div>
             )}
             <PhotoField

@@ -230,6 +230,72 @@
         "value": "REQUIRES_REPLACEMENT",
         "label": "Requires Replacement - Replace before next inspection"
       }
+    ],
+    "equipment_location": [
+      {
+        "value": "PLATFORM",
+        "label": "Platform / Basket"
+      },
+      {
+        "value": "BOOM_BASE",
+        "label": "Boom - Base Section"
+      },
+      {
+        "value": "BOOM_MID",
+        "label": "Boom - Mid Section"
+      },
+      {
+        "value": "BOOM_FLY",
+        "label": "Boom - Fly Section"
+      },
+      {
+        "value": "TURRET",
+        "label": "Turret / Rotating Assembly"
+      },
+      {
+        "value": "PEDESTAL",
+        "label": "Pedestal / Mounting Base"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_LEFT",
+        "label": "Outriggers - Front Left"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_RIGHT",
+        "label": "Outriggers - Front Right"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_LEFT",
+        "label": "Outriggers - Rear Left"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_RIGHT",
+        "label": "Outriggers - Rear Right"
+      },
+      {
+        "value": "HYDRAULIC_SYSTEM",
+        "label": "Hydraulic System"
+      },
+      {
+        "value": "ELECTRICAL_SYSTEM",
+        "label": "Electrical System"
+      },
+      {
+        "value": "CONTROLS_PLATFORM",
+        "label": "Controls - Platform"
+      },
+      {
+        "value": "CONTROLS_GROUND",
+        "label": "Controls - Ground"
+      },
+      {
+        "value": "CHASSIS",
+        "label": "Chassis / Vehicle Base"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other (specify in description)"
+      }
     ]
   },
   "schemas": {
@@ -259,8 +325,9 @@
         },
         {
           "field_id": "location",
-          "type": "TEXT",
-          "required": false
+          "type": "ENUM",
+          "required": false,
+          "enum_ref": "equipment_location"
         },
         {
           "field_id": "photo_evidence",
