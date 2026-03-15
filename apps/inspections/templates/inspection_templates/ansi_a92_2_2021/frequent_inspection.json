@@ -22,8 +22,12 @@
       ]
     },
     "applicability": {
-      "asset_types": ["EQUIPMENT"],
-      "equipment_types": ["A92_2_AERIAL"],
+      "asset_types": [
+        "EQUIPMENT"
+      ],
+      "equipment_types": [
+        "A92_2_AERIAL"
+      ],
       "notes": "Frequent Inspection per Section 8.2.3. Performed at intervals from daily to monthly, depending on equipment usage. Required before each use or shift for heavy-use equipment."
     },
     "policy": {
@@ -90,6 +94,13 @@
       "DETERIORATION",
       "CONTAMINATION",
       "OTHER"
+    ],
+    "wear_level": [
+      "NONE",
+      "MINOR",
+      "MODERATE",
+      "EXCESSIVE",
+      "REQUIRES_REPLACEMENT"
     ]
   },
   "schemas": {
@@ -702,6 +713,30 @@
             "type": "TEXT_AREA",
             "required": false,
             "help_text": "Document location and nature of any defects"
+          },
+          {
+            "field_id": "defect_photos",
+            "label": "Defect Photos",
+            "type": "PHOTO",
+            "required": false,
+            "help_text": "Upload photo(s) of any defects, damage, or wear found. Required for FAIL conditions and excessive wear. Strongly recommended for all issues.",
+            "conditionally_required_if": {
+              "any_field_in": [
+                "FAIL",
+                "EXCESSIVE",
+                "REQUIRES_REPLACEMENT",
+                "SERVICE_REQUIRED",
+                "UNSAFE_OUT_OF_SERVICE"
+              ],
+              "description": "Photos required when defects found"
+            },
+            "conditionally_suggested_if": {
+              "any_field_in": [
+                "MODERATE",
+                "MINOR"
+              ],
+              "description": "Photos strongly recommended for documentation"
+            }
           }
         ],
         "auto_defect_on": [
@@ -824,6 +859,30 @@
             "type": "TEXT_AREA",
             "required": false,
             "help_text": "Document location and nature of any defects"
+          },
+          {
+            "field_id": "defect_photos",
+            "label": "Defect Photos",
+            "type": "PHOTO",
+            "required": false,
+            "help_text": "Upload photo(s) of any defects, damage, or wear found. Required for FAIL conditions and excessive wear. Strongly recommended for all issues.",
+            "conditionally_required_if": {
+              "any_field_in": [
+                "FAIL",
+                "EXCESSIVE",
+                "REQUIRES_REPLACEMENT",
+                "SERVICE_REQUIRED",
+                "UNSAFE_OUT_OF_SERVICE"
+              ],
+              "description": "Photos required when defects found"
+            },
+            "conditionally_suggested_if": {
+              "any_field_in": [
+                "MODERATE",
+                "MINOR"
+              ],
+              "description": "Photos strongly recommended for documentation"
+            }
           }
         ],
         "auto_defect_on": [
@@ -911,6 +970,30 @@
             "type": "TEXT_AREA",
             "required": false,
             "help_text": "Document any issues or observations"
+          },
+          {
+            "field_id": "defect_photos",
+            "label": "Defect Photos",
+            "type": "PHOTO",
+            "required": false,
+            "help_text": "Upload photo(s) of any defects, damage, or wear found. Required for FAIL conditions and excessive wear. Strongly recommended for all issues.",
+            "conditionally_required_if": {
+              "any_field_in": [
+                "FAIL",
+                "EXCESSIVE",
+                "REQUIRES_REPLACEMENT",
+                "SERVICE_REQUIRED",
+                "UNSAFE_OUT_OF_SERVICE"
+              ],
+              "description": "Photos required when defects found"
+            },
+            "conditionally_suggested_if": {
+              "any_field_in": [
+                "MODERATE",
+                "MINOR"
+              ],
+              "description": "Photos strongly recommended for documentation"
+            }
           }
         ],
         "auto_defect_on": [
@@ -1006,6 +1089,30 @@
             "type": "TEXT_AREA",
             "required": false,
             "help_text": "Document missing or illegible items"
+          },
+          {
+            "field_id": "defect_photos",
+            "label": "Defect Photos",
+            "type": "PHOTO",
+            "required": false,
+            "help_text": "Upload photo(s) of any defects, damage, or wear found. Required for FAIL conditions and excessive wear. Strongly recommended for all issues.",
+            "conditionally_required_if": {
+              "any_field_in": [
+                "FAIL",
+                "EXCESSIVE",
+                "REQUIRES_REPLACEMENT",
+                "SERVICE_REQUIRED",
+                "UNSAFE_OUT_OF_SERVICE"
+              ],
+              "description": "Photos required when defects found"
+            },
+            "conditionally_suggested_if": {
+              "any_field_in": [
+                "MODERATE",
+                "MINOR"
+              ],
+              "description": "Photos strongly recommended for documentation"
+            }
           }
         ],
         "auto_defect_on": [

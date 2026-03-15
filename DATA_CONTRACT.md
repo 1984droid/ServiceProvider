@@ -318,6 +318,8 @@ Only capabilities that affect inspections/maintenance:
 - `template_snapshot` (JSONField, required) - **Immutable template copy**
 - `step_data` (JSONField) - Collected inspection data
 - `notes`
+- `inspection_outcome` (PASS/PASS_WITH_REPAIRS/FAIL) - **Auto-calculated at finalization**
+- `outcome_summary` (JSONField) - Detailed outcome breakdown with defect counts
 
 **Validation:**
 - Asset customer must match inspection customer
@@ -326,10 +328,35 @@ Only capabilities that affect inspections/maintenance:
 
 **Properties:** `asset`, `is_finalized`, `defect_count`, `critical_defect_count`
 
+**Outcome Calculation (Auto-computed at finalization):**
+The system automatically determines inspection outcome based on defects:
+- **FAIL**: Any CRITICAL severity defects OR blocking step failures (blocking_fail: true)
+- **PASS_WITH_REPAIRS**: Any MAJOR severity defects (but no CRITICAL)
+- **PASS**: Only MINOR/ADVISORY defects or no defects
+
+The `outcome_summary` JSON contains:
+```json
+{
+  "total_defects": 5,
+  "defects_by_severity": {
+    "CRITICAL": 0,
+    "MAJOR": 2,
+    "MINOR": 3,
+    "ADVISORY": 0
+  },
+  "blocking_failures": [],
+  "critical_defects_found": false,
+  "major_defects_found": true,
+  "equipment_safe_for_operation": true,
+  "requires_immediate_action": false,
+  "requires_repairs": true
+}
+```
+
 ---
 
 ### InspectionDefect
-**Purpose:** Defect/finding - automatically generated from rule evaluation
+**Purpose:** Defect/finding - created from auto-rules OR manual capture during inspection
 
 **Core Fields:**
 - `inspection_run` FK(InspectionRun, required)
@@ -341,9 +368,38 @@ Only capabilities that affect inspections/maintenance:
 - `defect_details` (JSONField) - Structured data (actual/expected values)
 - `evaluation_trace` (JSONField) - Complete rule evaluation audit trail
 
+**Defect Creation Sources:**
+1. **Auto-generated from rules** (`auto_defect_on` in template) - System evaluates conditions
+2. **Manual capture** (`ADD_DEFECT_ITEMS` mode) - Inspector documents structured defects
+
+**Manual Defect Schema (8 fields):**
+When step has `defect_schema_ref` and `ui.mode: "ADD_DEFECT_ITEMS"`:
+```json
+{
+  "defect_id": "uuid",
+  "title": "Structural bolt wear detected",
+  "severity": "SERVICE_REQUIRED",
+  "description": "Excessive wear on pedestal mounting bolts...",
+  "component": "Pedestal Mounting Bolts to Chassis",
+  "location": "Driver side pedestal",
+  "photo_evidence": ["photo1.jpg", "photo2.jpg"],
+  "corrective_action": "Replace all pedestal mounting bolts...",
+  "standard_reference": "ANSI A92.2-2021 Section 8.2.4(13)"
+}
+```
+
+**Photo Requirements:**
+- Photos conditionally required based on severity
+- `SERVICE_REQUIRED` and `UNSAFE_OUT_OF_SERVICE` severities require photos
+- Photos stored in `defect_details.photos` array
+
 **Idempotency:**
 ```python
+# Auto-generated defects
 defect_identity = SHA256(run_id + module_key + step_key + rule_id)
+
+# Manual defects
+defect_identity = SHA256(run_id + module_key + step_key + "manual_" + defect_id)
 ```
 Re-running evaluation updates existing defects rather than creating duplicates.
 
@@ -354,10 +410,13 @@ Re-running evaluation updates existing defects rather than creating duplicates.
 - **Enum:** EQUALS, IN
 - **Existence:** EXISTS, NOT_EXISTS
 
-**Severity Mapping:**
+**Severity Mapping (Template → Database):**
 - `UNSAFE_OUT_OF_SERVICE` → `CRITICAL`
+- `SERVICE_REQUIRED` → `MAJOR`
 - `DEGRADED_PERFORMANCE` → `MAJOR`
 - `MINOR_ISSUE` → `MINOR`
+- `MINOR` → `MINOR`
+- `SAFE` → `ADVISORY`
 - `ADVISORY_NOTICE` → `ADVISORY`
 
 ---

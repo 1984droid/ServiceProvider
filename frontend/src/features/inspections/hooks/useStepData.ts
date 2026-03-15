@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/lib/axios';
-import { validateStep } from '../utils/validation';
+import { validateStep, getStepWarnings } from '../utils/validation';
 
 interface TemplateField {
   field_id: string;
@@ -35,6 +35,7 @@ interface UseStepDataReturn {
   allStepValues: Record<string, Record<string, any>>;
   completedSteps: Set<number>;
   validationErrors: Record<string, string>;
+  validationWarnings: Record<string, string>;
   isCurrentStepValid: boolean;
   isDirty: boolean;
   isSaving: boolean;
@@ -72,8 +73,9 @@ export function useStepData({
   const [error, setError] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Validation errors
+  // Validation errors and warnings
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationWarnings, setValidationWarnings] = useState<Record<string, string>>({});
 
   // Get current step
   const currentStep = steps[currentStepIndex];
@@ -99,7 +101,9 @@ export function useStepData({
 
     const fields = getCurrentStepFields();
     const errors = validateStep(fields, stepValues, enumValues);
+    const warnings = getStepWarnings(fields, stepValues);
     setValidationErrors(errors);
+    setValidationWarnings(warnings);
     return Object.keys(errors).length === 0;
   };
 
@@ -180,6 +184,7 @@ export function useStepData({
     setCurrentStepIndex(stepIndex);
     setIsDirty(false);
     setValidationErrors({}); // Clear validation errors when changing steps
+    setValidationWarnings({}); // Clear validation warnings when changing steps
   };
 
   // Save current step to backend
@@ -271,6 +276,7 @@ export function useStepData({
     allStepValues,
     completedSteps,
     validationErrors,
+    validationWarnings,
     isCurrentStepValid,
     isDirty,
     isSaving,

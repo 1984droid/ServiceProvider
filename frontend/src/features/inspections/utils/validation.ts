@@ -11,6 +11,14 @@ interface TemplateField {
   max?: number;
   precision?: number;
   values?: string[];
+  conditionally_required_if?: {
+    any_field_in?: string[];
+    description?: string;
+  };
+  conditionally_suggested_if?: {
+    any_field_in?: string[];
+    description?: string;
+  };
 }
 
 interface ValidationError {
@@ -23,7 +31,8 @@ interface ValidationError {
  */
 export function validateField(
   field: TemplateField,
-  value: any
+  value: any,
+  allValues?: Record<string, any>
 ): string | null {
   const fieldType = field.type.toUpperCase();
 
@@ -39,6 +48,33 @@ export function validateField(
 
     if (Array.isArray(value) && value.length === 0) {
       return `${field.label} is required`;
+    }
+  }
+
+  // Check conditional requirements (e.g., photo required when defect found)
+  if (field.conditionally_required_if && allValues) {
+    const condition = field.conditionally_required_if;
+
+    if (condition.any_field_in) {
+      const triggerValues = condition.any_field_in;
+      const hasTriggeringValue = Object.values(allValues).some(v =>
+        triggerValues.includes(v)
+      );
+
+      if (hasTriggeringValue) {
+        // This field is now required
+        if (value === null || value === undefined) {
+          return `${field.label} is required when defects are found`;
+        }
+
+        if (typeof value === 'string' && value.trim() === '') {
+          return `${field.label} is required when defects are found`;
+        }
+
+        if (Array.isArray(value) && value.length === 0) {
+          return `${field.label} is required when defects are found`;
+        }
+      }
     }
   }
 
@@ -188,7 +224,7 @@ export function validateStep(
     }
 
     const value = values[field.field_id];
-    const error = validateField(fieldToValidate, value);
+    const error = validateField(fieldToValidate, value, values);
 
     if (error) {
       errors[field.field_id] = error;
@@ -208,4 +244,46 @@ export function isStepValid(
 ): boolean {
   const errors = validateStep(fields, values, enumValues);
   return Object.keys(errors).length === 0;
+}
+
+/**
+ * Get warnings for fields (non-blocking suggestions)
+ */
+export function getStepWarnings(
+  fields: TemplateField[],
+  values: Record<string, any>
+): Record<string, string> {
+  const warnings: Record<string, string> = {};
+
+  for (const field of fields) {
+    // Check conditional suggestions (e.g., photo suggested for minor issues)
+    if (field.conditionally_suggested_if) {
+      const condition = field.conditionally_suggested_if;
+
+      if (condition.any_field_in) {
+        const triggerValues = condition.any_field_in;
+        const hasTriggeringValue = Object.values(values).some(v =>
+          triggerValues.includes(v)
+        );
+
+        if (hasTriggeringValue) {
+          const value = values[field.field_id];
+
+          // Check if field is empty
+          const isEmpty =
+            value === null ||
+            value === undefined ||
+            (typeof value === 'string' && value.trim() === '') ||
+            (Array.isArray(value) && value.length === 0);
+
+          if (isEmpty) {
+            warnings[field.field_id] =
+              condition.description || `${field.label} is strongly recommended`;
+          }
+        }
+      }
+    }
+  }
+
+  return warnings;
 }

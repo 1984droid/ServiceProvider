@@ -23,8 +23,12 @@
       ]
     },
     "applicability": {
-      "asset_types": ["EQUIPMENT"],
-      "equipment_types": ["A92_2_AERIAL"],
+      "asset_types": [
+        "EQUIPMENT"
+      ],
+      "equipment_types": [
+        "A92_2_AERIAL"
+      ],
       "notes": "Periodic Inspection per Section 8.2.4. Performed at 1 to 12-month intervals depending on usage and manufacturer recommendations. Includes all Frequent Inspection items plus detailed examination of structural components, mechanical systems, and comprehensive operational testing. Load test and dielectric test may be performed separately using dedicated templates."
     },
     "policy": {
@@ -536,119 +540,96 @@
         "ui": {
           "mode": "ADD_DEFECT_ITEMS",
           "guidance": [
-            "Check all bolts, pins, and fasteners for tightness, wear, and damage",
+            "Assess condition and wear level for each component",
+            "When EXCESSIVE wear or other defects are found, click 'Add Defect' to document details",
             "Verify correct grade fasteners are used per manufacturer specifications",
             "Check for proper torque on critical mounting bolts",
             "Verify all pivot pins have proper retaining hardware (cotter pins, snap rings)",
             "Look for elongated holes in mounting points",
-            "Check for missing, loose, or damaged fasteners",
-            "Inspect boom pivot pins for wear",
-            "Check cylinder mounting pins and retainers"
+            "Include photos for all defects - required for EXCESSIVE wear and SERVICE_REQUIRED severity"
           ]
         },
         "fields": [
           {
-            "field_id": "structural_bolts",
+            "field_id": "structural_bolts_condition",
             "label": "Structural Bolts (tightness and condition)",
-            "type": "ENUM",
-            "enum_ref": "pass_fail",
-            "required": true,
-            "help_text": "All structural mounting bolts"
-          },
-          {
-            "field_id": "boom_pivot_pins",
-            "label": "Boom Pivot Pins and Retaining Hardware",
-            "type": "ENUM",
-            "enum_ref": "pass_fail",
-            "required": true,
-            "help_text": "Check pins for wear and retainers in place"
-          },
-          {
-            "field_id": "boom_pivot_pin_wear",
-            "label": "Boom Pivot Pin Wear Assessment",
             "type": "ENUM",
             "enum_ref": "wear_level",
             "required": true,
-            "help_text": "Assess wear level - excessive wear requires replacement"
+            "help_text": "All structural mounting bolts - check for tightness, corrosion, damage"
           },
           {
-            "field_id": "cylinder_mounting_pins",
+            "field_id": "boom_pivot_pins_condition",
+            "label": "Boom Pivot Pins and Retaining Hardware",
+            "type": "ENUM",
+            "enum_ref": "wear_level",
+            "required": true,
+            "help_text": "Check pins for wear, retainers in place, no play in joint"
+          },
+          {
+            "field_id": "cylinder_mounting_pins_condition",
             "label": "Hydraulic Cylinder Mounting Pins",
             "type": "ENUM",
-            "enum_ref": "pass_fail",
+            "enum_ref": "wear_level",
             "required": true,
-            "help_text": "Check all cylinder pin connections"
+            "help_text": "All cylinder pin connections - check for wear and proper retention"
           },
           {
-            "field_id": "platform_mounting_bolts",
+            "field_id": "platform_mounting_bolts_condition",
             "label": "Platform Mounting Bolts and Hardware",
             "type": "ENUM",
-            "enum_ref": "pass_fail",
+            "enum_ref": "wear_level",
             "required": true,
-            "help_text": "Platform attachment to boom"
+            "help_text": "Platform attachment to boom - critical connection point"
           },
           {
-            "field_id": "pedestal_mounting_bolts",
+            "field_id": "pedestal_mounting_bolts_condition",
             "label": "Pedestal Mounting Bolts to Chassis (Critical)",
             "type": "ENUM",
-            "enum_ref": "pass_fail",
+            "enum_ref": "wear_level",
             "required": true,
-            "help_text": "Most critical bolts - check torque per specs"
+            "help_text": "MOST CRITICAL BOLTS - check torque per specs, look for cracks in flanges"
           },
           {
-            "field_id": "turret_bearing_bolts",
+            "field_id": "turret_bearing_bolts_condition",
             "label": "Turret Bearing Mounting Bolts",
             "type": "ENUM",
-            "enum_ref": "pass_fail",
+            "enum_ref": "wear_level",
             "required": true,
-            "help_text": "Critical bearing attachment bolts"
+            "help_text": "Critical bearing attachment bolts - proper torque essential"
           },
           {
-            "field_id": "outrigger_bolts_pins",
+            "field_id": "outrigger_bolts_pins_condition",
             "label": "Outrigger Bolts and Pins",
             "type": "ENUM",
-            "enum_ref": "pass_fail",
+            "enum_ref": "wear_level",
             "required": true,
-            "help_text": "All outrigger fasteners and pins"
-          },
-          {
-            "field_id": "loose_fasteners_found",
-            "label": "Any loose fasteners found?",
-            "type": "BOOLEAN",
-            "required": true
-          },
-          {
-            "field_id": "missing_fasteners_found",
-            "label": "Any missing fasteners found?",
-            "type": "BOOLEAN",
-            "required": true
-          },
-          {
-            "field_id": "fastener_defects_found",
-            "label": "Any bolt/fastener defects found?",
-            "type": "BOOLEAN",
-            "required": true
+            "help_text": "All outrigger fasteners and pins - check for wear and tightness"
           },
           {
             "field_id": "fastener_notes",
             "label": "Bolts/Fasteners Inspection Notes",
             "type": "TEXT_AREA",
-            "required": false
+            "required": false,
+            "help_text": "Additional observations, measurements, or general notes about fasteners"
           }
         ],
         "auto_defect_on": [
           {
             "when": {
-              "path": "fastener_defects_found",
-              "equals": true
+              "any_field_in": [
+                "EXCESSIVE",
+                "REQUIRES_REPLACEMENT"
+              ]
             },
             "defect": {
-              "title": "Bolt/fastener defects found during periodic inspection",
+              "title": "Critical fastener wear/damage found during periodic inspection",
               "severity": "SERVICE_REQUIRED",
-              "description": "Fastener defects detected that require correction."
+              "description": "Fastener condition requires replacement or repair. See defect details for specific components and recommendations."
             }
           }
-        ]
+        ],
+        "blocking_fail": true
       },
       {
         "step_key": "hydraulic_system",

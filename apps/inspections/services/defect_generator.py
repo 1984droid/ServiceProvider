@@ -34,6 +34,9 @@ class DefectGenerator:
         'MAJOR': 'MAJOR',
         'MINOR': 'MINOR',
         'ADVISORY': 'ADVISORY',
+        # Defect schema severity values (from ADD_DEFECT_ITEMS mode)
+        'SERVICE_REQUIRED': 'MAJOR',
+        'SAFE': 'ADVISORY',
     }
 
     @classmethod
@@ -43,7 +46,11 @@ class DefectGenerator:
         inspection_run: InspectionRun
     ) -> List[InspectionDefect]:
         """
-        Evaluate all rules and generate defects for failed rules.
+        Generate defects from both rules and manual defects in step_data.
+
+        This processes two types of defects:
+        1. Auto-generated defects from rule evaluation (auto_defect_on)
+        2. Manual defects from structured defect capture (ADD_DEFECT_ITEMS mode)
 
         Args:
             inspection_run: InspectionRun to evaluate
@@ -54,11 +61,10 @@ class DefectGenerator:
         template = inspection_run.template_snapshot
         step_data = inspection_run.step_data or {}
 
-        # Evaluate all rules
-        evaluation_results = RuleEvaluator.evaluate_all_rules(template, step_data)
-
-        # Generate defects for failures
         defects = []
+
+        # 1. Generate defects from rule evaluation (existing logic)
+        evaluation_results = RuleEvaluator.evaluate_all_rules(template, step_data)
         for result in evaluation_results:
             if not result.passed:
                 # Find rule definition
@@ -71,6 +77,10 @@ class DefectGenerator:
                     )
                     if defect:
                         defects.append(defect)
+
+        # 2. Process manual defects from step_data (NEW)
+        manual_defects = cls.process_manual_defects(inspection_run, step_data)
+        defects.extend(manual_defects)
 
         return defects
 
@@ -143,6 +153,148 @@ class DefectGenerator:
 
         # If defect already exists, update it with latest evaluation
         if not created:
+            defect.defect_details = defect_details
+            defect.evaluation_trace = evaluation_trace
+            defect.save()
+
+        return defect
+
+    @classmethod
+    def process_manual_defects(
+        cls,
+        inspection_run: InspectionRun,
+        step_data: Dict[str, Any]
+    ) -> List[InspectionDefect]:
+        """
+        Process manual defects from step_data.
+
+        Converts defects captured via ADD_DEFECT_ITEMS mode into InspectionDefect records.
+        Defects are stored in step_data as:
+        step_data[step_key]['defects'] = [
+            {
+                'defect_id': 'uuid',
+                'title': '...',
+                'severity': 'SERVICE_REQUIRED',
+                'description': '...',
+                'component': '...',
+                'location': '...',
+                'photo_evidence': ['photo1.jpg', ...],
+                'corrective_action': '...',
+                'standard_reference': '...'
+            }
+        ]
+
+        Args:
+            inspection_run: InspectionRun instance
+            step_data: Step data dict
+
+        Returns:
+            List of created InspectionDefect objects
+        """
+        defects = []
+
+        # Iterate through all steps in step_data
+        for step_key, step_values in step_data.items():
+            if not isinstance(step_values, dict):
+                continue
+
+            # Check if step has defects array
+            step_defects = step_values.get('defects', [])
+            if not isinstance(step_defects, list):
+                continue
+
+            # Process each defect in the step
+            for defect_data in step_defects:
+                if not isinstance(defect_data, dict):
+                    continue
+
+                try:
+                    defect = cls.create_defect_from_manual_data(
+                        inspection_run=inspection_run,
+                        step_key=step_key,
+                        defect_data=defect_data
+                    )
+                    if defect:
+                        defects.append(defect)
+                except Exception as e:
+                    # Log error but continue processing other defects
+                    print(f"Error processing manual defect in step {step_key}: {e}")
+
+        return defects
+
+    @classmethod
+    def create_defect_from_manual_data(
+        cls,
+        inspection_run: InspectionRun,
+        step_key: str,
+        defect_data: Dict[str, Any]
+    ) -> Optional[InspectionDefect]:
+        """
+        Create InspectionDefect from manual defect data.
+
+        Args:
+            inspection_run: InspectionRun instance
+            step_key: Step where defect was captured
+            defect_data: Defect data from step_data.defects array
+
+        Returns:
+            InspectionDefect instance
+        """
+        # Generate defect identity for idempotency
+        # Use defect_id from frontend as part of identity
+        defect_id = defect_data.get('defect_id', '')
+        defect_identity = InspectionDefect.generate_defect_identity(
+            inspection_run_id=inspection_run.id,
+            module_key='',
+            step_key=step_key,
+            rule_id=f"manual_{defect_id}"
+        )
+
+        # Map severity from defect schema to model
+        template_severity = defect_data.get('severity', 'MINOR')
+        model_severity = cls.map_severity(template_severity)
+
+        # Build defect_details from defect schema fields
+        defect_details = {
+            'component': defect_data.get('component'),
+            'location': defect_data.get('location'),
+            'photos': defect_data.get('photo_evidence', []),
+            'corrective_action': defect_data.get('corrective_action'),
+            'standard_reference': defect_data.get('standard_reference'),
+            'source': 'manual',
+            'defect_id': defect_id,
+        }
+
+        # Build evaluation trace
+        evaluation_trace = {
+            'type': 'manual_defect',
+            'captured_at': timezone.now().isoformat(),
+            'step_key': step_key,
+            'defect_data': defect_data
+        }
+
+        # Get or create defect (idempotent)
+        defect, created = InspectionDefect.objects.get_or_create(
+            defect_identity=defect_identity,
+            defaults={
+                'inspection_run': inspection_run,
+                'module_key': '',
+                'step_key': step_key,
+                'rule_id': None,  # No rule for manual defects
+                'severity': model_severity,
+                'status': 'OPEN',
+                'title': defect_data.get('title', 'Manual defect'),
+                'description': defect_data.get('description', ''),
+                'defect_details': defect_details,
+                'evaluation_trace': evaluation_trace
+            }
+        )
+
+        # If defect already exists, update it
+        if not created:
+            defect.title = defect_data.get('title', 'Manual defect')
+            defect.description = defect_data.get('description', '')
+            defect.severity = model_severity
             defect.defect_details = defect_details
             defect.evaluation_trace = evaluation_trace
             defect.save()

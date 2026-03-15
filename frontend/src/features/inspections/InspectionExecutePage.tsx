@@ -54,6 +54,7 @@ interface InspectionTemplate {
     title: string;
     fields: TemplateField[];
   }>;
+  schemas?: Record<string, any>;
 }
 
 export function InspectionExecutePage({
@@ -90,6 +91,7 @@ export function InspectionExecutePage({
         steps: templateSnapshot.procedure?.steps || [],
         enums: templateSnapshot.enums || {},
         measurement_sets: templateSnapshot.measurement_sets || {},
+        schemas: templateSnapshot.schemas || {},
       };
 
       setTemplate(transformedTemplate);
@@ -259,6 +261,21 @@ export function InspectionExecutePage({
               <p className="text-sm">{stepData.error}</p>
             </div>
           )}
+          {Object.keys(stepData.validationWarnings).length > 0 && (
+            <div className="mb-4 p-3 rounded" style={{ backgroundColor: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
+              <div className="flex items-start">
+                <svg className="w-5 h-5 mr-2 flex-shrink-0" style={{ color: '#f59e0b' }} fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-medium" style={{ color: '#92400e' }}>Recommendations</p>
+                  {Object.values(stepData.validationWarnings).map((warning, index) => (
+                    <p key={index} className="text-sm mt-1" style={{ color: '#92400e' }}>{warning}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
           <StepRenderer
             step={currentStep}
             currentIndex={currentStepIndex}
@@ -268,6 +285,7 @@ export function InspectionExecutePage({
             errors={stepData.validationErrors}
             enumValues={template.enums || {}}
             measurementSets={template.measurement_sets || {}}
+            schemas={template.schemas || {}}
             inspectionId={inspectionId}
             templateKey={inspectionRun?.template_key}
           />

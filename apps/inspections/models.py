@@ -88,6 +88,26 @@ class InspectionRun(BaseModel):
         db_index=True
     )
 
+    # Inspection Outcome (auto-calculated at finalization)
+    OUTCOME_CHOICES = [
+        ('PASS', 'Pass - Equipment safe for operation'),
+        ('PASS_WITH_REPAIRS', 'Pass - Repairs required before next inspection'),
+        ('FAIL', 'Fail - Equipment unsafe, tagged out of service'),
+    ]
+    inspection_outcome = models.CharField(
+        max_length=30,
+        choices=OUTCOME_CHOICES,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Auto-calculated outcome based on defects and blocking failures"
+    )
+    outcome_summary = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Summary data: defect counts by severity, blocking failures, etc."
+    )
+
     # Timestamps
     started_at = models.DateTimeField(
         help_text="When inspection was started"

@@ -18,6 +18,7 @@ from apps.inspections.models import InspectionRun, InspectionDefect
 from apps.inspections.services.template_service import TemplateService
 from apps.inspections.services.validation_service import ResponseValidator, StepValidationResult
 from apps.inspections.services.defect_generator import DefectGenerator
+from apps.inspections.services.outcome_calculator import OutcomeCalculator
 
 
 class InspectionRuntimeError(Exception):
@@ -450,5 +451,11 @@ class InspectionRuntime:
         defects = []
         if evaluate_rules:
             defects = cls.evaluate_rules(inspection_run)
+
+        # Calculate inspection outcome based on defects
+        outcome_result = OutcomeCalculator.calculate_outcome(inspection_run, defects)
+        inspection_run.inspection_outcome = outcome_result['outcome']
+        inspection_run.outcome_summary = outcome_result['summary']
+        inspection_run.save(update_fields=['inspection_outcome', 'outcome_summary'])
 
         return (inspection_run, defects)

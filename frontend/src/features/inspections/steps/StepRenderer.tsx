@@ -49,6 +49,7 @@ interface StepRendererProps {
   disabled?: boolean;
   enumValues?: Record<string, string[]>;
   measurementSets?: Record<string, MeasurementSet>;
+  schemas?: Record<string, any>;
   inspectionId?: string;
   templateKey?: string;
 }
@@ -63,11 +64,15 @@ export function StepRenderer({
   disabled = false,
   enumValues = {},
   measurementSets = {},
+  schemas = {},
   inspectionId = '',
   templateKey = ''
 }: StepRendererProps) {
 
   const stepType = step.type.toUpperCase();
+
+  // Get defect schema if step references it
+  const defectSchema = step.defect_schema_ref ? schemas[step.defect_schema_ref] : undefined;
 
   // Route to the appropriate step component
   switch (stepType) {
@@ -97,6 +102,7 @@ export function StepRenderer({
           errors={errors}
           disabled={disabled}
           enumValues={enumValues}
+          defectSchema={defectSchema}
         />
       );
 
