@@ -317,7 +317,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "pre_test_preparation",
@@ -382,7 +387,12 @@
             "required": false
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "load_capacity_info",
@@ -436,7 +446,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "boom_raise_test",
@@ -522,7 +537,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "boom_extend_test",
@@ -607,7 +627,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "boom_rotation_test",
@@ -693,7 +718,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "holding_valve_drift_test",
@@ -731,7 +761,12 @@
             "required": false,
             "help_text": "Document measurement method and any observations"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "boom_lowering_test",
@@ -807,7 +842,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "post_test_inspection",
@@ -899,7 +939,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "load_test_evaluation",
@@ -964,7 +1009,12 @@
             "required": false,
             "help_text": "If applicable per periodic schedule"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       }
     ]
   },

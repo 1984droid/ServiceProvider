@@ -574,7 +574,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "5.6.3",
+          "excerpt": "Test documentation shall include: name of entity performing test, make/model/serial number of tested device, test voltage and current values, test results, and date of test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "pre_test_visual_inspection",
@@ -663,7 +668,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "5.4.1",
+          "excerpt": "Before electrical testing, ensure all conductive components are properly bonded, insulating surfaces are clean and dry, and test equipment is calibrated and functioning properly.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "test_equipment_verification",
@@ -718,7 +728,12 @@
             "required": false
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "5.5",
+          "excerpt": "Test equipment shall meet the requirements of IEEE Std. 4-2013 and be capable of measuring leakage current in microamperes.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "test_setup_cat_ab",
@@ -819,7 +834,12 @@
             "required": false
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "5.4.3.1(11)(c)",
+          "excerpt": "Method C (Before-Use Test): Apply test voltage as specified in Table 3 for overload test using line contact method before each day's use or after adverse weather conditions.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "test_setup_cat_cde",
@@ -935,7 +955,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "5.4.3",
+          "excerpt": "Each insulating aerial device shall be periodically electrically tested in accordance with Table 2.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "execute_test_method_b_dc",
@@ -976,7 +1001,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "5.4.3",
+          "excerpt": "Each insulating aerial device shall be periodically electrically tested in accordance with Table 2.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "execute_test_method_c_before_use",
@@ -1024,7 +1054,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "5.4.3.1(11)(c)",
+          "excerpt": "Method C (Before-Use Test): Apply test voltage as specified in Table 3 for overload test using line contact method before each day's use or after adverse weather conditions.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "chassis_insulating_system_test",
@@ -1080,7 +1115,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "5.4.3.4",
+          "excerpt": "When the chassis is equipped with an insulating system, test the chassis insulating system in accordance with manufacturer specifications and applicable standards.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "test_results_evaluation",

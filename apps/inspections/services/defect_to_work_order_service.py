@@ -79,6 +79,18 @@ class DefectToWorkOrderService:
         Returns:
             Dict with keys: verb, noun, service_location, description
         """
+        # Build base description (include both title and description if both exist)
+        if defect.title and defect.description and defect.title != defect.description:
+            base_description = f"{defect.title}\n\n{defect.description}"
+        else:
+            base_description = defect.description or defect.title
+
+        # Add standard reference if available
+        defect_details = defect.defect_details or {}
+        standard_ref = defect_details.get('standard_reference')
+        if standard_ref:
+            base_description = f"{base_description}\n\nStandard: {standard_ref}"
+
         # Try catalog mapping first
         mapping = cls.load_defect_mapping()
 
@@ -89,7 +101,7 @@ class DefectToWorkOrderService:
                 'verb': catalog_entry.get('verb', 'Inspect'),
                 'noun': catalog_entry.get('noun', 'Component'),
                 'service_location': catalog_entry.get('service_location', 'General'),
-                'description': defect.description or defect.title
+                'description': base_description
             }
 
         # Try rule_id lookup
@@ -99,19 +111,20 @@ class DefectToWorkOrderService:
                 'verb': catalog_entry.get('verb', 'Inspect'),
                 'noun': catalog_entry.get('noun', 'Component'),
                 'service_location': catalog_entry.get('service_location', 'General'),
-                'description': defect.description or defect.title
+                'description': base_description
             }
 
         # Fallback: Rule-based extraction from title/description
-        return cls._extract_vocabulary_from_text(defect)
+        return cls._extract_vocabulary_from_text(defect, base_description)
 
     @classmethod
-    def _extract_vocabulary_from_text(cls, defect: InspectionDefect) -> Dict[str, str]:
+    def _extract_vocabulary_from_text(cls, defect: InspectionDefect, description: str = None) -> Dict[str, str]:
         """
         Extract vocabulary from defect title/description using keyword matching.
 
         Args:
             defect: InspectionDefect instance
+            description: Pre-built description (optional, will build if not provided)
 
         Returns:
             Dict with keys: verb, noun, service_location, description
@@ -126,11 +139,24 @@ class DefectToWorkOrderService:
         noun = suggestions['nouns'][0] if suggestions['nouns'] else 'Component'
         location = suggestions['locations'][0] if suggestions['locations'] else cls._default_location_from_module(defect.module_key)
 
+        # Use provided description or build one
+        if description is None:
+            # Include both title and description if both exist
+            if defect.title and defect.description and defect.title != defect.description:
+                description = f"{defect.title}\n\n{defect.description}"
+            else:
+                description = defect.description or defect.title
+
+            defect_details = defect.defect_details or {}
+            standard_ref = defect_details.get('standard_reference')
+            if standard_ref:
+                description = f"{description}\n\nStandard: {standard_ref}"
+
         return {
             'verb': verb,
             'noun': noun,
             'service_location': location,
-            'description': defect.description or defect.title
+            'description': description
         }
 
     @classmethod

@@ -408,7 +408,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "pre_inspection_review",
@@ -457,7 +462,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "structural_components",
@@ -612,7 +622,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "welds_inspection",
@@ -717,7 +732,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "bolts_fasteners",
@@ -819,7 +839,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4(13)",
+          "excerpt": "Condition and tightness of bolts and other fasteners.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "hydraulic_system",
@@ -973,7 +998,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.4(4)-(6)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "electrical_system",
@@ -1086,7 +1116,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.4(11)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "operating_controls",
@@ -1221,7 +1256,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "emergency_controls",
@@ -1309,7 +1349,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "safety_devices",
@@ -1423,7 +1468,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "markings_placards_manuals",
@@ -1535,7 +1585,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.4(15)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "load_test_reference",
@@ -1579,7 +1634,12 @@
             "required": false,
             "help_text": "If performed as part of this inspection, reference separate Load Test template for detailed documentation"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4.1",
+          "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "dielectric_test_reference",
@@ -1644,7 +1704,12 @@
             "required": false,
             "help_text": "If performed as part of this inspection, reference separate Dielectric Test template for detailed documentation"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "5.4",
+          "excerpt": "Insulating aerial devices shall be electrically tested to verify their ability to protect workers from electrical hazards when working near energized conductors.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "overall_evaluation",
@@ -1721,7 +1786,12 @@
             "required": true,
             "help_text": "Comprehensive summary of inspection findings, defects found, repairs needed, and recommendations"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.4",
+          "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment.",
+          "show_full_section": false
+        }
       }
     ]
   },

@@ -367,7 +367,12 @@
             "required": false,
             "help_text": "Reference to work order or repair documentation"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "work_documentation_review",
@@ -446,7 +451,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "7.11, 8.2.5",
+          "excerpt": "Review prior work documentation, maintenance records, and manufacturer bulletins. Verify all markings are legible and properly maintained.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "detailed_structural_inspection",
@@ -556,7 +566,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "weld_inspection_detailed",
@@ -676,7 +691,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "bolts_pins_fasteners_detailed",
@@ -787,7 +807,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.4(2) & (13)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "hydraulic_system_detailed",
@@ -894,7 +919,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.4(3)-(9)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "functional_testing",
@@ -981,7 +1011,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.4(12)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "load_test_requirement",
@@ -1024,7 +1059,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "dielectric_test_requirement",
@@ -1071,7 +1111,12 @@
             "required": false,
             "help_text": "Reference to separate dielectric test inspection"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "markings_and_documentation",
@@ -1153,7 +1198,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.4(15)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "7.11",
+          "excerpt": "Markings on the aerial device shall not be removed, defaced, or altered. All missing or illegible markings shall be promptly replaced.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "final_evaluation",
@@ -1215,7 +1265,12 @@
             "required": true,
             "help_text": "Comprehensive summary of inspection findings and recommendations"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.5",
+          "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "documentation_requirements",
@@ -1278,7 +1333,12 @@
             "type": "BOOLEAN",
             "required": true
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "7.11",
+          "excerpt": "Markings on the aerial device shall not be removed, defaced, or altered. All missing or illegible markings shall be promptly replaced.",
+          "show_full_section": false
+        }
       }
     ]
   },

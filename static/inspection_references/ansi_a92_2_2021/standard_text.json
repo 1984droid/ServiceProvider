@@ -110,6 +110,18 @@
     "sections_combined": {
       "section": "Sections 5.6.3, 7.11.2, 8.3.2",
       "excerpt": "Comprehensive test documentation, markings verification, and inspection records shall be maintained per manufacturer requirements and ANSI standards."
+    },
+    "work_documentation": {
+      "section": "7.11, 8.2.5",
+      "excerpt": "Review prior work documentation, maintenance records, and manufacturer bulletins. Verify all markings are legible and properly maintained."
+    },
+    "test_method_c_overload": {
+      "section": "5.4.3.1(11)(c)",
+      "excerpt": "Method C (Before-Use Test): Apply test voltage as specified in Table 3 for overload test using line contact method before each day's use or after adverse weather conditions."
+    },
+    "chassis_insulating_test": {
+      "section": "5.4.3.4",
+      "excerpt": "When the chassis is equipped with an insulating system, test the chassis insulating system in accordance with manufacturer specifications and applicable standards."
     }
   }
 }

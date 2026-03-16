@@ -73,10 +73,10 @@ class StandardTextValidationTest(TestCase):
                 self.assertTrue(excerpt['section'].strip(), f"Empty section in excerpt '{key}'")
                 self.assertTrue(excerpt['excerpt'].strip(), f"Empty excerpt in excerpt '{key}'")
 
-    def test_standard_text_has_25_excerpts(self):
-        """Test that we have 25 excerpts as documented."""
+    def test_standard_text_has_28_excerpts(self):
+        """Test that we have 28 excerpts as documented."""
         excerpts = self.standard_text_data['common_excerpts']
-        self.assertEqual(len(excerpts), 25, "Expected 25 excerpts for 100% coverage")
+        self.assertEqual(len(excerpts), 28, "Expected 28 excerpts for 100% coverage")
 
     def test_all_templates_load_successfully(self):
         """Test that all templates load and validate."""

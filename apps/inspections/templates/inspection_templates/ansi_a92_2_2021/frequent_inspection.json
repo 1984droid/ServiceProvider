@@ -399,7 +399,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "pre_inspection_review",
@@ -441,7 +446,12 @@
             "type": "TEXT_AREA",
             "required": false
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "operating_controls_test",
@@ -581,7 +591,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "emergency_controls_test",
@@ -670,7 +685,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "safety_devices_test",
@@ -785,7 +805,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "visual_structural_inspection",
@@ -957,7 +982,12 @@
             }
           }
         ],
-        "blocking_fail": true
+        "blocking_fail": true,
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "visual_hydraulic_inspection",
@@ -1103,7 +1133,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.3(6)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "visual_electrical_inspection",
@@ -1215,7 +1250,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.3(7)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "markings_placards",
@@ -1335,7 +1375,12 @@
               "standard_reference": "ANSI A92.2-2021 Section 8.2.3(5)"
             }
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       },
       {
         "step_key": "overall_evaluation",
@@ -1390,7 +1435,12 @@
             "required": true,
             "help_text": "Summary of inspection findings and recommendations"
           }
-        ]
+        ],
+        "standard_text": {
+          "section": "8.2.3",
+          "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations.",
+          "show_full_section": false
+        }
       }
     ]
   },
