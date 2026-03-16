@@ -25,8 +25,7 @@ class TestCompanyModel:
 
         assert company.name == default_data['name']
         assert company.dba_name == default_data['dba_name']
-        assert company.phone == default_data['phone']
-        assert company.email == default_data['email']
+        # Phone/email are on the primary contact, not company model
         assert str(company) == default_data['dba_name']
 
     def test_company_creation_minimal(self):

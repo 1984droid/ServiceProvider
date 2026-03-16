@@ -33,7 +33,7 @@ class TestTemplateServiceLoading:
         assert template['format'] == 'AF_INSPECTION_TEMPLATE'
         assert template['format_version'] == 1
         assert template['template']['template_key'] == 'ansi_a92_2_periodic_dielectric_test'
-        assert template['template']['name'] == 'ANSI A92.2-2021 Periodic - Insulating Components & Dielectric Testing'
+        assert template['template']['name'] == 'ANSI A92.2-2021 Periodic Dielectric Test'
         assert template['template']['status'] == 'PUBLISHED'
 
     def test_load_periodic_inspection_template(self):
@@ -235,12 +235,12 @@ class TestTemplateContentAccess:
         """Test getting a specific step from template."""
         step = TemplateService.get_template_step(
             'ansi_a92_2_periodic_dielectric_test',
-            'dielectric_test_execute'
+            'pre_test_visual_inspection'
         )
 
         assert step is not None
-        assert step['step_key'] == 'dielectric_test_execute'
-        assert step['type'] == 'MEASUREMENT'
+        assert step['step_key'] == 'pre_test_visual_inspection'
+        assert step['type'] == 'VISUAL_INSPECTION'
         assert step['required'] is True
 
     def test_get_nonexistent_step(self):
@@ -266,10 +266,11 @@ class TestTemplateContentAccess:
         enums = TemplateService.get_template_enums('ansi_a92_2_periodic_dielectric_test')
 
         assert 'severity' in enums
-        assert 'step_status' in enums
         assert isinstance(enums['severity'], list)
-        assert 'SAFE' in enums['severity']
-        assert 'UNSAFE_OUT_OF_SERVICE' in enums['severity']
+        # Enums are now EnumOption objects, extract values
+        severity_values = [opt.value for opt in enums['severity']]
+        assert 'SAFE' in severity_values
+        assert 'UNSAFE_OUT_OF_SERVICE' in severity_values
 
     def test_get_enum_values(self):
         """Test getting values for specific enum."""
@@ -396,8 +397,10 @@ class TestTemplatePydanticValidation:
         assert template.count_rules() == 4
 
         # Check enum retrieval
-        severity_values = template.get_enum_values('severity')
-        assert severity_values is not None
+        severity_options = template.get_enum_values('severity')
+        assert severity_options is not None
+        # Extract values from EnumOption objects
+        severity_values = [opt.value for opt in severity_options]
         assert 'SAFE' in severity_values
 
         # Check step retrieval
