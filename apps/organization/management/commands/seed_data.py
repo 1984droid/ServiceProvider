@@ -614,6 +614,17 @@ class Command(BaseCommand):
                 else:
                     description = "General maintenance and service"
 
+                # Set approval_status based on work order status
+                # Workflow: DRAFT → PENDING_APPROVAL → APPROVED → work starts
+                if wo_status in ['DRAFT']:
+                    approval_status = 'DRAFT'
+                elif wo_status in ['PENDING']:
+                    approval_status = random.choice(['DRAFT', 'PENDING_APPROVAL'])
+                elif wo_status in ['IN_PROGRESS', 'ON_HOLD', 'COMPLETED']:
+                    approval_status = 'APPROVED'
+                else:  # CANCELLED
+                    approval_status = random.choice(['DRAFT', 'REJECTED', 'APPROVED'])
+
                 # Create work order following new single-source pattern
                 work_order = WorkOrder.objects.create(
                     customer=customer,
@@ -626,6 +637,7 @@ class Command(BaseCommand):
                     description=description,
                     status=wo_status,
                     priority=wo_priority,
+                    approval_status=approval_status,
                     scheduled_date=(timezone.now() + timedelta(days=random.randint(1, 30))).date() if wo_status == 'PENDING' else None,
                 )
 
