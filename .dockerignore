@@ -12,6 +12,7 @@ env/
 venv/
 .venv/
 ENV/
+*.egg-info/
 
 # Django
 *.log
@@ -19,6 +20,12 @@ db.sqlite3
 db.sqlite3-journal
 /staticfiles/
 /media/
+
+# Frontend (node_modules will be installed in Docker)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
 
 # IDE
 .vscode/
@@ -39,6 +46,7 @@ docs/
 .pytest_cache/
 .coverage
 htmlcov/
+tests/__pycache__/
 
 # Environment
 .env
@@ -51,3 +59,9 @@ backups/
 
 # Logs
 logs/
+
+# Temp files
+temp/
+tmp/
+*.tmp
+*.bak
