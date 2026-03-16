@@ -69,7 +69,7 @@ class WorkOrderViewSet(viewsets.ModelViewSet):
         'asset_type',
         'is_active',
     ]
-    search_fields = ['title', 'description', 'notes', 'source']
+    search_fields = ['title', 'description', 'notes', 'source_type']
     ordering_fields = ['created_at', 'scheduled_date', 'due_date', 'priority', 'status']
     ordering = ['-created_at']
 

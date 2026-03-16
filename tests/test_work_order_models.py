@@ -43,7 +43,7 @@ class TestWorkOrderModel:
         assert work_order.asset_id is not None
         assert work_order.status in VALID_CHOICES['work_order_statuses']
         assert work_order.priority in VALID_CHOICES['work_order_priorities']
-        assert work_order.source in VALID_CHOICES['work_order_sources']
+        assert work_order.source_type in VALID_CHOICES['work_order_sources']
         assert work_order.description
 
     def test_work_order_number_auto_generation(self):
@@ -162,8 +162,8 @@ class TestWorkOrderModel:
     def test_work_order_source_choices(self):
         """Test all valid work order sources."""
         for source in VALID_CHOICES['work_order_sources']:
-            work_order = WorkOrderFactory(source=source)
-            assert work_order.source == source
+            work_order = WorkOrderFactory(source_type=source)
+            assert work_order.source_type == source
 
     def test_work_order_invalid_status(self):
         """Test invalid status raises error."""
@@ -455,56 +455,7 @@ class TestWorkOrderDefectModel:
         assert before <= link.linked_at <= after
 
 
-@pytest.mark.django_db
-class TestWorkOrderDepartmentAssignments:
-    """Tests for work order department and employee assignments."""
-
-    def test_work_order_multiple_departments(self):
-        """Test work order can have multiple departments assigned."""
-        from tests.factories import DepartmentFactory
-
-        work_order = WorkOrderFactory()
-        dept1 = DepartmentFactory()
-        dept2 = DepartmentFactory()
-
-        work_order.departments.add(dept1, dept2)
-
-        assert work_order.departments.count() == 2
-        assert dept1 in work_order.departments.all()
-        assert dept2 in work_order.departments.all()
-
-    def test_work_order_multiple_employees(self):
-        """Test work order can have multiple employees assigned."""
-        from tests.factories import EmployeeFactory
-
-        work_order = WorkOrderFactory()
-        emp1 = EmployeeFactory()
-        emp2 = EmployeeFactory()
-        emp3 = EmployeeFactory()
-
-        work_order.assigned_employees.add(emp1, emp2, emp3)
-
-        assert work_order.assigned_employees.count() == 3
-        assert emp1 in work_order.assigned_employees.all()
-
-    def test_work_order_department_employee_integration(self):
-        """Test work order with matching departments and employees."""
-        from tests.factories import DepartmentFactory, EmployeeFactory
-
-        service = DepartmentFactory()
-        inspection = DepartmentFactory()
-
-        tech = EmployeeFactory(base_department=service)
-        inspector = EmployeeFactory(base_department=inspection)
-
-        work_order = WorkOrderFactory()
-        work_order.departments.add(service, inspection)
-        work_order.assigned_employees.add(tech, inspector)
-
-        # Verify the assignments
-        assert work_order.departments.count() == 2
-        assert work_order.assigned_employees.count() == 2
-
-        # Verify employees can work in their departments
-        assert tech.can_work_in_department(service)
-        assert inspector.can_work_in_department(inspection)
+# ============================================================================
+# Note: Department and employee M2M assignment tests removed
+# Work orders now use single department FK and WorkOrderLine.assigned_to
+# ============================================================================

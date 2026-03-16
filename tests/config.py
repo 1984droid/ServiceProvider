@@ -367,7 +367,7 @@ VALID_CHOICES = {
     'defect_statuses': ['OPEN', 'WORK_ORDER_CREATED', 'RESOLVED'],
     'work_order_statuses': ['DRAFT', 'PENDING', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED', 'CANCELLED'],
     'work_order_priorities': ['LOW', 'NORMAL', 'HIGH', 'EMERGENCY'],
-    'work_order_sources': ['INSPECTION', 'CUSTOMER_REQUEST', 'PM_SCHEDULE', 'BREAKDOWN'],
+    'work_order_sources': ['INSPECTION_DEFECT', 'MAINTENANCE_SCHEDULE', 'CUSTOMER_REQUEST', 'BREAKDOWN', 'MANUAL'],
 }
 
 # ============================================================================

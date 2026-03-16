@@ -84,7 +84,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
         'title',
         'description',
         'notes',
-        'source',
+        'source_type',
     ]
 
     readonly_fields = [
@@ -114,7 +114,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
             'fields': ('approval_status', 'approved_by', 'approved_at', 'rejected_reason')
         }),
         ('Source Tracking', {
-            'fields': ('source_type', 'source_id', 'source_link', 'source')
+            'fields': ('source_type', 'source_id', 'source_link')
         }),
         ('Scheduling', {
             'fields': ('scheduled_date', 'due_date', 'assigned_to')

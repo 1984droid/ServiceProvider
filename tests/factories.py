@@ -550,8 +550,8 @@ class DepartmentFactory(DjangoModelFactory):
 
     name = factory.Sequence(lambda n: f"{get_test_data('department', 'default')['name']} {n}")
     code = factory.Sequence(lambda n: f"D{n:03d}")  # Unique codes
-    description = factory.LazyFunction(lambda: get_test_data('department', 'default')['description'])
-    is_active = factory.LazyFunction(lambda: get_test_data('department', 'default')['is_active'])
+    description = factory.LazyFunction(lambda: get_test_data('department', 'default').get('description', ''))
+    is_active = factory.LazyFunction(lambda: get_test_data('department', 'default').get('is_active', True))
     allows_floating = factory.LazyFunction(lambda: get_test_data('department', 'default')['allows_floating'])
     manager = None  # Set after employees are created if needed
 
