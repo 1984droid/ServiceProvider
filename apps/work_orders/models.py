@@ -121,27 +121,6 @@ class WorkOrder(BaseModel):
         help_text="UUID of source object (defect, maintenance task, etc.)"
     )
 
-    # Legacy source field - kept for backward compatibility
-    SOURCE_CHOICES = [
-        ('INSPECTION', 'Inspection'),
-        ('CUSTOMER_REQUEST', 'Customer Request'),
-        ('PM_SCHEDULE', 'PM Schedule'),
-        ('BREAKDOWN', 'Breakdown'),
-    ]
-    source = models.CharField(
-        max_length=30,
-        choices=SOURCE_CHOICES,
-        default='CUSTOMER_REQUEST',
-        help_text="Legacy: How this work order originated (use source_type instead)"
-    )
-    source_inspection_run = models.ForeignKey(
-        'inspections.InspectionRun',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='work_orders',
-        help_text="Link to inspection if source is INSPECTION"
-    )
 
     # Work details
     title = models.CharField(
@@ -154,26 +133,14 @@ class WorkOrder(BaseModel):
         help_text="Description of work to be performed"
     )
 
-    # Department assignments (Phase 5: added single department for primary assignment)
+    # Department assignment
     department = models.ForeignKey(
         'organization.Department',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='assigned_work_orders',
-        help_text="Primary department assigned to this work order"
-    )
-    departments = models.ManyToManyField(
-        'organization.Department',
-        blank=True,
-        related_name='work_orders',
-        help_text="Legacy: Departments involved in this work order"
-    )
-    assigned_employees = models.ManyToManyField(
-        'organization.Employee',
-        blank=True,
-        related_name='assigned_work_orders',
-        help_text="Legacy: Employees assigned to this work order (use WorkOrderLine.assigned_to instead)"
+        help_text="Department assigned to this work order"
     )
 
     # Scheduling
@@ -270,7 +237,7 @@ class WorkOrder(BaseModel):
         indexes = [
             models.Index(fields=['customer', 'status']),
             models.Index(fields=['asset_type', 'asset_id']),
-            models.Index(fields=['source_inspection_run']),
+            models.Index(fields=['source_type', 'source_id']),
             models.Index(fields=['scheduled_date']),
             models.Index(fields=['status', 'priority']),
             models.Index(fields=['completed_at']),
@@ -382,12 +349,34 @@ class WorkOrder(BaseModel):
                 pass
 
         # Validate source inspection matches asset if provided
-        if self.source_inspection_run:
-            if (self.source_inspection_run.asset_type != self.asset_type or
-                self.source_inspection_run.asset_id != self.asset_id):
-                raise ValidationError({
-                    'source_inspection_run': 'Source inspection must be for the same asset'
-                })
+        if self.source_type == 'INSPECTION_DEFECT' and self.source_id:
+            from apps.inspections.models import InspectionDefect, InspectionRun
+
+            # Check if source is a defect (most common case)
+            try:
+                defect = InspectionDefect.objects.get(id=self.source_id)
+                inspection = defect.inspection_run
+
+                if (inspection.asset_type != self.asset_type or
+                    inspection.asset_id != self.asset_id):
+                    raise ValidationError({
+                        'source_id': 'Source inspection defect must be for the same asset'
+                    })
+            except InspectionDefect.DoesNotExist:
+                # Check if source_id points to inspection directly (grouped WOs)
+                try:
+                    inspection = InspectionRun.objects.get(id=self.source_id)
+
+                    if (inspection.asset_type != self.asset_type or
+                        inspection.asset_id != self.asset_id):
+                        raise ValidationError({
+                            'source_id': 'Source inspection must be for the same asset'
+                        })
+                except InspectionRun.DoesNotExist:
+                    # Invalid source_id
+                    raise ValidationError({
+                        'source_id': 'Invalid source_id for INSPECTION_DEFECT type'
+                    })
 
         # Validate status progression (only on update, not creation)
         if self.pk:

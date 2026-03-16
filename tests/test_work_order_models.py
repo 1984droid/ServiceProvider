@@ -94,8 +94,8 @@ class TestWorkOrderModel:
         inspection = InspectionRunFactory()
         work_order = WorkOrderFactory.from_inspection(inspection_run=inspection)
 
-        assert work_order.source == 'INSPECTION'
-        assert work_order.source_inspection_run == inspection
+        assert work_order.source_type == 'INSPECTION_DEFECT'
+        assert work_order.source_id == inspection.id
         assert work_order.customer == inspection.customer
         assert work_order.asset_type == inspection.asset_type
         assert work_order.asset_id == inspection.asset_id
@@ -206,14 +206,15 @@ class TestWorkOrderModel:
 
         with pytest.raises(ValidationError) as exc_info:
             work_order = WorkOrderFactory.build(
-                source_inspection_run=inspection,
+                source_type='INSPECTION_DEFECT',
+                source_id=inspection.id,
                 asset_type='EQUIPMENT',
                 asset_id=different_equipment.id,
                 customer=different_equipment.customer
             )
             work_order.full_clean()
 
-        assert 'source_inspection_run' in str(exc_info.value)
+        assert 'source_id' in str(exc_info.value)
 
     def test_work_order_cannot_reopen_completed(self):
         """Test cannot change status from COMPLETED back to other statuses."""
@@ -281,8 +282,8 @@ class TestWorkOrderModel:
         """Test creating customer request work order."""
         work_order = WorkOrderFactory.customer_request()
 
-        assert work_order.source == 'CUSTOMER_REQUEST'
-        assert work_order.source_inspection_run is None
+        assert work_order.source_type == 'CUSTOMER_REQUEST'
+        assert work_order.source_id is None
 
     def test_work_order_str_representation(self):
         """Test string representation."""

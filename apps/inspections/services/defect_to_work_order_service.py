@@ -343,11 +343,11 @@ class DefectToWorkOrderService:
             parts.append("CORRECTIVE ACTION:")
             parts.append(corrective_action)
 
-        # Photo Evidence
-        photos = defect_details.get('photos', [])
-        if photos:
+        # Photo Evidence (from InspectionPhoto model)
+        photo_count = defect.photos.count()
+        if photo_count > 0:
             parts.append("")
-            parts.append(f"Photo Evidence: {len(photos)} photo(s) attached to defect record")
+            parts.append(f"Photo Evidence: {photo_count} photo(s) attached to defect record")
 
         # Inspection context
         parts.append("")
@@ -581,10 +581,10 @@ class DefectToWorkOrderService:
         if corrective_action:
             parts.append(f"  Action: {corrective_action}")
 
-        # Photo count
-        photos = defect_details.get('photos', [])
-        if photos:
-            parts.append(f"  Photos: {len(photos)} attached")
+        # Photo count (from InspectionPhoto model)
+        photo_count = defect.photos.count()
+        if photo_count > 0:
+            parts.append(f"  Photos: {photo_count} attached")
 
         return "\n".join(parts)
 

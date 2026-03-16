@@ -364,8 +364,8 @@ class WorkOrderFactory(DjangoModelFactory):
     asset_id = factory.LazyAttribute(lambda obj: EquipmentFactory(customer=obj.customer).id)
     status = factory.LazyFunction(lambda: get_test_data('work_order', 'default')['status'])
     priority = factory.LazyFunction(lambda: get_test_data('work_order', 'default')['priority'])
-    source = factory.LazyFunction(lambda: get_test_data('work_order', 'default')['source'])
-    source_inspection_run = None
+    source_type = factory.LazyFunction(lambda: get_test_data('work_order', 'default')['source_type'])
+    source_id = None
     description = factory.LazyFunction(lambda: get_test_data('work_order', 'default')['description'])
     scheduled_date = None
     assigned_to = None
@@ -411,8 +411,8 @@ class WorkOrderFactory(DjangoModelFactory):
             customer=inspection_run.customer,
             asset_type=inspection_run.asset_type,
             asset_id=inspection_run.asset_id,
-            source='INSPECTION',
-            source_inspection_run=inspection_run,
+            source_type='INSPECTION_DEFECT',
+            source_id=inspection_run.id,
             **kwargs
         )
 
