@@ -54,3 +54,8 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Temporary files
+temp/
+*.rtf
+*.txt

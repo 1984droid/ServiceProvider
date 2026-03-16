@@ -3,6 +3,9 @@ Tests for PDF Export Service
 """
 
 import hashlib
+import json
+from pathlib import Path
+from unittest.mock import patch, mock_open
 from django.test import TestCase
 from django.utils import timezone
 
@@ -152,3 +155,342 @@ class PDFExportTest(TestCase):
         # Verify it starts with PDF header
         pdf_content = pdf_buffer.getvalue()
         self.assertTrue(pdf_content.startswith(b'%PDF'))
+
+
+class PDFStandardTextIntegrationTest(TestCase):
+    """Test PDF export with ANSI standard text integration."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        # Create customer
+        self.customer = Customer.objects.create(
+            name="Test Fleet Company",
+            city="Chicago",
+            state="IL"
+        )
+
+        # Create vehicle
+        self.vehicle = Vehicle.objects.create(
+            customer=self.customer,
+            vin="1HGCM82633A123456",
+            unit_number="TRUCK-001",
+            year=2020,
+            make="Ford",
+            model="F-350"
+        )
+
+        # Mock standard text data
+        self.mock_standard_text = {
+            "standard": "ANSI A92.2-2021",
+            "common_excerpts": {
+                "boom_inspection": {
+                    "section": "8.2.3(2)",
+                    "excerpt": "Inspect boom and platform for visible defects such as cracks, damage, excessive wear, and loose or missing bolts."
+                },
+                "hydraulic_inspection": {
+                    "section": "8.2.3(4)",
+                    "excerpt": "Inspect hydraulic system for leaks, damaged hoses, and proper fluid levels."
+                },
+                "load_test_general": {
+                    "section": "8.2.4.1",
+                    "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test."
+                }
+            }
+        }
+
+    def test_standard_text_cache_loading(self):
+        """Test that standard text cache loads correctly."""
+        mock_json = json.dumps(self.mock_standard_text)
+
+        with patch('pathlib.Path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data=mock_json)):
+
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='test_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='John Doe',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            # Create exporter (should load cache)
+            exporter = InspectionPDFExporter(inspection)
+
+            # Verify cache was populated
+            self.assertIsNotNone(InspectionPDFExporter._standard_text_cache)
+            self.assertEqual(len(InspectionPDFExporter._standard_text_cache), 3)
+            self.assertIn('8.2.3(2)', InspectionPDFExporter._standard_text_cache)
+            self.assertIn('8.2.3(4)', InspectionPDFExporter._standard_text_cache)
+            self.assertIn('8.2.4.1', InspectionPDFExporter._standard_text_cache)
+
+    def test_standard_text_cache_missing_file(self):
+        """Test graceful handling when standard text file is missing."""
+        with patch('pathlib.Path.exists', return_value=False):
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='test_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='John Doe',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            # Create exporter (should handle missing file)
+            exporter = InspectionPDFExporter(inspection)
+
+            # Verify cache is empty dict (not None)
+            self.assertIsNotNone(InspectionPDFExporter._standard_text_cache)
+            self.assertEqual(len(InspectionPDFExporter._standard_text_cache), 0)
+
+    def test_standard_text_lookup_exact_match(self):
+        """Test looking up standard text with exact section match."""
+        mock_json = json.dumps(self.mock_standard_text)
+
+        with patch('pathlib.Path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data=mock_json)):
+
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='test_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='John Doe',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            exporter = InspectionPDFExporter(inspection)
+
+            # Test exact match
+            excerpt = exporter._get_standard_text_for_reference("ANSI A92.2-2021 Section 8.2.3(2)")
+            self.assertIsNotNone(excerpt)
+            self.assertIn("Inspect boom and platform", excerpt)
+
+    def test_standard_text_lookup_partial_match(self):
+        """Test looking up standard text with partial section match."""
+        mock_json = json.dumps(self.mock_standard_text)
+
+        with patch('pathlib.Path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data=mock_json)):
+
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='test_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='John Doe',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            exporter = InspectionPDFExporter(inspection)
+
+            # Test partial match (should find 8.2.3(4) in "8.2.3(4)")
+            excerpt = exporter._get_standard_text_for_reference("Section 8.2.3(4)")
+            self.assertIsNotNone(excerpt)
+            self.assertIn("hydraulic system", excerpt)
+
+    def test_standard_text_lookup_no_match(self):
+        """Test looking up standard text with no match."""
+        mock_json = json.dumps(self.mock_standard_text)
+
+        with patch('pathlib.Path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data=mock_json)):
+
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='test_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='John Doe',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            exporter = InspectionPDFExporter(inspection)
+
+            # Test no match
+            excerpt = exporter._get_standard_text_for_reference("Section 99.99.99")
+            self.assertIsNone(excerpt)
+
+    def test_standard_text_truncation(self):
+        """Test that long excerpts are truncated to 150 characters."""
+        long_excerpt_data = {
+            "standard": "ANSI A92.2-2021",
+            "common_excerpts": {
+                "long_text": {
+                    "section": "1.1",
+                    "excerpt": "A" * 200  # 200 character excerpt
+                }
+            }
+        }
+
+        mock_json = json.dumps(long_excerpt_data)
+
+        with patch('pathlib.Path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data=mock_json)):
+
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='test_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='John Doe',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            exporter = InspectionPDFExporter(inspection)
+
+            # Test truncation
+            excerpt = exporter._get_standard_text_for_reference("Section 1.1")
+            self.assertIsNotNone(excerpt)
+            self.assertEqual(len(excerpt), 150)  # 147 + '...'
+            self.assertTrue(excerpt.endswith('...'))
+
+    def test_pdf_with_standard_text_in_defects(self):
+        """Test PDF generation includes standard text in defect details."""
+        mock_json = json.dumps(self.mock_standard_text)
+
+        with patch('pathlib.Path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data=mock_json)):
+
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='ansi_a92_2_2021_periodic_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='Jane Smith',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            # Create defect with standard reference
+            InspectionDefect.objects.create(
+                inspection_run=inspection,
+                defect_identity=hashlib.sha256(b'boom_defect').hexdigest(),
+                module_key='boom_assembly',
+                step_key='visual_inspection',
+                severity='CRITICAL',
+                status='OPEN',
+                title='Cracked Boom Weld',
+                description='Structural crack detected in boom weld joint',
+                defect_details={
+                    'standard_reference': 'ANSI A92.2-2021 Section 8.2.3(2)',
+                    'severity': 'CRITICAL',
+                    'location': 'Upper boom assembly',
+                    'corrective_action': 'Replace boom section'
+                }
+            )
+
+            # Generate PDF
+            exporter = InspectionPDFExporter(inspection)
+            pdf_buffer = exporter.generate()
+
+            # Verify PDF was generated
+            self.assertIsNotNone(pdf_buffer)
+            self.assertGreater(pdf_buffer.getvalue().__len__(), 0)
+
+            # Verify it starts with PDF header
+            pdf_content = pdf_buffer.getvalue()
+            self.assertTrue(pdf_content.startswith(b'%PDF'))
+
+    def test_pdf_generation_without_standard_text(self):
+        """Test PDF generation works when standard text is unavailable."""
+        with patch('pathlib.Path.exists', return_value=False):
+            # Reset cache
+            InspectionPDFExporter._standard_text_cache = None
+
+            # Create inspection
+            inspection = InspectionRun.objects.create(
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                customer=self.customer,
+                template_key='ansi_a92_2_2021_periodic_inspection',
+                status='COMPLETED',
+                started_at=timezone.now(),
+                finalized_at=timezone.now(),
+                inspector_name='John Doe',
+                template_snapshot={'modules': [], 'metadata': {}},
+                step_data={}
+            )
+
+            # Create defect with standard reference
+            InspectionDefect.objects.create(
+                inspection_run=inspection,
+                defect_identity=hashlib.sha256(b'defect').hexdigest(),
+                module_key='hydraulic_system',
+                step_key='hose_inspection',
+                severity='MAJOR',
+                status='OPEN',
+                title='Hydraulic Leak',
+                description='Leak detected in main hydraulic line',
+                defect_details={
+                    'standard_reference': 'ANSI A92.2-2021 Section 8.2.3(4)',
+                    'severity': 'MAJOR'
+                }
+            )
+
+            # Generate PDF (should work without standard text)
+            exporter = InspectionPDFExporter(inspection)
+            pdf_buffer = exporter.generate()
+
+            # Verify PDF was generated
+            self.assertIsNotNone(pdf_buffer)
+            self.assertGreater(pdf_buffer.getvalue().__len__(), 0)
+
+            # Verify it starts with PDF header
+            pdf_content = pdf_buffer.getvalue()
+            self.assertTrue(pdf_content.startswith(b'%PDF'))

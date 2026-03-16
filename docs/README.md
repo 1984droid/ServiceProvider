@@ -1,115 +1,56 @@
-# Documentation Index
+# Documentation
 
-Complete documentation for the Service Provider application.
+This directory contains project documentation organized by topic.
 
----
+## Active Documentation
 
-## Quick Start
+### ANSI Standard Integration (`ansi_standard_integration/`)
+Documentation for the ANSI A92.2-2021 standard text integration system:
 
-**New to the project?** Start here:
-- **[SETUP_SCRIPT.md](SETUP_SCRIPT.md)** - Automated setup with `python setup.py setup` (RECOMMENDED)
-- **[QUICK_START.md](QUICK_START.md)** - Manual setup guide (alternative)
+- **STANDARD_TEXT_INTEGRATION_SUMMARY.md** - Comprehensive implementation summary
+  - Business value and impact
+  - Implementation details
+  - Coverage analysis (100% across all templates)
+  - Technical architecture
+  - Testing recommendations
 
-**Important:** NEW_BUILD_STARTER runs on **port 8100** (not 8000) to avoid conflicts with the legacy application.
+- **STANDARD_TEXT_REFERENCE_DESIGN.md** - Original design document
+  - Design options considered
+  - Hybrid approach rationale
+  - Integration strategy
 
----
+- **STANDARD_TEXT_USAGE_EXAMPLE.md** - Usage guide for template authors
+  - How to add standard text to templates
+  - Available excerpts
+  - Best practices
+
+## Archive (`archive/`)
+Historical documentation from previous iterations and experiments:
+
+- **ANSI_RTF_IMAGES_EXTRACTION_SUMMARY.md** - RTF image extraction research
+- **DIELECTRIC_TEST_AUDIT.md** - Dielectric test template audit
+- **REFERENCE_IMAGE_IMPLEMENTATION_PLAN.md** - Image reference implementation planning
+
+These documents are preserved for historical reference but represent superseded approaches.
 
 ## Core Documentation
 
-### Data Model & Architecture
+Project-wide documentation:
 
-1. **[SCHEMA_QUICK_REFERENCE.md](SCHEMA_QUICK_REFERENCE.md)** 📊
-   - Visual guide to all models, fields, and relationships
-   - Quick reference cheat sheet
-   - **Start here for data model overview**
+- **README.md** (root) - Project overview and quick start
+- **DEPLOYMENT.md** - Production deployment guide
+- **DEPLOY_QUICK_START.md** - Quick deployment reference
+- **SETUP.md** - Development environment setup
+- **SETUP_SUMMARY.md** - Setup process overview
+- **DATA_CONTRACT.md** - API and data model documentation
+- **API_SUMMARY.md** - API endpoint reference
+- **FRONTEND_ROADMAP.md** - Frontend development roadmap
 
-2. **[DATA_CONTRACT.md](DATA_CONTRACT.md)** 📋
-   - Comprehensive data model specification
-   - Business rules and constraints
-   - API expectations
-   - Validation rules
+## Contributing
 
-3. **[MODEL_CHANGES_SUMMARY.md](MODEL_CHANGES_SUMMARY.md)** 📝
-   - Recent model changes and rationale
-   - Migration from multi-tenant to single-tenant
-   - New features explained
+When adding new documentation:
 
-### Specialized Workflows
-
-4. **[INSPECTION_EQUIPMENT_FLOW.md](INSPECTION_EQUIPMENT_FLOW.md)** 🔧
-   - Tag-driven inspection workflow
-   - Equipment data collection on-demand
-   - Placard and capability data entry
-
-### Development Tools
-
-5. **[SETUP_SCRIPT.md](SETUP_SCRIPT.md)** 🔧
-   - Automated setup/update/wipe script
-   - Database management commands
-   - Development workflow guide
-   - **Recommended for all installations**
-
-6. **[SCRIPTS_README.md](SCRIPTS_README.md)** 🛠️
-   - Guide to all development scripts
-   - Daily workflows
-   - Troubleshooting
-
-7. **[DEPLOYMENT.md](DEPLOYMENT.md)** 🚀
-   - Port configuration details
-   - Production deployment guide
-   - Docker and Nginx examples
-   - Migration strategy
-
-8. **[API_REFERENCE.md](API_REFERENCE.md)** 📡
-   - Complete REST API documentation
-   - All endpoints with examples
-   - Request/response formats
-   - Filtering, searching, pagination
-
----
-
-## Document Summary
-
-| Document | Purpose | When to Use |
-|----------|---------|-------------|
-| **SETUP_SCRIPT.md** | Automated setup script | First time setup, updates (RECOMMENDED) |
-| **QUICK_START.md** | Manual setup guide | Alternative setup method |
-| **SCHEMA_QUICK_REFERENCE.md** | Visual data model | Building features, API design |
-| **DATA_CONTRACT.md** | Detailed specification | Implementation, validation |
-| **MODEL_CHANGES_SUMMARY.md** | Change history | Understanding recent updates |
-| **INSPECTION_EQUIPMENT_FLOW.md** | Equipment workflow | Building inspection features |
-| **SCRIPTS_README.md** | Development scripts | Daily development |
-| **DEPLOYMENT.md** | Deployment guide | Production setup, port config |
-| **API_REFERENCE.md** | REST API documentation | API integration, frontend development |
-
----
-
-## Reading Order
-
-### For Developers (First Time)
-1. QUICK_START.md - Get running
-2. SCHEMA_QUICK_REFERENCE.md - Understand data model
-3. API_REFERENCE.md - Learn API endpoints
-4. SCRIPTS_README.md - Learn daily tools
-
-### For Product/Design
-1. DATA_CONTRACT.md - Business rules
-2. INSPECTION_EQUIPMENT_FLOW.md - User workflows
-3. SCHEMA_QUICK_REFERENCE.md - Data relationships
-
-### For QA/Testing
-1. DATA_CONTRACT.md - Validation rules
-2. MODEL_CHANGES_SUMMARY.md - What changed
-3. INSPECTION_EQUIPMENT_FLOW.md - Test scenarios
-
----
-
-## Additional Resources
-
-- **Main README**: `../README.md` - Project overview
-- **Scripts**: `../scripts/` - Development helper scripts
-- **Models**: `../apps/*/models.py` - Actual model implementations
-
----
-
-**Keep this documentation up to date as the project evolves.**
+1. Place topic-specific docs in appropriate subdirectories
+2. Keep root-level docs for broad project concerns
+3. Move superseded docs to `archive/` with context
+4. Update this README with new doc locations

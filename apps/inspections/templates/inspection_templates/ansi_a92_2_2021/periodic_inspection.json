@@ -329,7 +329,7 @@
         {
           "field_id": "standard_reference",
           "type": "TEXT",
-          "required": false
+          "required": true
         }
       ]
     }
@@ -607,7 +607,8 @@
             "defect": {
               "title": "Structural defect found during periodic inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Structural defect detected that requires evaluation and repair before continued operation."
+              "description": "Structural defect detected that requires evaluation and repair before continued operation.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(1)"
             }
           }
         ],
@@ -711,7 +712,8 @@
             "defect": {
               "title": "CRITICAL: Weld cracks found during periodic inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Cracks detected in structural welds. Equipment must be tagged OUT OF SERVICE immediately and evaluated by qualified personnel."
+              "description": "Cracks detected in structural welds. Equipment must be tagged OUT OF SERVICE immediately and evaluated by qualified personnel.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(14)"
             }
           }
         ],
@@ -812,7 +814,8 @@
             "defect": {
               "title": "Critical fastener wear/damage found during periodic inspection",
               "severity": "SERVICE_REQUIRED",
-              "description": "Fastener condition requires replacement or repair. See defect details for specific components and recommendations."
+              "description": "Fastener condition requires replacement or repair. See defect details for specific components and recommendations.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(13)"
             }
           }
         ],
@@ -966,7 +969,8 @@
             "defect": {
               "title": "Hydraulic system defect found during periodic inspection",
               "severity": "SERVICE_REQUIRED",
-              "description": "Hydraulic system defect detected that requires repair."
+              "description": "Hydraulic system defect detected that requires repair.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(4)-(6)"
             }
           }
         ]
@@ -1078,7 +1082,8 @@
             "defect": {
               "title": "Electrical system defect found during periodic inspection",
               "severity": "SERVICE_REQUIRED",
-              "description": "Electrical system defect detected that requires repair."
+              "description": "Electrical system defect detected that requires repair.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(11)"
             }
           }
         ]
@@ -1211,7 +1216,8 @@
             "defect": {
               "title": "Operating control defect found during periodic inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Operating control malfunction detected. Equipment must not be operated until repairs are completed."
+              "description": "Operating control malfunction detected. Equipment must not be operated until repairs are completed.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(12)"
             }
           }
         ],
@@ -1298,7 +1304,8 @@
             "defect": {
               "title": "CRITICAL: Emergency control defect found",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Emergency control malfunction detected. Equipment must be tagged OUT OF SERVICE immediately."
+              "description": "Emergency control malfunction detected. Equipment must be tagged OUT OF SERVICE immediately.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(12)"
             }
           }
         ],
@@ -1411,7 +1418,8 @@
             "defect": {
               "title": "Safety device defect found during periodic inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Safety device malfunction detected. Equipment must be tagged OUT OF SERVICE."
+              "description": "Safety device malfunction detected. Equipment must be tagged OUT OF SERVICE.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(12)"
             }
           }
         ],
@@ -1523,7 +1531,8 @@
             "defect": {
               "title": "Missing or illegible marking/placard/manual found",
               "severity": "SERVICE_REQUIRED",
-              "description": "Required marking, placard, or manual is missing or illegible. Must be corrected before continued operation."
+              "description": "Required marking, placard, or manual is missing or illegible. Must be corrected before continued operation.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(15)"
             }
           }
         ]

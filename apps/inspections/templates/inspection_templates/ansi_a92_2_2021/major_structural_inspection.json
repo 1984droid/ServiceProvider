@@ -23,8 +23,12 @@
       ]
     },
     "applicability": {
-      "asset_types": ["EQUIPMENT"],
-      "equipment_types": ["A92_2_AERIAL"],
+      "asset_types": [
+        "EQUIPMENT"
+      ],
+      "equipment_types": [
+        "A92_2_AERIAL"
+      ],
       "notes": "Major Structural Inspection per Section 8.2.5. Required after major repairs, structural modifications, overload events, or accidents. Includes comprehensive structural examination, non-destructive testing where appropriate, and mandatory load testing."
     },
     "policy": {
@@ -41,52 +45,226 @@
   },
   "enums": {
     "severity": [
-      "SAFE",
-      "MINOR",
-      "SERVICE_REQUIRED",
-      "UNSAFE_OUT_OF_SERVICE"
+      {
+        "value": "SAFE",
+        "label": "Safe"
+      },
+      {
+        "value": "MINOR",
+        "label": "Minor"
+      },
+      {
+        "value": "SERVICE_REQUIRED",
+        "label": "Service Required"
+      },
+      {
+        "value": "UNSAFE_OUT_OF_SERVICE",
+        "label": "Unsafe Out Of Service"
+      }
     ],
     "pass_fail_ndt": [
-      "PASS",
-      "FAIL",
-      "NOT_APPLICABLE",
-      "REQUIRES_NDT"
+      {
+        "value": "PASS",
+        "label": "Pass"
+      },
+      {
+        "value": "FAIL",
+        "label": "Fail"
+      },
+      {
+        "value": "NOT_APPLICABLE",
+        "label": "Not Applicable"
+      },
+      {
+        "value": "REQUIRES_NDT",
+        "label": "Requires Ndt"
+      }
     ],
     "ndt_method": [
-      "MAGNETIC_PARTICLE",
-      "DYE_PENETRANT",
-      "ULTRASONIC",
-      "RADIOGRAPHIC",
-      "VISUAL_ENHANCED",
-      "NOT_PERFORMED"
+      {
+        "value": "MAGNETIC_PARTICLE",
+        "label": "Magnetic Particle"
+      },
+      {
+        "value": "DYE_PENETRANT",
+        "label": "Dye Penetrant"
+      },
+      {
+        "value": "ULTRASONIC",
+        "label": "Ultrasonic"
+      },
+      {
+        "value": "RADIOGRAPHIC",
+        "label": "Radiographic"
+      },
+      {
+        "value": "VISUAL_ENHANCED",
+        "label": "Visual Enhanced"
+      },
+      {
+        "value": "NOT_PERFORMED",
+        "label": "Not Performed"
+      }
     ],
     "repair_type": [
-      "WELD_REPAIR",
-      "STRUCTURAL_REPLACEMENT",
-      "CYLINDER_REPLACEMENT",
-      "BOOM_SECTION_REPLACEMENT",
-      "MODIFICATION",
-      "ACCIDENT_DAMAGE_REPAIR",
-      "OVERLOAD_EVENT",
-      "OTHER"
+      {
+        "value": "WELD_REPAIR",
+        "label": "Weld Repair"
+      },
+      {
+        "value": "STRUCTURAL_REPLACEMENT",
+        "label": "Structural Replacement"
+      },
+      {
+        "value": "CYLINDER_REPLACEMENT",
+        "label": "Cylinder Replacement"
+      },
+      {
+        "value": "BOOM_SECTION_REPLACEMENT",
+        "label": "Boom Section Replacement"
+      },
+      {
+        "value": "MODIFICATION",
+        "label": "Modification"
+      },
+      {
+        "value": "ACCIDENT_DAMAGE_REPAIR",
+        "label": "Accident Damage Repair"
+      },
+      {
+        "value": "OVERLOAD_EVENT",
+        "label": "Overload Event"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "weld_defect_type": [
-      "CRACK",
-      "POROSITY",
-      "INCOMPLETE_PENETRATION",
-      "UNDERCUT",
-      "OVERLAP",
-      "SLAG_INCLUSION",
-      "OTHER"
+      {
+        "value": "CRACK",
+        "label": "Crack"
+      },
+      {
+        "value": "POROSITY",
+        "label": "Porosity"
+      },
+      {
+        "value": "INCOMPLETE_PENETRATION",
+        "label": "Incomplete Penetration"
+      },
+      {
+        "value": "UNDERCUT",
+        "label": "Undercut"
+      },
+      {
+        "value": "OVERLAP",
+        "label": "Overlap"
+      },
+      {
+        "value": "SLAG_INCLUSION",
+        "label": "Slag Inclusion"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ],
     "structural_defect_type": [
-      "CRACK",
-      "DEFORMATION",
-      "CORROSION",
-      "WEAR",
-      "DAMAGE",
-      "MISALIGNMENT",
-      "OTHER"
+      {
+        "value": "CRACK",
+        "label": "Crack"
+      },
+      {
+        "value": "DEFORMATION",
+        "label": "Deformation"
+      },
+      {
+        "value": "CORROSION",
+        "label": "Corrosion"
+      },
+      {
+        "value": "WEAR",
+        "label": "Wear"
+      },
+      {
+        "value": "DAMAGE",
+        "label": "Damage"
+      },
+      {
+        "value": "MISALIGNMENT",
+        "label": "Misalignment"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
+    ],
+    "equipment_location": [
+      {
+        "value": "PLATFORM",
+        "label": "Platform / Basket"
+      },
+      {
+        "value": "BOOM_BASE",
+        "label": "Boom - Base Section"
+      },
+      {
+        "value": "BOOM_MID",
+        "label": "Boom - Mid Section"
+      },
+      {
+        "value": "BOOM_FLY",
+        "label": "Boom - Fly Section"
+      },
+      {
+        "value": "TURRET",
+        "label": "Turret / Rotating Assembly"
+      },
+      {
+        "value": "PEDESTAL",
+        "label": "Pedestal / Mounting Base"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_LEFT",
+        "label": "Outriggers - Front Left"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_RIGHT",
+        "label": "Outriggers - Front Right"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_LEFT",
+        "label": "Outriggers - Rear Left"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_RIGHT",
+        "label": "Outriggers - Rear Right"
+      },
+      {
+        "value": "HYDRAULIC_SYSTEM",
+        "label": "Hydraulic System"
+      },
+      {
+        "value": "ELECTRICAL_SYSTEM",
+        "label": "Electrical System"
+      },
+      {
+        "value": "CONTROLS_PLATFORM",
+        "label": "Controls - Platform"
+      },
+      {
+        "value": "CONTROLS_GROUND",
+        "label": "Controls - Ground"
+      },
+      {
+        "value": "CHASSIS",
+        "label": "Chassis / Vehicle Base"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other (specify in description)"
+      }
     ]
   },
   "schemas": {
@@ -110,15 +288,15 @@
           "required": true
         },
         {
-          "field_id": "location",
+          "field_id": "component",
           "type": "TEXT",
           "required": false
         },
         {
-          "field_id": "defect_type",
+          "field_id": "location",
           "type": "ENUM",
-          "enum_ref": "structural_defect_type",
-          "required": false
+          "required": false,
+          "enum_ref": "equipment_location"
         },
         {
           "field_id": "photo_evidence",
@@ -131,9 +309,9 @@
           "required": false
         },
         {
-          "field_id": "ndt_required",
-          "type": "BOOLEAN",
-          "required": false
+          "field_id": "standard_reference",
+          "type": "TEXT",
+          "required": true
         }
       ]
     }
@@ -263,7 +441,8 @@
             "defect": {
               "title": "CRITICAL: Repair documentation incomplete or inadequate",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "All repairs and modifications must be documented per Section 7.11 before unit can be returned to service. Missing or inadequate documentation found."
+              "description": "All repairs and modifications must be documented per Section 7.11 before unit can be returned to service. Missing or inadequate documentation found.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.5"
             }
           }
         ],
@@ -372,7 +551,8 @@
             "defect": {
               "title": "CRITICAL: Structural defects found during major structural inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Structural defects found that require correction before unit can be returned to service."
+              "description": "Structural defects found that require correction before unit can be returned to service.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.5(2)"
             }
           }
         ],
@@ -491,7 +671,8 @@
             "defect": {
               "title": "CRITICAL: Weld defects found during major structural inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Weld defects found that require correction before unit can be returned to service."
+              "description": "Weld defects found that require correction before unit can be returned to service.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(14) & 8.2.5(2)"
             }
           }
         ],
@@ -602,7 +783,8 @@
             "defect": {
               "title": "Fastener defects found during major structural inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Fastener defects found that require correction before unit can be returned to service."
+              "description": "Fastener defects found that require correction before unit can be returned to service.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(2) & (13)"
             }
           }
         ]
@@ -708,7 +890,8 @@
             "defect": {
               "title": "Hydraulic system defects found during major structural inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Hydraulic system defects found that require correction before unit can be returned to service."
+              "description": "Hydraulic system defects found that require correction before unit can be returned to service.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(3)-(9)"
             }
           }
         ]
@@ -794,7 +977,8 @@
             "defect": {
               "title": "Functional defects found during major structural inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Functional defects found that require correction before unit can be returned to service."
+              "description": "Functional defects found that require correction before unit can be returned to service.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(12)"
             }
           }
         ]
@@ -965,7 +1149,8 @@
             "defect": {
               "title": "Marking or documentation deficiencies found",
               "severity": "SERVICE_REQUIRED",
-              "description": "Markings, placards, or documentation deficiencies found that require correction."
+              "description": "Markings, placards, or documentation deficiencies found that require correction.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.4(15)"
             }
           }
         ]

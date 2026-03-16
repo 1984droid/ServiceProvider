@@ -370,3 +370,243 @@ class DefectToWorkOrderServiceTest(TestCase):
 
         # Should return new instance
         self.assertIsNot(mapping1, mapping2)
+
+
+class WorkOrderStandardTextIntegrationTest(TestCase):
+    """Test work order generation with ANSI standard text integration."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        # Create customer
+        self.customer = Customer.objects.create(
+            name="Test Customer",
+            city="Chicago",
+            state="IL"
+        )
+
+        # Create vehicle
+        self.vehicle = Vehicle.objects.create(
+            customer=self.customer,
+            vin="1HGCM82633A123456",
+            year=2020,
+            make="Ford",
+            model="F-350"
+        )
+
+        # Create inspection
+        self.inspection = InspectionRun.objects.create(
+            asset_type='VEHICLE',
+            asset_id=self.vehicle.id,
+            customer=self.customer,
+            template_key='ansi_a92_2_2021_periodic_inspection',
+            status='COMPLETED',
+            started_at=timezone.now(),
+            template_snapshot={'modules': [], 'metadata': {}}
+        )
+
+    def test_work_order_includes_standard_reference(self):
+        """Test work order line includes standard reference from defect."""
+        # Create defect with standard reference
+        defect = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('boom_defect_with_standard'),
+            module_key='boom_inspection',
+            step_key='visual_inspection',
+            severity='CRITICAL',
+            status='OPEN',
+            title='Cracked Boom Weld',
+            description='Structural crack detected in boom weld joint',
+            defect_details={
+                'standard_reference': 'ANSI A92.2-2021 Section 8.2.3(2)',
+                'severity': 'CRITICAL',
+                'location': 'Upper boom assembly',
+                'corrective_action': 'Replace boom section'
+            }
+        )
+
+        # Generate work order
+        wo = DefectToWorkOrderService.generate_work_order_from_defect(defect=defect)
+
+        # Verify work order created
+        self.assertIsNotNone(wo)
+        self.assertEqual(wo.lines.count(), 1)
+
+        # Verify work order line has description with standard reference
+        line = wo.lines.first()
+        self.assertIn('ANSI A92.2-2021 Section 8.2.3(2)', line.description)
+        self.assertIn('Standard:', line.description)
+
+    def test_work_order_without_standard_reference(self):
+        """Test work order generation when defect has no standard reference."""
+        # Create defect without standard reference
+        defect = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('defect_no_standard'),
+            module_key='hydraulic_system',
+            step_key='hose_inspection',
+            severity='MAJOR',
+            status='OPEN',
+            title='Hydraulic Leak',
+            description='Leak detected in main hydraulic line',
+            defect_details={
+                'severity': 'MAJOR',
+                'location': 'Main hydraulic line'
+            }
+        )
+
+        # Generate work order (should work without standard reference)
+        wo = DefectToWorkOrderService.generate_work_order_from_defect(defect=defect)
+
+        # Verify work order created
+        self.assertIsNotNone(wo)
+        self.assertEqual(wo.lines.count(), 1)
+
+        # Verify work order line exists but doesn't contain "Standard:"
+        line = wo.lines.first()
+        self.assertNotIn('Standard:', line.description)
+
+    def test_work_order_standard_reference_formatting(self):
+        """Test standard reference is properly formatted in work order description."""
+        # Create defect with various defect_details fields
+        defect = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('formatted_standard_ref'),
+            module_key='boom_inspection',
+            step_key='load_test',
+            severity='CRITICAL',
+            status='OPEN',
+            title='Failed Load Test',
+            description='Load test failed at 150% rated capacity',
+            defect_details={
+                'standard_reference': 'ANSI A92.2-2021 Section 8.2.4.1',
+                'severity': 'CRITICAL',
+                'location': 'Load test platform',
+                'corrective_action': 'Inspect and repair structural components',
+                'observations': 'Platform deflection exceeded limits'
+            }
+        )
+
+        # Generate work order
+        wo = DefectToWorkOrderService.generate_work_order_from_defect(defect=defect)
+
+        # Verify work order line description
+        line = wo.lines.first()
+
+        # Should contain standard reference
+        self.assertIn('Standard: ANSI A92.2-2021 Section 8.2.4.1', line.description)
+
+        # Should also contain other defect details
+        self.assertIn('Failed Load Test', line.description)
+        self.assertIn('Load test failed at 150% rated capacity', line.description)
+
+    def test_multiple_defects_preserve_standard_references(self):
+        """Test multiple defects with different standard references create correct work orders."""
+        # Create multiple defects with different standard references
+        defect1 = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('defect_std_1'),
+            module_key='boom_inspection',
+            step_key='visual_inspection',
+            severity='CRITICAL',
+            status='OPEN',
+            title='Boom Crack',
+            description='Crack in boom structure',
+            defect_details={
+                'standard_reference': 'ANSI A92.2-2021 Section 8.2.3(2)',
+                'severity': 'CRITICAL'
+            }
+        )
+
+        defect2 = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('defect_std_2'),
+            module_key='hydraulic_system',
+            step_key='hydraulic_test',
+            severity='MAJOR',
+            status='OPEN',
+            title='Hydraulic Pressure Low',
+            description='Hydraulic system pressure below minimum',
+            defect_details={
+                'standard_reference': 'ANSI A92.2-2021 Section 8.2.3(4)',
+                'severity': 'MAJOR'
+            }
+        )
+
+        defect3 = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('defect_std_3'),
+            module_key='electrical_system',
+            step_key='dielectric_test',
+            severity='CRITICAL',
+            status='OPEN',
+            title='Dielectric Test Failed',
+            description='Failed dielectric test at rated voltage',
+            defect_details={
+                'standard_reference': 'ANSI A92.2-2021 Section 5.4.1',
+                'severity': 'CRITICAL'
+            }
+        )
+
+        # Generate work orders (ungrouped)
+        work_orders = DefectToWorkOrderService.generate_work_orders_from_inspection(
+            inspection=self.inspection,
+            group_by_location=False
+        )
+
+        # Should create 3 work orders
+        self.assertEqual(len(work_orders), 3)
+
+        # Each work order should have its respective standard reference
+        all_descriptions = [wo.lines.first().description for wo in work_orders]
+
+        self.assertTrue(any('Section 8.2.3(2)' in desc for desc in all_descriptions))
+        self.assertTrue(any('Section 8.2.3(4)' in desc for desc in all_descriptions))
+        self.assertTrue(any('Section 5.4.1' in desc for desc in all_descriptions))
+
+    def test_grouped_work_order_preserves_all_standard_references(self):
+        """Test grouped work order preserves standard references from all defects."""
+        # Create multiple defects in same location with different standard references
+        defect1 = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('grouped_std_1'),
+            module_key='boom_inspection',
+            step_key='weld_inspection',
+            severity='CRITICAL',
+            status='OPEN',
+            title='Weld Crack',
+            description='Crack in weld joint',
+            defect_details={
+                'standard_reference': 'ANSI A92.2-2021 Section 8.2.3(2)',
+                'severity': 'CRITICAL'
+            }
+        )
+
+        defect2 = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=make_defect_identity('grouped_std_2'),
+            module_key='boom_inspection',
+            step_key='bolt_inspection',
+            severity='MAJOR',
+            status='OPEN',
+            title='Missing Bolts',
+            description='Multiple bolts missing from boom assembly',
+            defect_details={
+                'standard_reference': 'ANSI A92.2-2021 Section 8.2.3(2)',
+                'severity': 'MAJOR'
+            }
+        )
+
+        # Generate grouped work orders
+        work_orders = DefectToWorkOrderService.generate_work_orders_from_inspection(
+            inspection=self.inspection,
+            group_by_location=True
+        )
+
+        # Find the grouped work order (should have 2 lines)
+        grouped_wo = next((wo for wo in work_orders if wo.lines.count() == 2), None)
+        self.assertIsNotNone(grouped_wo)
+
+        # Both lines should have standard references
+        line1, line2 = grouped_wo.lines.all()
+        self.assertIn('Section 8.2.3(2)', line1.description)
+        self.assertIn('Section 8.2.3(2)', line2.description)

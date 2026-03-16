@@ -5,7 +5,7 @@ These schemas validate the AF_INSPECTION_TEMPLATE format from asset_templates_v2
 Ensures templates are properly structured before being loaded into the system.
 """
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, model_validator
 from typing import List, Dict, Any, Optional, Literal, Union
 from enum import Enum
 
@@ -181,6 +181,33 @@ class UIGuidance(BaseModel):
     guidance: Optional[List[str]] = None
 
 
+class ReferenceImage(BaseModel):
+    """Reference image/diagram for inspection guidance."""
+    model_config = ConfigDict(frozen=True)
+
+    image_id: str = Field(..., description="Unique identifier (e.g., 'figure_1a')")
+    title: str = Field(..., description="Image title (e.g., 'Figure 1A: Lower Test Electrode')")
+    file_path: str = Field(..., description="Path relative to static/inspection_references/")
+    caption: Optional[str] = Field(default=None, description="Optional detailed caption")
+    display_mode: Literal["inline", "modal", "both"] = Field(
+        default="modal",
+        description="How to display: inline (always visible), modal (click to view), both"
+    )
+    figure_number: Optional[str] = Field(default=None, description="ANSI figure/table number")
+
+
+class StandardTextReference(BaseModel):
+    """Reference to ANSI standard text for this step."""
+    model_config = ConfigDict(frozen=True)
+
+    section: str = Field(..., description="Section number (e.g., '8.2.3(2)', '5.4.3.5')")
+    excerpt: str = Field(..., description="Short excerpt (1-2 sentences) from standard section")
+    show_full_section: bool = Field(
+        default=False,
+        description="If true, make full section text available via modal/API"
+    )
+
+
 class ProcedureInput(BaseModel):
     """Input field for procedure initialization."""
     input_id: str
@@ -206,6 +233,14 @@ class ProcedureStep(BaseModel):
     fields: List[SchemaField] = Field(default_factory=list)
     validations: Optional[List[StepValidation]] = None
     auto_defect_on: Optional[List[AutoDefect]] = None
+    reference_images: Optional[List[ReferenceImage]] = Field(
+        default=None,
+        description="Reference images/diagrams for this step"
+    )
+    standard_text: Optional[StandardTextReference] = Field(
+        default=None,
+        description="ANSI standard text excerpt for this step"
+    )
 
     @field_validator('step_key')
     @classmethod
@@ -268,6 +303,12 @@ class InspectionRule(BaseModel):
 # Complete Template Schema
 # ============================================================================
 
+class EnumOption(BaseModel):
+    """Enum option with value and optional label."""
+    value: str
+    label: str
+
+
 class InspectionTemplate(BaseModel):
     """
     Complete inspection template validation schema.
@@ -279,7 +320,7 @@ class InspectionTemplate(BaseModel):
     format: Literal["AF_INSPECTION_TEMPLATE"] = Field(..., description="Template format identifier")
     format_version: int = Field(..., description="Format version number")
     template: TemplateMetadata = Field(..., description="Template metadata")
-    enums: Dict[str, List[str]] = Field(default_factory=dict, description="Enumerated value definitions")
+    enums: Dict[str, Union[List[str], List[EnumOption]]] = Field(default_factory=dict, description="Enumerated value definitions (supports both string arrays and {value, label} objects)")
     schemas: Optional[TemplateSchemas] = Field(default=None, description="Schema definitions")
     procedure: Procedure = Field(..., description="Inspection procedure")
     rules: Optional[List[InspectionRule]] = Field(default_factory=list, description="Automated rules")

@@ -338,6 +338,11 @@
           "field_id": "corrective_action",
           "type": "TEXT_AREA",
           "required": false
+        },
+        {
+          "field_id": "standard_reference",
+          "type": "TEXT",
+          "required": true
         }
       ]
     }
@@ -571,7 +576,8 @@
             "defect": {
               "title": "Operating control defect found during frequent inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Operating control malfunction detected. Equipment must not be operated until repairs are completed and verified."
+              "description": "Operating control malfunction detected. Equipment must not be operated until repairs are completed and verified.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.3(2)"
             }
           }
         ],
@@ -659,7 +665,8 @@
             "defect": {
               "title": "CRITICAL: Emergency control defect found",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Emergency control malfunction detected. Equipment must be tagged OUT OF SERVICE immediately until repairs are completed and verified."
+              "description": "Emergency control malfunction detected. Equipment must be tagged OUT OF SERVICE immediately until repairs are completed and verified.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.3(2) & (3)"
             }
           }
         ],
@@ -773,7 +780,8 @@
             "defect": {
               "title": "Safety device defect found during frequent inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Safety device malfunction detected. Equipment must be tagged OUT OF SERVICE until repairs are completed and verified."
+              "description": "Safety device malfunction detected. Equipment must be tagged OUT OF SERVICE until repairs are completed and verified.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.3(3)"
             }
           }
         ],
@@ -944,7 +952,8 @@
             "defect": {
               "title": "Structural defect found during frequent inspection",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Structural defect detected. Equipment must be tagged OUT OF SERVICE and evaluated by qualified personnel."
+              "description": "Structural defect detected. Equipment must be tagged OUT OF SERVICE and evaluated by qualified personnel.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.3(1)"
             }
           }
         ],
@@ -1090,7 +1099,8 @@
             "defect": {
               "title": "Hydraulic system defect found during frequent inspection",
               "severity": "SERVICE_REQUIRED",
-              "description": "Hydraulic system defect detected. Evaluate severity and repair as needed before continued operation."
+              "description": "Hydraulic system defect detected. Evaluate severity and repair as needed before continued operation.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.3(6)"
             }
           }
         ]
@@ -1201,7 +1211,8 @@
             "defect": {
               "title": "Electrical system defect found during frequent inspection",
               "severity": "SERVICE_REQUIRED",
-              "description": "Electrical system defect detected. Repair as needed before continued operation."
+              "description": "Electrical system defect detected. Repair as needed before continued operation.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.3(7)"
             }
           }
         ]
@@ -1320,7 +1331,8 @@
             "defect": {
               "title": "Missing or illegible marking/placard found",
               "severity": "SERVICE_REQUIRED",
-              "description": "Required marking or placard is missing or illegible. Must be replaced before continued operation."
+              "description": "Required marking or placard is missing or illegible. Must be replaced before continued operation.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.3(5)"
             }
           }
         ]

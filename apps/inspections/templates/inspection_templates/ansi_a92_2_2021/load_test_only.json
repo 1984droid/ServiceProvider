@@ -22,8 +22,12 @@
       ]
     },
     "applicability": {
-      "asset_types": ["EQUIPMENT"],
-      "equipment_types": ["A92_2_AERIAL"],
+      "asset_types": [
+        "EQUIPMENT"
+      ],
+      "equipment_types": [
+        "A92_2_AERIAL"
+      ],
       "notes": "Load Test per ANSI A92.2-2021 Section 8.2.4.1. Standalone load test to verify structural integrity and load-holding capability. Tests equipment at rated capacity through full range of motion. Required after major structural work, modifications, or as part of periodic inspection. CRITICAL SAFETY TEST - Equipment must pass load test before being returned to service after repairs or structural work."
     },
     "policy": {
@@ -40,24 +44,132 @@
   },
   "enums": {
     "severity": [
-      "SAFE",
-      "MINOR",
-      "SERVICE_REQUIRED",
-      "UNSAFE_OUT_OF_SERVICE"
+      {
+        "value": "SAFE",
+        "label": "Safe"
+      },
+      {
+        "value": "MINOR",
+        "label": "Minor"
+      },
+      {
+        "value": "SERVICE_REQUIRED",
+        "label": "Service Required"
+      },
+      {
+        "value": "UNSAFE_OUT_OF_SERVICE",
+        "label": "Unsafe Out Of Service"
+      }
     ],
     "pass_fail": [
-      "PASS",
-      "FAIL",
-      "NOT_TESTED"
+      {
+        "value": "PASS",
+        "label": "Pass"
+      },
+      {
+        "value": "FAIL",
+        "label": "Fail"
+      },
+      {
+        "value": "NOT_TESTED",
+        "label": "Not Tested"
+      }
     ],
     "test_reason": [
-      "PERIODIC_INSPECTION",
-      "POST_REPAIR",
-      "POST_MODIFICATION",
-      "MAJOR_STRUCTURAL_WORK",
-      "ANNUAL_CERTIFICATION",
-      "POST_OVERLOAD_EVENT",
-      "OTHER"
+      {
+        "value": "PERIODIC_INSPECTION",
+        "label": "Periodic Inspection"
+      },
+      {
+        "value": "POST_REPAIR",
+        "label": "Post Repair"
+      },
+      {
+        "value": "POST_MODIFICATION",
+        "label": "Post Modification"
+      },
+      {
+        "value": "MAJOR_STRUCTURAL_WORK",
+        "label": "Major Structural Work"
+      },
+      {
+        "value": "ANNUAL_CERTIFICATION",
+        "label": "Annual Certification"
+      },
+      {
+        "value": "POST_OVERLOAD_EVENT",
+        "label": "Post Overload Event"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
+    ],
+    "equipment_location": [
+      {
+        "value": "PLATFORM",
+        "label": "Platform / Basket"
+      },
+      {
+        "value": "BOOM_BASE",
+        "label": "Boom - Base Section"
+      },
+      {
+        "value": "BOOM_MID",
+        "label": "Boom - Mid Section"
+      },
+      {
+        "value": "BOOM_FLY",
+        "label": "Boom - Fly Section"
+      },
+      {
+        "value": "TURRET",
+        "label": "Turret / Rotating Assembly"
+      },
+      {
+        "value": "PEDESTAL",
+        "label": "Pedestal / Mounting Base"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_LEFT",
+        "label": "Outriggers - Front Left"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_RIGHT",
+        "label": "Outriggers - Front Right"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_LEFT",
+        "label": "Outriggers - Rear Left"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_RIGHT",
+        "label": "Outriggers - Rear Right"
+      },
+      {
+        "value": "HYDRAULIC_SYSTEM",
+        "label": "Hydraulic System"
+      },
+      {
+        "value": "ELECTRICAL_SYSTEM",
+        "label": "Electrical System"
+      },
+      {
+        "value": "CONTROLS_PLATFORM",
+        "label": "Controls - Platform"
+      },
+      {
+        "value": "CONTROLS_GROUND",
+        "label": "Controls - Ground"
+      },
+      {
+        "value": "CHASSIS",
+        "label": "Chassis / Vehicle Base"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other (specify in description)"
+      }
     ]
   },
   "schemas": {
@@ -125,19 +237,15 @@
           "required": true
         },
         {
-          "field_id": "standard_reference",
-          "type": "TEXT",
-          "required": false
-        },
-        {
           "field_id": "component",
           "type": "TEXT",
           "required": false
         },
         {
           "field_id": "location",
-          "type": "TEXT",
-          "required": false
+          "type": "ENUM",
+          "required": false,
+          "enum_ref": "equipment_location"
         },
         {
           "field_id": "photo_evidence",
@@ -148,6 +256,11 @@
           "field_id": "corrective_action",
           "type": "TEXT_AREA",
           "required": false
+        },
+        {
+          "field_id": "standard_reference",
+          "type": "TEXT",
+          "required": true
         }
       ]
     }
@@ -404,7 +517,8 @@
             "defect": {
               "title": "Boom raise test defect found under load",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Defect found during boom raise test with rated capacity load. Equipment must not be operated until issue is resolved."
+              "description": "Defect found during boom raise test with rated capacity load. Equipment must not be operated until issue is resolved.",
+              "standard_reference": "ANSI A92.2-2021 Section 4.5.1 & 8.2.5(1)"
             }
           }
         ],
@@ -488,7 +602,8 @@
             "defect": {
               "title": "Boom extension test defect found under load",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Defect found during boom extension test with rated capacity load. Equipment must not be operated until issue is resolved."
+              "description": "Defect found during boom extension test with rated capacity load. Equipment must not be operated until issue is resolved.",
+              "standard_reference": "ANSI A92.2-2021 Section 4.5.1 & 8.2.5(1)"
             }
           }
         ],
@@ -573,7 +688,8 @@
             "defect": {
               "title": "Boom rotation test defect found under load",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Defect found during boom rotation test with rated capacity load. Equipment must not be operated until issue is resolved."
+              "description": "Defect found during boom rotation test with rated capacity load. Equipment must not be operated until issue is resolved.",
+              "standard_reference": "ANSI A92.2-2021 Section 4.5.1 & 8.2.5(1)"
             }
           }
         ],
@@ -686,7 +802,8 @@
             "defect": {
               "title": "Boom lowering/retraction test defect found under load",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Defect found during boom lowering/retraction test. Equipment must not be operated until issue is resolved."
+              "description": "Defect found during boom lowering/retraction test. Equipment must not be operated until issue is resolved.",
+              "standard_reference": "ANSI A92.2-2021 Section 4.5.1 & 8.2.5(1)"
             }
           }
         ],
@@ -777,7 +894,8 @@
             "defect": {
               "title": "CRITICAL: Structural damage found during load test",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Structural damage detected during or after load test. Equipment has FAILED load test and must be tagged OUT OF SERVICE until damage is repaired and unit is retested."
+              "description": "Structural damage detected during or after load test. Equipment has FAILED load test and must be tagged OUT OF SERVICE until damage is repaired and unit is retested.",
+              "standard_reference": "ANSI A92.2-2021 Section 8.2.5(2)"
             }
           }
         ],

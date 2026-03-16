@@ -7,6 +7,7 @@ Maps defects to vocabulary-based work order line items.
 
 import json
 import os
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from django.conf import settings
 from django.db import transaction
@@ -222,6 +223,9 @@ class DefectToWorkOrderService:
         # Map defect to vocabulary
         vocab = cls.map_defect_to_vocabulary(defect)
 
+        # Build comprehensive description from defect data
+        work_description = cls._build_work_description(defect, vocab)
+
         # Create work order
         wo = WorkOrder.objects.create(
             customer=customer,
@@ -229,7 +233,7 @@ class DefectToWorkOrderService:
             asset_id=inspection.asset_id,
             department_id=department_id,
             title=f"{vocab['verb']} {vocab['noun']} - {asset}",
-            description=f"Work order generated from inspection defect: {defect.title}",
+            description=work_description,
             priority=cls._map_severity_to_priority(defect.severity),
             source_type='INSPECTION_DEFECT',
             source_id=defect.id,
@@ -254,6 +258,77 @@ class DefectToWorkOrderService:
         defect.save()
 
         return wo
+
+    @classmethod
+    def _build_work_description(cls, defect: InspectionDefect, vocab: Dict[str, str]) -> str:
+        """
+        Build comprehensive work order description from defect data.
+
+        Includes all structured defect fields per DATA_CONTRACT.md:
+        - Title and description
+        - Component
+        - Equipment location
+        - Standard reference
+        - Corrective action
+        - Photo count
+
+        Args:
+            defect: InspectionDefect instance
+            vocab: Vocabulary mapping dict
+
+        Returns:
+            Formatted work order description
+        """
+        parts = []
+
+        # Header
+        parts.append(f"DEFECT: {defect.title}")
+        parts.append(f"Severity: {defect.get_severity_display()}")
+        parts.append("")
+
+        # Description
+        if defect.description:
+            parts.append("DESCRIPTION:")
+            parts.append(defect.description)
+            parts.append("")
+
+        # Extract structured defect details
+        defect_details = defect.defect_details or {}
+
+        # Component
+        component = defect_details.get('component')
+        if component:
+            parts.append(f"Component: {component}")
+
+        # Equipment Location (from defect schema, not module_key)
+        location = defect_details.get('location')
+        if location:
+            parts.append(f"Equipment Location: {location}")
+
+        # Standard Reference (REQUIRED per user specification)
+        standard_ref = defect_details.get('standard_reference')
+        if standard_ref:
+            parts.append(f"Standard Reference: {standard_ref}")
+
+        # Corrective Action
+        corrective_action = defect_details.get('corrective_action')
+        if corrective_action:
+            parts.append("")
+            parts.append("CORRECTIVE ACTION:")
+            parts.append(corrective_action)
+
+        # Photo Evidence
+        photos = defect_details.get('photos', [])
+        if photos:
+            parts.append("")
+            parts.append(f"Photo Evidence: {len(photos)} photo(s) attached to defect record")
+
+        # Inspection context
+        parts.append("")
+        parts.append(f"Inspection ID: {defect.inspection_run_id}")
+        parts.append(f"Step: {defect.step_key}")
+
+        return "\n".join(parts)
 
     @classmethod
     def _map_severity_to_priority(cls, severity: str) -> str:
@@ -414,13 +489,16 @@ class DefectToWorkOrderService:
         for idx, defect in enumerate(defects, start=1):
             vocab = cls.map_defect_to_vocabulary(defect)
 
+            # Build detailed line description with all defect data
+            line_description = cls._build_line_description(defect, vocab)
+
             WorkOrderLine.objects.create(
                 work_order=wo,
                 line_number=idx,
                 verb=vocab['verb'],
                 noun=vocab['noun'],
                 service_location=vocab['service_location'],
-                description=f"[{defect.get_severity_display()}] {vocab['description']}",
+                description=line_description,
                 blocks_operation=(defect.severity == 'CRITICAL'),
                 status='PENDING'
             )
@@ -430,6 +508,59 @@ class DefectToWorkOrderService:
             defect.save()
 
         return wo
+
+    @classmethod
+    def _build_line_description(cls, defect: InspectionDefect, vocab: Dict[str, str]) -> str:
+        """
+        Build work order line description with structured defect data.
+
+        Used for grouped work orders where each defect becomes a line item.
+
+        Args:
+            defect: InspectionDefect instance
+            vocab: Vocabulary mapping dict
+
+        Returns:
+            Formatted line description
+        """
+        parts = []
+
+        # Start with severity and title
+        parts.append(f"[{defect.get_severity_display()}] {defect.title}")
+
+        # Add description if present
+        if defect.description:
+            parts.append(f"  Description: {defect.description}")
+
+        # Extract structured details
+        defect_details = defect.defect_details or {}
+
+        # Component
+        component = defect_details.get('component')
+        if component:
+            parts.append(f"  Component: {component}")
+
+        # Equipment Location
+        location = defect_details.get('location')
+        if location:
+            parts.append(f"  Location: {location}")
+
+        # Standard Reference
+        standard_ref = defect_details.get('standard_reference')
+        if standard_ref:
+            parts.append(f"  Standard: {standard_ref}")
+
+        # Corrective Action
+        corrective_action = defect_details.get('corrective_action')
+        if corrective_action:
+            parts.append(f"  Action: {corrective_action}")
+
+        # Photo count
+        photos = defect_details.get('photos', [])
+        if photos:
+            parts.append(f"  Photos: {len(photos)} attached")
+
+        return "\n".join(parts)
 
     @classmethod
     def get_defect_work_order(cls, defect: InspectionDefect) -> Optional[WorkOrder]:

@@ -37,7 +37,7 @@ Single-tenant service provider application for equipment inspection and work ord
 
 **One command setup:**
 ```bash
-python setup.py setup
+python scripts/setup/setup.py setup
 ```
 
 Visit: http://localhost:8100/admin
@@ -59,17 +59,17 @@ python manage.py create_roles
 
 **Other commands:**
 ```bash
-python setup.py update    # Update after pulling changes
-python setup.py wipe      # Wipe database and migrations (dev only)
-python setup.py reset     # Full reset (wipe + setup)
-python setup.py status    # Check system status
+python scripts/setup/setup.py update    # Update after pulling changes
+python scripts/setup/setup.py wipe      # Wipe database and migrations (dev only)
+python scripts/setup/setup.py reset     # Full reset (wipe + setup)
+python scripts/setup/setup.py status    # Check system status
 ```
 
-See [SETUP_SCRIPT.md](docs/SETUP_SCRIPT.md) for complete documentation.
+See [docs/SETUP.md](docs/SETUP.md) for complete setup documentation.
 
 ### Manual Setup (Alternative)
 
-See [QUICK_START.md](docs/QUICK_START.md) for manual setup instructions.
+See [docs/SETUP_SUMMARY.md](docs/SETUP_SUMMARY.md) for manual setup instructions.
 
 ## Project Structure
 
@@ -127,24 +127,44 @@ service-provider/
 │
 ├── docs/                   # Documentation
 │   ├── README.md           # Documentation index
-│   ├── SETUP_SCRIPT.md     # Automated setup script guide
-│   ├── QUICK_START.md      # Manual setup guide
-│   ├── SCHEMA_QUICK_REFERENCE.md  # Visual data model
-│   ├── DATA_CONTRACT.md    # Complete specification
-│   ├── MODEL_CHANGES_SUMMARY.md   # Change history
-│   ├── INSPECTION_AND_WORK_ORDER_FLOWS.md  # Workflow guide
-│   ├── IMPLEMENTATION_PLAN.md  # 6-phase implementation plan
-│   ├── PHASE_1_COMPLETION.md   # Phase 1 status
-│   └── SCRIPTS_README.md   # Script documentation
+│   ├── SETUP.md            # Development setup guide
+│   ├── SETUP_SUMMARY.md    # Setup quick reference
+│   ├── DEPLOYMENT.md       # Production deployment guide
+│   ├── DEPLOY_QUICK_START.md  # Deployment quick reference
+│   ├── DATA_CONTRACT.md    # Complete API/data specification
+│   ├── API_SUMMARY.md      # API endpoint reference
+│   ├── FRONTEND_ROADMAP.md # Frontend development roadmap
+│   ├── ansi_standard_integration/  # ANSI standard text docs
+│   │   ├── STANDARD_TEXT_INTEGRATION_SUMMARY.md
+│   │   ├── STANDARD_TEXT_REFERENCE_DESIGN.md
+│   │   └── STANDARD_TEXT_USAGE_EXAMPLE.md
+│   └── archive/            # Historical documentation
 │
-└── scripts/                # Development helper scripts
-    ├── README.md           # Scripts quick reference
-    ├── setup_dev.sh/bat    # Initial environment setup
-    ├── run_dev.sh/bat      # Start development server
-    ├── shell.sh/bat        # Django shell
-    ├── make_migrations.sh/bat  # Create migrations
-    ├── reset_dev.sh/bat    # Reset database
-    └── generate_env.sh/bat # Generate .env
+├── scripts/                # Development and setup scripts
+│   ├── README.md           # Scripts documentation
+│   ├── setup/              # Setup and deployment scripts
+│   │   ├── setup.py        # Main setup script
+│   │   ├── deploy.py       # Deployment script
+│   │   ├── setup_from_repo.sh/bat  # Clone and setup
+│   ├── archive/            # Completed migration scripts
+│   ├── extract_standard_text.py  # ANSI text extraction
+│   ├── generate_sample_pdfs.py   # PDF generation testing
+│   ├── reset_database.py  # Database reset utility
+│   ├── setup_dev.sh/bat   # Development environment setup
+│   ├── run_dev.sh/bat     # Start development server
+│   ├── shell.sh/bat       # Django shell
+│   ├── make_migrations.sh/bat  # Create migrations
+│   └── reset_dev.sh/bat   # Reset database
+│
+└── static/                # Static assets and reference files
+    └── inspection_references/  # ANSI standard references
+        └── ansi_a92_2_2021/
+            ├── ANSI A92.2-2021.docx  # Source document
+            ├── standard_text.json     # Extracted excerpts
+            ├── figures/               # Standard diagrams
+            ├── tables/                # Standard tables
+            ├── symbols/               # Equipment symbols
+            └── logos/                 # ANSI/SAIA logos
 ```
 
 ## Models Overview

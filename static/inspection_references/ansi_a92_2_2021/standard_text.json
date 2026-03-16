@@ -1,0 +1,115 @@
+{
+  "standard": "ANSI A92.2-2021",
+  "title": "Vehicle-Mounted Elevating and Rotating Aerial Devices",
+  "extracted_date": "2026-03-15",
+  "sections": {
+    "4.5.1": {
+      "section": "4.5.1",
+      "title": "Stability on Level Surface Test. Over center units shall also be tested in the over center position",
+      "content": "Inspect the structure for unusual deformations, broken members, or cracked welds. All damaged items shall be replaced or repaired before the unit is returned to service. Inspect the structure for unusual deformations, broken members, or cracked welds. All damaged items shall be replaced or repaired before the unit is returned to service. Inspection and Test Records Maintenance. Maintenance and frequency of maintenance shall be determined by the owner in accordance with the manufacturer’s recommendations. Alterations. Altering or disabling the function of safety devices, guards, covers, or interlocks, if so equipped, is prohibited. out in accordance with the manufacturer’s recommendations and procedures. Procedures for overriding safety devices shall be designed to minimize the possibility that an unsafe condition could exist. Note: Any change in weight distribution may adversely affect stability. Markings. The markings on the aerial device shall not be removed, defaced, or altered. All missing or illegible markings shall be promptly replaced. Safety Bulletins. Owners shall comply with safety related bulletins as received from the manufacturer, dealer, or installer. Manuals. The owner shall ensure that the operating manual(s) is stored on the mobile unit (MEWP). Training, Retraining, and Familiarization of Operators. The purpose and use of manuals. That operating manuals are an integral part of the aerial device and must be properly stored on the vehicle when not in use. A pre-start inspection. Responsibilities associated with problems or malfunctions affecting the operation of the aerial device. Prohibition of overriding safety devices except as approved by the manufacturer (see 8.5.2). That secondary operating systems shall not be used for purposes other than test or recovering the work platform. Factors affecting stability including manufacturer’s maximum allowable slope and limits. The purpose of placards and decals. Workplace inspection. industries using aerial devices have safety rules pertinent to that industry. Authorization to operate. Securing the aerial device and mobile unit (MEWP) from unauthorized use. Operator warnings and instructions. Proper use of personal fall protection equipment. Fall protection systems criteria and practices are covered in 29 CFR 1926.502. Stowing the aerial device for transport and precautions related to moving the mobile unit (MEWP). Retraining. The operator shall be retrained, when so directed by the user, based on the following: The user’s observation and evaluation of the operator. This evaluation of the operator shall include evaluating the operator’s proficiency of operating the aerial device in a safe manner. After an accident or near miss while operating an aerial device. Familiarization. When an operator is directed to operate an aerial device they are not familiar with, the operator shall: Prior to operating, be instructed by a qualified person regarding the following items: The location of the manuals. The manufacturer’s warnings and instructions. The purpose and function of all controls. Safety devices and operating characteristics specific to the aerial device. Operate the aerial device for a sufficient period of time to achieve proficiency in the actual operation of the aerial device. Where authorized by the user, a qualified person may self-familiarize if the items above are completed. Owner as a Lessor. When owners function as lessors, they shall have the same responsibilities as specified under Section 11 of this standard. Responsibilities of Users General Responsibilities. Each User shall comply with the requirements of this section. Personnel. Only trained and authorized personnel shall be permitted to operate the aerial device. Training, Retraining, and Familiarization of Operators The purpose and use of manuals. That operating manuals are an integral part of the aerial device and must be properly stored on the vehicle when not in use. A pre-start inspection. Responsibilities associated with problems or malfunctions affecting the operation of the aerial device. Prohibition of overriding safety devices except as approved by the manufacturer (see 8.5.2). That secondary operating systems shall not be used for purposes other than test or recovering the work platform. Factors affecting stability including manufacturer’s maximum allowable slope and limits. The purpose of placards and decals. Workplace inspection. Authorization to operate. Securing the aerial device and mobile unit (MEWP) from unauthorized use. Operator warnings and instructions. Proper use of personal fall protection equipment. Fall protection systems criteria and practices are covered in 29 CFR 1926.502. Stowing the aerial device for transport and precautions related to moving the mobile unit (MEWP). Retraining. The operator shall be retrained, when so directed by the user, based on the following: The user’s observation and evaluation of the operator. This evaluation of the operator shall include evaluating the operator’s proficiency of operating the aerial device in a safe manner. After an accident or near miss while operating an aerial device. Familiarization. When an operator is directed to operate an aerial device they are not familiar with, the operator shall: Prior to operating, be instructed by a qualified person regarding the following items: The location of the manuals. The manufacturer’s warnings and instructions. The purpose and function of all controls. Safety devices and operating characteristics specific to the aerial device. Operate the aerial device for a sufficient period of time to achieve proficiency in the actual operation of the aerial device. Where authorized by the user, a qualified person may self-familiarize if the items above are completed. Name of trainee Name of entity providing training or retraining Name of trainer(s) Clear identification of the make(s) and model(s) of the mobile unit (MEWP)(s) on which the operator has been trained. The date of training The specific period of time the training is valid. Note: The User is directed to Appendix C for guidance as to appropriate applications. Bare-Hand Work. For bare-hand work, a Category A aerial device shall be used. Lower Controls. The lower controls of aerial devices shall not be used with personnel in the platform except for operator rescue or platform recovery. Manufacturer’s Safety Bulletins. The user shall comply with the applicable safety-related bulletins as received from the manufacturer, installer, dealer or owner. Responsibilities of Operators General Responsibilities. Each operator shall comply with the requirements of this section. Personnel. Only trained, familiarized, and authorized personnel shall be permitted to operate the aerial device.",
+      "items": []
+    }
+  },
+  "common_excerpts": {
+    "structural_visual": {
+      "section": "8.2.3(1)",
+      "excerpt": "Structural members for deformation, cracks, or corrosion."
+    },
+    "operating_controls": {
+      "section": "8.2.3(2)",
+      "excerpt": "Performance test of all boom movements."
+    },
+    "safety_devices": {
+      "section": "8.2.3(3)",
+      "excerpt": "Test of all safety devices including interlocks, limit switches, and emergency controls."
+    },
+    "hydraulic_system": {
+      "section": "8.2.3(4)-(6)",
+      "excerpt": "Hydraulic system for proper oil level. Hydraulic fittings, hoses, and tubing for evidence of leakage, abnormal deformation, or excessive abrasion."
+    },
+    "electrical_system": {
+      "section": "8.2.3(11)",
+      "excerpt": "Electrical systems and components for deterioration or wear."
+    },
+    "fasteners": {
+      "section": "8.2.3(13)",
+      "excerpt": "Condition and tightness of bolts and other fasteners in accordance with the manufacturer's recommendation."
+    },
+    "markings": {
+      "section": "8.2.3(15)",
+      "excerpt": "Legible and proper identification, operational, and instructional markings."
+    },
+    "welds": {
+      "section": "8.2.4(14)",
+      "excerpt": "Welds, as specified by the manufacturer."
+    },
+    "bolts_detailed": {
+      "section": "8.2.4(13)",
+      "excerpt": "Condition and tightness of bolts and other fasteners."
+    },
+    "dielectric_qualification": {
+      "section": "5.4.2",
+      "excerpt": "Qualification test to verify the type and magnitude of line voltage for which the aerial device has been designed."
+    },
+    "dielectric_periodic": {
+      "section": "5.4.3",
+      "excerpt": "Each insulating aerial device shall be periodically electrically tested in accordance with Table 2."
+    },
+    "insulating_liner": {
+      "section": "5.4.3.5",
+      "excerpt": "Insulating liners shall be tested in accordance with Table 4."
+    },
+    "upper_control_resistance": {
+      "section": "5.4.3.6",
+      "excerpt": "Upper controls with high electrical resistance components shall be electrically tested per Table 5."
+    },
+    "load_test": {
+      "section": "4.5.1",
+      "excerpt": "Stability test with one and one-half times the rated load capacity."
+    },
+    "frequent_inspection_general": {
+      "section": "8.2.3",
+      "excerpt": "Items to be inspected daily to monthly intervals as determined by the owner in accordance with the manufacturer's recommendations."
+    },
+    "periodic_inspection_general": {
+      "section": "8.2.4",
+      "excerpt": "An inspection of the mobile unit (MEWP) shall be performed at intervals defined in 8.2.2 depending upon its activity, severity of service, and environment."
+    },
+    "major_structural_general": {
+      "section": "8.2.5",
+      "excerpt": "A major structural inspection of the mobile unit (MEWP) shall be performed after the first fifteen years of service, and at every ten year interval thereafter."
+    },
+    "load_test_general": {
+      "section": "8.2.4.1",
+      "excerpt": "Perform a load test of one and one-half times the rated load capacity in accordance with Section 4.5.1 Stability on Level Surface Test."
+    },
+    "dielectric_testing_general": {
+      "section": "5.4",
+      "excerpt": "Insulating aerial devices shall be electrically tested to verify their ability to protect workers from electrical hazards when working near energized conductors."
+    },
+    "pre_test_requirements": {
+      "section": "5.4.1",
+      "excerpt": "Before electrical testing, ensure all conductive components are properly bonded, insulating surfaces are clean and dry, and test equipment is calibrated and functioning properly."
+    },
+    "test_equipment": {
+      "section": "5.5",
+      "excerpt": "Test equipment shall meet the requirements of IEEE Std. 4-2013 and be capable of measuring leakage current in microamperes."
+    },
+    "test_documentation": {
+      "section": "5.6.3",
+      "excerpt": "Test documentation shall include: name of entity performing test, make/model/serial number of tested device, test voltage and current values, test results, and date of test."
+    },
+    "markings_documentation": {
+      "section": "7.11",
+      "excerpt": "Markings on the aerial device shall not be removed, defaced, or altered. All missing or illegible markings shall be promptly replaced."
+    },
+    "tables_2_3_reference": {
+      "section": "Tables 2 & 3",
+      "excerpt": "Refer to Table 2 for periodic electrical test values and Table 3 for overload test line contact values based on unit voltage rating."
+    },
+    "sections_combined": {
+      "section": "Sections 5.6.3, 7.11.2, 8.3.2",
+      "excerpt": "Comprehensive test documentation, markings verification, and inspection records shall be maintained per manufacturer requirements and ANSI standards."
+    }
+  }
+}

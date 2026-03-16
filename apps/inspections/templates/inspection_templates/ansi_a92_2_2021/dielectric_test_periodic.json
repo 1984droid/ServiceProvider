@@ -22,8 +22,12 @@
       ]
     },
     "applicability": {
-      "asset_types": ["EQUIPMENT"],
-      "equipment_types": ["A92_2_AERIAL"],
+      "asset_types": [
+        "EQUIPMENT"
+      ],
+      "equipment_types": [
+        "A92_2_AERIAL"
+      ],
       "notes": "For insulating aerial devices requiring periodic electrical testing per ANSI A92.2-2021 Section 5.3.3 and 8.2.4(16). This test verifies the integrity of the insulating system by measuring leakage current at specified test voltages. CRITICAL SAFETY TEST - Must be performed by qualified personnel with proper test equipment meeting IEEE Std. 4-2013 requirements."
     },
     "policy": {
@@ -40,58 +44,220 @@
   },
   "enums": {
     "severity": [
-      "SAFE",
-      "MINOR",
-      "SERVICE_REQUIRED",
-      "UNSAFE_OUT_OF_SERVICE"
+      {
+        "value": "SAFE",
+        "label": "Safe"
+      },
+      {
+        "value": "MINOR",
+        "label": "Minor"
+      },
+      {
+        "value": "SERVICE_REQUIRED",
+        "label": "Service Required"
+      },
+      {
+        "value": "UNSAFE_OUT_OF_SERVICE",
+        "label": "Unsafe Out Of Service"
+      }
     ],
     "pass_fail": [
-      "PASS",
-      "FAIL",
-      "NOT_APPLICABLE"
+      {
+        "value": "PASS",
+        "label": "Pass"
+      },
+      {
+        "value": "FAIL",
+        "label": "Fail"
+      },
+      {
+        "value": "NOT_APPLICABLE",
+        "label": "Not Applicable"
+      }
     ],
     "unit_category": [
-      "A",
-      "B",
-      "C",
-      "D",
-      "E"
+      {
+        "value": "A",
+        "label": "A"
+      },
+      {
+        "value": "B",
+        "label": "B"
+      },
+      {
+        "value": "C",
+        "label": "C"
+      },
+      {
+        "value": "D",
+        "label": "D"
+      },
+      {
+        "value": "E",
+        "label": "E"
+      }
     ],
     "test_method": [
-      "METHOD_A_AC_TABLE2",
-      "METHOD_B_DC_TABLE2",
-      "METHOD_C_BEFORE_USE_TABLE3"
+      {
+        "value": "METHOD_A_AC_TABLE2",
+        "label": "Method A Ac Table2"
+      },
+      {
+        "value": "METHOD_B_DC_TABLE2",
+        "label": "Method B Dc Table2"
+      },
+      {
+        "value": "METHOD_C_BEFORE_USE_TABLE3",
+        "label": "Method C Before Use Table3"
+      }
     ],
     "test_voltage_type": [
-      "AC",
-      "DC"
+      {
+        "value": "AC",
+        "label": "Ac"
+      },
+      {
+        "value": "DC",
+        "label": "Dc"
+      }
     ],
     "yes_no": [
-      "YES",
-      "NO"
+      {
+        "value": "YES",
+        "label": "Yes"
+      },
+      {
+        "value": "NO",
+        "label": "No"
+      }
     ],
     "cleanliness_status": [
-      "CLEAN",
-      "CONTAMINATED"
+      {
+        "value": "CLEAN",
+        "label": "Clean"
+      },
+      {
+        "value": "CONTAMINATED",
+        "label": "Contaminated"
+      }
     ],
     "boom_position_figure": [
-      "FIGURE_1",
-      "FIGURE_2",
-      "FIGURE_2A",
-      "FIGURE_3",
-      "FIGURE_4"
+      {
+        "value": "FIGURE_1",
+        "label": "Figure 1"
+      },
+      {
+        "value": "FIGURE_2",
+        "label": "Figure 2"
+      },
+      {
+        "value": "FIGURE_2A",
+        "label": "Figure 2A"
+      },
+      {
+        "value": "FIGURE_3",
+        "label": "Figure 3"
+      },
+      {
+        "value": "FIGURE_4",
+        "label": "Figure 4"
+      }
     ],
     "test_setup_method": [
-      "METHOD_A_B_PER_FIGURE",
-      "METHOD_C_FIELD_TEST"
+      {
+        "value": "METHOD_A_B_PER_FIGURE",
+        "label": "Method A B Per Figure"
+      },
+      {
+        "value": "METHOD_C_FIELD_TEST",
+        "label": "Method C Field Test"
+      }
     ],
     "chassis_test_method": [
-      "AC_35KV_3MIN",
-      "DC_50KV_3MIN"
+      {
+        "value": "AC_35KV_3MIN",
+        "label": "Ac 35Kv 3Min"
+      },
+      {
+        "value": "DC_50KV_3MIN",
+        "label": "Dc 50Kv 3Min"
+      }
     ],
     "current_unit": [
-      "MICROAMPS",
-      "MILLIAMPS"
+      {
+        "value": "MICROAMPS",
+        "label": "Microamps"
+      },
+      {
+        "value": "MILLIAMPS",
+        "label": "Milliamps"
+      }
+    ],
+    "equipment_location": [
+      {
+        "value": "PLATFORM",
+        "label": "Platform / Basket"
+      },
+      {
+        "value": "BOOM_BASE",
+        "label": "Boom - Base Section"
+      },
+      {
+        "value": "BOOM_MID",
+        "label": "Boom - Mid Section"
+      },
+      {
+        "value": "BOOM_FLY",
+        "label": "Boom - Fly Section"
+      },
+      {
+        "value": "TURRET",
+        "label": "Turret / Rotating Assembly"
+      },
+      {
+        "value": "PEDESTAL",
+        "label": "Pedestal / Mounting Base"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_LEFT",
+        "label": "Outriggers - Front Left"
+      },
+      {
+        "value": "OUTRIGGERS_FRONT_RIGHT",
+        "label": "Outriggers - Front Right"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_LEFT",
+        "label": "Outriggers - Rear Left"
+      },
+      {
+        "value": "OUTRIGGERS_REAR_RIGHT",
+        "label": "Outriggers - Rear Right"
+      },
+      {
+        "value": "HYDRAULIC_SYSTEM",
+        "label": "Hydraulic System"
+      },
+      {
+        "value": "ELECTRICAL_SYSTEM",
+        "label": "Electrical System"
+      },
+      {
+        "value": "CONTROLS_PLATFORM",
+        "label": "Controls - Platform"
+      },
+      {
+        "value": "CONTROLS_GROUND",
+        "label": "Controls - Ground"
+      },
+      {
+        "value": "CHASSIS",
+        "label": "Chassis / Vehicle Base"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other (specify in description)"
+      }
     ]
   },
   "schemas": {
@@ -129,7 +295,7 @@
           },
           {
             "field_id": "final_leakage_current_microamps",
-            "label": "Final leakage current (µA RMS)",
+            "label": "Final leakage current (ÂµA RMS)",
             "type": "NUMBER",
             "required": true,
             "precision": 2,
@@ -171,7 +337,7 @@
           },
           {
             "field_id": "final_leakage_current_microamps",
-            "label": "Final leakage current (µA)",
+            "label": "Final leakage current (ÂµA)",
             "type": "NUMBER",
             "required": true,
             "precision": 2,
@@ -204,7 +370,7 @@
           },
           {
             "field_id": "measured_current_microamps",
-            "label": "Measured leakage current (µA)",
+            "label": "Measured leakage current (ÂµA)",
             "type": "NUMBER",
             "required": true,
             "precision": 3,
@@ -250,7 +416,7 @@
             "required": true,
             "precision": 3,
             "min": 0,
-            "help_text": "AC: ≤3 mA, DC: ≤100 µA"
+            "help_text": "AC: â‰¤3 mA, DC: â‰¤100 ÂµA"
           },
           {
             "field_id": "current_unit",
@@ -283,14 +449,15 @@
           "required": true
         },
         {
-          "field_id": "standard_reference",
+          "field_id": "component",
           "type": "TEXT",
           "required": false
         },
         {
           "field_id": "location",
-          "type": "TEXT",
-          "required": false
+          "type": "ENUM",
+          "required": false,
+          "enum_ref": "equipment_location"
         },
         {
           "field_id": "photo_evidence",
@@ -301,6 +468,11 @@
           "field_id": "corrective_action",
           "type": "TEXT_AREA",
           "required": false
+        },
+        {
+          "field_id": "standard_reference",
+          "type": "TEXT",
+          "required": true
         }
       ]
     }
@@ -462,7 +634,8 @@
             "defect": {
               "title": "Insulating components contaminated - must be cleaned before test",
               "severity": "SERVICE_REQUIRED",
-              "description": "Insulating components must be clean and free of contamination before dielectric testing per Section 5.4.1."
+              "description": "Insulating components must be clean and free of contamination before dielectric testing per Section 5.4.1.",
+              "standard_reference": "ANSI A92.2-2021 Section 5.4.3.1(1)-(4) & 8.2.4(16)"
             }
           },
           {
@@ -473,7 +646,8 @@
             "defect": {
               "title": "CRITICAL: Visible damage to insulating components",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Visible damage found on insulating components. Unit must not be operated until damage is repaired and unit is retested."
+              "description": "Visible damage found on insulating components. Unit must not be operated until damage is repaired and unit is retested.",
+              "standard_reference": "ANSI A92.2-2021 Section 5.4.3.1(1)-(4) & 8.2.4(16)"
             }
           },
           {
@@ -484,7 +658,8 @@
             "defect": {
               "title": "Conditions found that compromise insulation integrity",
               "severity": "UNSAFE_OUT_OF_SERVICE",
-              "description": "Conditions found that may compromise the insulating system. Must be corrected before testing."
+              "description": "Conditions found that may compromise the insulating system. Must be corrected before testing.",
+              "standard_reference": "ANSI A92.2-2021 Section 5.4.3.1(1)-(4) & 8.2.4(16)"
             }
           }
         ],
@@ -502,7 +677,7 @@
             "label": "Test equipment meets IEEE Std. 4-2013 requirements?",
             "type": "BOOLEAN",
             "required": true,
-            "help_text": "Section 5.5.1 - RMS voltage ≤3% uncertainty, RMS current ≤5% uncertainty"
+            "help_text": "Section 5.5.1 - RMS voltage â‰¤3% uncertainty, RMS current â‰¤5% uncertainty"
           },
           {
             "field_id": "test_equipment_calibrated",
@@ -553,7 +728,10 @@
         "required": true,
         "visibility_conditions": {
           "path": "inputs.unit_category",
-          "in": ["A", "B"]
+          "in": [
+            "A",
+            "B"
+          ]
         },
         "fields": [
           {
@@ -651,7 +829,11 @@
         "required": true,
         "visibility_conditions": {
           "path": "inputs.unit_category",
-          "in": ["C", "D", "E"]
+          "in": [
+            "C",
+            "D",
+            "E"
+          ]
         },
         "fields": [
           {
@@ -728,7 +910,7 @@
         "fields": [
           {
             "field_id": "voltage_maintained_within_tolerance",
-            "label": "Test voltage maintained within ±3% for entire duration?",
+            "label": "Test voltage maintained within Â±3% for entire duration?",
             "type": "BOOLEAN",
             "required": true,
             "help_text": "Section 5.5.2 - Voltage tolerance requirement"
@@ -769,7 +951,7 @@
         "fields": [
           {
             "field_id": "voltage_maintained_within_tolerance",
-            "label": "Test voltage maintained within ±3% for entire duration?",
+            "label": "Test voltage maintained within Â±3% for entire duration?",
             "type": "BOOLEAN",
             "required": true,
             "help_text": "Section 5.5.2 - Voltage tolerance requirement"
@@ -824,7 +1006,7 @@
           },
           {
             "field_id": "line_voltage_within_limits",
-            "label": "Line voltage ≥ max working voltage AND ≤ qualification voltage?",
+            "label": "Line voltage â‰¥ max working voltage AND â‰¤ qualification voltage?",
             "type": "BOOLEAN",
             "required": true,
             "help_text": "Critical safety requirement - voltage must be in acceptable range"

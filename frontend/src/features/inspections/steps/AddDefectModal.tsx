@@ -189,10 +189,10 @@ export function AddDefectModal({
     ['MINOR'].includes(formData.severity);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto m-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[95vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10">
           <h2 className="text-xl font-semibold text-gray-900">
             {editMode ? 'Edit Defect' : 'Add Defect'}
           </h2>
@@ -202,17 +202,17 @@ export function AddDefectModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6">
           {/* Component Selection - Show if context has triggered fields */}
           {context && context.triggeredFields && context.triggeredFields.length > 0 && !editMode && (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded mb-6">
               <div className="font-medium text-gray-900 mb-2">
                 Defect Conditions Detected ({context.triggeredFields.length})
               </div>
               <div className="text-sm text-gray-700 mb-3">
                 Select the component(s) affected by this defect:
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 {context.triggeredFields.map(field => (
                   <label key={field.fieldId} className="flex items-center gap-3 p-2 hover:bg-yellow-100 rounded cursor-pointer">
                     <input
@@ -233,8 +233,8 @@ export function AddDefectModal({
                       }}
                       className="h-4 w-4"
                     />
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">{field.label}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 truncate">{field.label}</div>
                       <div className="text-xs text-gray-600">
                         Condition: <span className="font-medium">{field.value}</span>
                         {field.suggestedSeverity && (
@@ -242,7 +242,7 @@ export function AddDefectModal({
                             backgroundColor: SEVERITY_COLORS[field.suggestedSeverity],
                             color: 'white'
                           }}>
-                            Suggested: {field.suggestedSeverity.replace('_', ' ')}
+                            {field.suggestedSeverity.replace('_', ' ')}
                           </span>
                         )}
                       </div>
@@ -253,173 +253,162 @@ export function AddDefectModal({
             </div>
           )}
 
-          {/* Severity */}
-          <FormField label="Severity" required error={errors.severity}>
-            <Select
-              value={formData.severity || ''}
-              onChange={(e) => handleChange('severity', e.target.value)}
-              options={SEVERITY_OPTIONS}
-            />
-            {formData.severity && (
-              <div
-                className="mt-2 p-3 rounded text-sm font-medium text-white"
-                style={{ backgroundColor: SEVERITY_COLORS[formData.severity] }}
+          {/* Grid Layout for Fields */}
+          <div className="grid grid-cols-3 gap-6">
+            {/* Column 1: Severity & Core Info */}
+            <div className="space-y-4">
+              {/* Severity */}
+              <FormField label="Severity" required error={errors.severity}>
+                <Select
+                  value={formData.severity || ''}
+                  onChange={(e) => handleChange('severity', e.target.value)}
+                  options={SEVERITY_OPTIONS}
+                />
+                {formData.severity && (
+                  <div
+                    className="mt-2 p-2 rounded text-sm font-medium text-white text-center"
+                    style={{ backgroundColor: SEVERITY_COLORS[formData.severity] }}
+                  >
+                    {SEVERITY_OPTIONS.find(opt => opt.value === formData.severity)?.label}
+                  </div>
+                )}
+              </FormField>
+
+              {/* Component */}
+              <FormField
+                label="Component"
+                error={errors.component}
+                helpText="Component or system"
               >
-                {SEVERITY_OPTIONS.find(opt => opt.value === formData.severity)?.label}
-              </div>
-            )}
-          </FormField>
+                <TextInput
+                  value={formData.component || ''}
+                  onChange={(e) => handleChange('component', e.target.value)}
+                  placeholder="e.g., Boom Pivot Pin"
+                />
+              </FormField>
 
-          {/* Title */}
-          <FormField
-            label="Defect Title"
-            required
-            error={errors.title}
-            helpText="Brief, descriptive summary (max 200 characters)"
-          >
-            <TextInput
-              value={formData.title || ''}
-              onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="e.g., Excessive wear on boom pivot pins"
-            />
-            <div className="text-xs text-gray-500 mt-1">
-              {formData.title?.length || 0} / 200 characters
-            </div>
-          </FormField>
-
-          {/* Description */}
-          <FormField
-            label="Description"
-            required
-            error={errors.description}
-            helpText="Detailed description with observations and measurements (max 2000 characters)"
-          >
-            <TextArea
-              value={formData.description || ''}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Provide detailed information: what was observed, measurements, comparison to normal condition, immediate actions taken..."
-              rows={5}
-            />
-            <div className="text-xs text-gray-500 mt-1">
-              {formData.description?.length || 0} / 2000 characters
-            </div>
-          </FormField>
-
-          {/* Component */}
-          <FormField
-            label="Component"
-            error={errors.component}
-            helpText="Component or system where defect was found (max 100 characters)"
-          >
-            <TextInput
-              value={formData.component || ''}
-              onChange={(e) => handleChange('component', e.target.value)}
-              placeholder="e.g., Boom Pivot Pin, Hydraulic Cylinder - Boom Lift"
-            />
-          </FormField>
-
-          {/* Location */}
-          <FormField
-            label="Location"
-            error={errors.location}
-            helpText={
-              defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref
-                ? "Select equipment location from dropdown"
-                : "Specific physical location on equipment (max 200 characters)"
-            }
-          >
-            {defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref ? (
-              <EnumField
-                value={formData.location || ''}
-                onChange={(value) => handleChange('location', value)}
-                options={enumValues[defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref!] || []}
-                placeholder="Select location..."
-              />
-            ) : (
-              <TextInput
-                value={formData.location || ''}
-                onChange={(e) => handleChange('location', e.target.value)}
-                placeholder="e.g., Driver side, lower boom section, second pivot pin from base"
-              />
-            )}
-          </FormField>
-
-          {/* Photo Evidence */}
-          <FormField
-            label="Photo Evidence"
-            required={isPhotoRequired}
-            error={errors.photo_evidence}
-            helpText={
-              isPhotoRequired
-                ? '⚠️ REQUIRED for this severity level'
-                : isPhotoSuggested
-                ? '📷 Strongly recommended for documentation'
-                : 'Visual documentation of defect'
-            }
-          >
-            {(isPhotoRequired || isPhotoSuggested) && (
-              <div
-                className={`mb-2 p-2 rounded text-sm ${
-                  isPhotoRequired
-                    ? 'bg-red-50 border border-red-300 text-red-800'
-                    : 'bg-yellow-50 border border-yellow-300 text-yellow-800'
-                }`}
+              {/* Location */}
+              <FormField
+                label="Location"
+                error={errors.location}
+                helpText="Physical location"
               >
-                {isPhotoRequired ? '⚠️ Photos REQUIRED for Service Required and Unsafe / Out of Service severities' : '📷 Photos strongly recommended'}
-              </div>
-            )}
-            <PhotoField
-              value={formData.photo_evidence || []}
-              onChange={(value) => handleChange('photo_evidence', value)}
-              multiple={true}
-            />
-            <div className="text-xs text-gray-500 mt-1">
-              {formData.photo_evidence?.length || 0} photo(s) uploaded (max 10)
-            </div>
-          </FormField>
+                {defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref ? (
+                  <EnumField
+                    value={formData.location || ''}
+                    onChange={(value) => handleChange('location', value)}
+                    options={enumValues[defectSchema.fields.find(f => f.field_id === 'location')?.enum_ref!] || []}
+                    placeholder="Select location..."
+                  />
+                ) : (
+                  <TextInput
+                    value={formData.location || ''}
+                    onChange={(e) => handleChange('location', e.target.value)}
+                    placeholder="e.g., Driver side, lower boom"
+                  />
+                )}
+              </FormField>
 
-          {/* Corrective Action */}
-          <FormField
-            label="Corrective Action"
-            error={errors.corrective_action}
-            helpText="Recommended repair or corrective action (max 1000 characters)"
-          >
-            <TextArea
-              value={formData.corrective_action || ''}
-              onChange={(e) => handleChange('corrective_action', e.target.value)}
-              placeholder="Recommended repair procedure, parts needed, or corrective actions..."
-              rows={3}
-            />
-            <div className="text-xs text-gray-500 mt-1">
-              {formData.corrective_action?.length || 0} / 1000 characters
+              {/* Standard Reference */}
+              <FormField
+                label="Standard Reference"
+                error={errors.standard_reference}
+                helpText="Applicable standard section"
+              >
+                <TextInput
+                  value={formData.standard_reference || ''}
+                  onChange={(e) => handleChange('standard_reference', e.target.value)}
+                  placeholder="e.g., ANSI A92.2-2021 § 8.2.4(13)"
+                />
+              </FormField>
             </div>
-          </FormField>
 
-          {/* Standard Reference */}
-          <FormField
-            label="Standard Reference"
-            error={errors.standard_reference}
-            helpText="Reference to applicable standard section (max 100 characters)"
-          >
-            <TextInput
-              value={formData.standard_reference || ''}
-              onChange={(e) => handleChange('standard_reference', e.target.value)}
-              placeholder="e.g., ANSI A92.2-2021 Section 8.2.4(13)"
-            />
-          </FormField>
+            {/* Column 2: Description & Details */}
+            <div className="space-y-4">
+              {/* Title */}
+              <FormField
+                label="Defect Title"
+                required
+                error={errors.title}
+                helpText={`Brief summary (${formData.title?.length || 0}/200)`}
+              >
+                <TextInput
+                  value={formData.title || ''}
+                  onChange={(e) => handleChange('title', e.target.value)}
+                  placeholder="e.g., Excessive wear on boom pivot pins"
+                />
+              </FormField>
+
+              {/* Description */}
+              <FormField
+                label="Description"
+                required
+                error={errors.description}
+                helpText={`Detailed observations (${formData.description?.length || 0}/2000)`}
+              >
+                <TextArea
+                  value={formData.description || ''}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                  placeholder="What was observed, measurements, comparison to normal condition..."
+                  rows={10}
+                />
+              </FormField>
+
+              {/* Corrective Action */}
+              <FormField
+                label="Corrective Action"
+                error={errors.corrective_action}
+                helpText={`Recommended repair (${formData.corrective_action?.length || 0}/1000)`}
+              >
+                <TextArea
+                  value={formData.corrective_action || ''}
+                  onChange={(e) => handleChange('corrective_action', e.target.value)}
+                  placeholder="Repair procedure, parts needed, or corrective actions..."
+                  rows={5}
+                />
+              </FormField>
+            </div>
+
+            {/* Column 3: Photo Evidence */}
+            <div className="space-y-4">
+              <FormField
+                label="Photo Evidence"
+                required={isPhotoRequired}
+                error={errors.photo_evidence}
+                helpText={`${formData.photo_evidence?.length || 0} photo(s) uploaded`}
+              >
+                {(isPhotoRequired || isPhotoSuggested) && (
+                  <div
+                    className={`mb-2 p-2 rounded text-sm ${
+                      isPhotoRequired
+                        ? 'bg-red-50 border border-red-300 text-red-800'
+                        : 'bg-yellow-50 border border-yellow-300 text-yellow-800'
+                    }`}
+                  >
+                    {isPhotoRequired ? '⚠️ REQUIRED for Service Required and Unsafe / Out of Service' : '📷 Recommended for documentation'}
+                  </div>
+                )}
+                <PhotoField
+                  value={formData.photo_evidence || []}
+                  onChange={(value) => handleChange('photo_evidence', value)}
+                  multiple={true}
+                />
+              </FormField>
+            </div>
+          </div>
 
           {/* Form Actions */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <div className="flex gap-3 pt-6 mt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+              className="px-6 py-2.5 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white rounded transition-colors"
+              className="px-6 py-2.5 text-sm font-medium text-white rounded transition-colors"
               style={{ backgroundColor: '#7ed321' }}
             >
               {editMode ? 'Update Defect' : 'Add Defect'}

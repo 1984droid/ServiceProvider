@@ -4,8 +4,10 @@ Inspection PDF Export Service
 Generates professional PDF reports for completed inspections.
 """
 
+import json
 from datetime import datetime
 from io import BytesIO
+from pathlib import Path
 from typing import Optional
 
 from reportlab.lib import colors
@@ -34,6 +36,9 @@ class InspectionPDFExporter:
     - Page numbers and timestamps
     """
 
+    # Class-level cache for standard text lookup
+    _standard_text_cache = None
+
     def __init__(self, inspection: InspectionRun):
         """
         Initialize PDF exporter.
@@ -45,6 +50,7 @@ class InspectionPDFExporter:
         self.buffer = BytesIO()
         self.styles = getSampleStyleSheet()
         self._setup_custom_styles()
+        self._load_standard_text_cache()
 
     def _setup_custom_styles(self):
         """Setup custom paragraph styles for the report."""
@@ -97,6 +103,51 @@ class InspectionPDFExporter:
             textColor=colors.HexColor('#7f8c8d'),
             spaceAfter=4
         ))
+
+    def _load_standard_text_cache(self):
+        """Load ANSI standard text excerpts for reference lookup."""
+        if InspectionPDFExporter._standard_text_cache is None:
+            try:
+                standard_text_path = Path('static/inspection_references/ansi_a92_2_2021/standard_text.json')
+                if standard_text_path.exists():
+                    with open(standard_text_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        # Create section -> excerpt mapping
+                        excerpts = {}
+                        for excerpt_data in data.get('common_excerpts', {}).values():
+                            section = excerpt_data.get('section', '')
+                            excerpt = excerpt_data.get('excerpt', '')
+                            if section and excerpt:
+                                excerpts[section] = excerpt
+                        InspectionPDFExporter._standard_text_cache = excerpts
+                else:
+                    InspectionPDFExporter._standard_text_cache = {}
+            except Exception:
+                # Fail gracefully if standard text not available
+                InspectionPDFExporter._standard_text_cache = {}
+
+    def _get_standard_text_for_reference(self, standard_reference: str) -> Optional[str]:
+        """
+        Look up standard text excerpt for a given standard reference.
+
+        Args:
+            standard_reference: Standard reference string (e.g., "ANSI A92.2-2021 Section 8.2.3")
+
+        Returns:
+            Standard text excerpt if found, None otherwise
+        """
+        if not InspectionPDFExporter._standard_text_cache:
+            return None
+
+        # Try to find matching section in cache
+        for section, excerpt in InspectionPDFExporter._standard_text_cache.items():
+            if section in standard_reference:
+                # Truncate if too long
+                if len(excerpt) > 150:
+                    return excerpt[:147] + '...'
+                return excerpt
+
+        return None
 
     def generate(self) -> BytesIO:
         """
@@ -254,7 +305,13 @@ class InspectionPDFExporter:
         return elements
 
     def _build_defects_summary(self):
-        """Build defects summary section."""
+        """
+        Build comprehensive defects section.
+
+        Includes:
+        - Summary table
+        - Detailed breakdown of each defect with all fields
+        """
         elements = []
 
         defects = self.inspection.defects.all().order_by('-severity', 'title')
@@ -268,30 +325,34 @@ class InspectionPDFExporter:
             elements.append(Paragraph("No defects found", self.styles['ReportBody']))
             return elements
 
-        # Build defects table
-        data = [['Severity', 'Location', 'Issue', 'Status']]
+        # Summary table
+        elements.append(Paragraph("Summary", self.styles['SubSection']))
+        data = [['Severity', 'Title', 'Component', 'Location']]
 
         for defect in defects:
-            severity_color = self._get_severity_color(defect.severity)
+            defect_details = defect.defect_details or {}
+            component = defect_details.get('component', 'N/A')
+            location = defect_details.get('location', defect.module_key or 'General')
+
             data.append([
                 defect.get_severity_display(),
-                defect.module_key or 'General',
-                defect.title,
-                defect.get_status_display()
+                defect.title[:50] + ('...' if len(defect.title) > 50 else ''),
+                component[:30] + ('...' if len(str(component)) > 30 else ''),
+                location[:30] + ('...' if len(str(location)) > 30 else '')
             ])
 
-        table = Table(data, colWidths=[1*inch, 1.5*inch, 2.5*inch, 1*inch])
+        table = Table(data, colWidths=[1*inch, 2*inch, 1.5*inch, 1.5*inch])
         table.setStyle(TableStyle([
             # Header row
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495e')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
 
             # Data rows
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor('#2c3e50')),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
@@ -305,6 +366,16 @@ class InspectionPDFExporter:
         ]))
 
         elements.append(table)
+        elements.append(Spacer(1, 0.2*inch))
+
+        # Detailed defect breakdown
+        elements.append(PageBreak())
+        elements.append(Paragraph("Detailed Defect Information", self.styles['SectionHeader']))
+
+        for idx, defect in enumerate(defects, start=1):
+            elements.extend(self._build_defect_detail(defect, idx))
+            if idx < defects.count():
+                elements.append(Spacer(1, 0.15*inch))
 
         return elements
 
@@ -364,6 +435,8 @@ class InspectionPDFExporter:
             step_key = step.get('step_key')
             title = step.get('title', step_key)
             step_type = step.get('type', '')
+            standard_ref = step.get('standard_reference', '')
+            standard_text_data = step.get('standard_text', {})
 
             # Get response from step_data
             response = step_data.get(step_key, 'Not Performed')
@@ -374,9 +447,26 @@ class InspectionPDFExporter:
             # Determine status
             status = self._determine_step_status(response, step)
 
+            # Build step title with standard reference
+            step_title_parts = [title]
+
+            # Add standard reference if available
+            if standard_ref:
+                step_title_parts.append(f"\n<font size=8 color='#7f8c8d'>{standard_ref}</font>")
+
+            # Add standard text excerpt if available
+            if standard_text_data and 'excerpt' in standard_text_data:
+                excerpt = standard_text_data['excerpt']
+                # Truncate if too long
+                if len(excerpt) > 150:
+                    excerpt = excerpt[:147] + '...'
+                step_title_parts.append(f"\n<font size=7 color='#95a5a6'><i>\"{excerpt}\"</i></font>")
+
+            step_title_html = ''.join(step_title_parts)
+
             # Add to table
             data.append([
-                title,
+                Paragraph(step_title_html, self.styles['ReportBody']),
                 formatted_response,
                 status
             ])
@@ -431,12 +521,28 @@ class InspectionPDFExporter:
             for step in module_steps:
                 step_key = step.get('step_key')
                 title = step.get('title', step_key)
+                standard_ref = step.get('standard_reference', '')
+                standard_text_data = step.get('standard_text', {})
 
                 response = step_data.get(step_key, 'Not Performed')
                 formatted_response = self._format_step_response(response, step)
                 status = self._determine_step_status(response, step)
 
-                data.append([title, formatted_response, status])
+                # Build step title with standard reference
+                step_title_parts = [title]
+
+                if standard_ref:
+                    step_title_parts.append(f"\n<font size=7 color='#7f8c8d'>{standard_ref}</font>")
+
+                if standard_text_data and 'excerpt' in standard_text_data:
+                    excerpt = standard_text_data['excerpt']
+                    if len(excerpt) > 120:
+                        excerpt = excerpt[:117] + '...'
+                    step_title_parts.append(f"\n<font size=6 color='#95a5a6'><i>\"{excerpt}\"</i></font>")
+
+                step_title_html = ''.join(step_title_parts)
+
+                data.append([Paragraph(step_title_html, self.styles['ReportBody']), formatted_response, status])
 
             # Create table
             table = Table(data, colWidths=[3*inch, 2*inch, 1*inch])
@@ -610,6 +716,111 @@ class InspectionPDFExporter:
             ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ]))
         elements.append(sig_table)
+
+        return elements
+
+    def _build_defect_detail(self, defect, defect_number: int):
+        """
+        Build detailed breakdown for a single defect.
+
+        Shows all 8 structured defect fields per DATA_CONTRACT.md:
+        - Title, severity, description
+        - Component, location
+        - Standard reference
+        - Corrective action
+        - Photo evidence count
+
+        Args:
+            defect: InspectionDefect instance
+            defect_number: Sequential defect number
+
+        Returns:
+            List of reportlab elements
+        """
+        elements = []
+
+        # Defect header with severity color
+        severity_color = self._get_severity_color(defect.severity)
+        header_style = ParagraphStyle(
+            name=f'DefectHeader{defect_number}',
+            parent=self.styles['SubSection'],
+            textColor=severity_color,
+            fontSize=11,
+            spaceAfter=6
+        )
+
+        elements.append(Paragraph(
+            f"Defect #{defect_number}: [{defect.get_severity_display()}] {defect.title}",
+            header_style
+        ))
+
+        # Build defect detail table
+        defect_details = defect.defect_details or {}
+        data = []
+
+        # Severity
+        data.append(['Severity:', defect.get_severity_display()])
+
+        # Description
+        if defect.description:
+            data.append(['Description:', defect.description])
+
+        # Component
+        component = defect_details.get('component')
+        if component:
+            data.append(['Component:', component])
+
+        # Equipment Location
+        location = defect_details.get('location')
+        if location:
+            data.append(['Equipment Location:', location])
+        elif defect.module_key:
+            data.append(['Module:', defect.module_key])
+
+        # Standard Reference (REQUIRED field)
+        standard_ref = defect_details.get('standard_reference')
+        if standard_ref:
+            # Try to add standard text excerpt if available
+            standard_text_excerpt = self._get_standard_text_for_reference(standard_ref)
+            if standard_text_excerpt:
+                ref_with_excerpt = f"{standard_ref}\n\"{standard_text_excerpt}\""
+                data.append(['Standard Reference:', ref_with_excerpt])
+            else:
+                data.append(['Standard Reference:', standard_ref])
+
+        # Corrective Action
+        corrective_action = defect_details.get('corrective_action')
+        if corrective_action:
+            data.append(['Corrective Action:', corrective_action])
+
+        # Photo Evidence
+        photos = defect_details.get('photos', [])
+        if photos:
+            data.append(['Photo Evidence:', f"{len(photos)} photo(s) attached"])
+
+        # Status
+        data.append(['Status:', defect.get_status_display()])
+
+        # Inspection context
+        data.append(['Step:', defect.step_key])
+
+        # Create table
+        detail_table = Table(data, colWidths=[1.5*inch, 4.5*inch])
+        detail_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#2c3e50')),
+            ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#34495e')),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('LINEBELOW', (0, -1), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+        ]))
+
+        elements.append(detail_table)
 
         return elements
 
