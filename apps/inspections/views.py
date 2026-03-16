@@ -719,8 +719,14 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
             inspection.refresh_from_db()
             detail_serializer = InspectionRunDetailSerializer(inspection)
 
+            # Add auto-save indicator fields for frontend
+            from django.utils import timezone
+
             return Response({
+                'success': True,
                 'message': 'Step saved successfully',
+                'saved_at': timezone.now().isoformat(),  # ISO 8601 format for frontend
+                'step_key': serializer.validated_data['step_key'],
                 'validation': {
                     'valid': validation_result.valid,
                     'errors': validation_result.all_errors
