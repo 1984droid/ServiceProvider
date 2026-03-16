@@ -53,7 +53,7 @@ psql -U postgres -c "ALTER DATABASE %DB_NAME% OWNER TO %DB_USER%;"
 echo Database created
 echo.
 
-echo [3/4] Running migrations...
+echo [3/6] Running migrations...
 python manage.py migrate
 if errorlevel 1 (
     echo ERROR: Failed to run migrations
@@ -62,15 +62,41 @@ if errorlevel 1 (
 echo Migrations completed
 echo.
 
-echo [4/4] Creating superuser...
-python manage.py createsuperuser
+echo [4/6] Creating roles and groups...
+python manage.py create_roles
+if errorlevel 1 (
+    echo ERROR: Failed to create roles
+    exit /b 1
+)
+echo Roles created
+echo.
+
+echo [5/6] Seeding test data...
+python manage.py seed_data
+if errorlevel 1 (
+    echo ERROR: Failed to seed data
+    exit /b 1
+)
+echo Test data seeded
+echo.
+
+echo [6/6] Creating superuser (optional)...
+echo You can skip this if you want to use the seeded users
+set /p CREATE_SUPER="Create a superuser? (y/n): "
+if /i "%CREATE_SUPER%"=="y" (
+    python manage.py createsuperuser
+)
 echo.
 
 echo ============================================
 echo Database Reset Complete!
 echo ============================================
 echo.
-echo You can now start the development server:
+echo You can now log in with seeded users:
+echo   Username: inspector1, inspector2, service1, service2, or support1
+echo   Password: password123
+echo.
+echo Or start the development server:
 echo   scripts\run_dev.bat
 echo.
 

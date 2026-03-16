@@ -13,11 +13,14 @@ from django.db import transaction
 from apps.customers.models import Customer, Contact, USDOTProfile
 from apps.assets.models import Vehicle, Equipment
 from apps.organization.models import Company, Department, Employee
-from apps.inspections.models import InspectionRun
-from datetime import datetime
+from apps.inspections.models import InspectionRun, InspectionDefect
+from apps.work_orders.models import WorkOrder, WorkOrderLine
+from datetime import datetime, timedelta
+from django.utils import timezone
 import random
 import secrets
 import string
+import hashlib
 from .seed_config import SeedConfig
 
 
@@ -50,6 +53,8 @@ class Command(BaseCommand):
         contact_users = self._create_contact_users(contacts)
         vehicles = self._create_vehicles(customers)
         equipment = self._create_equipment(customers, vehicles)
+        inspections = self._create_inspections(customers, equipment, employees)
+        work_orders = self._create_work_orders(customers, vehicles, equipment, departments, inspections)
 
         self.stdout.write(self.style.SUCCESS('[OK] Data seed completed successfully!'))
         self.stdout.write(self.style.SUCCESS(f'  - Company: 1'))
@@ -61,9 +66,14 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'  - Contact Portal Users: {len(contact_users)}'))
         self.stdout.write(self.style.SUCCESS(f'  - Vehicles: {len(vehicles)}'))
         self.stdout.write(self.style.SUCCESS(f'  - Equipment: {len(equipment)}'))
+        self.stdout.write(self.style.SUCCESS(f'  - Inspections: {len(inspections)}'))
+        self.stdout.write(self.style.SUCCESS(f'  - Work Orders: {len(work_orders)}'))
 
     def _clear_data(self):
         """Clear all seeded data (except superuser)."""
+        WorkOrderLine.objects.all().delete()
+        WorkOrder.objects.all().delete()
+        InspectionDefect.objects.all().delete()
         InspectionRun.objects.all().delete()
         Equipment.objects.all().delete()
         Vehicle.objects.all().delete()
@@ -429,3 +439,216 @@ class Command(BaseCommand):
                     self.stdout.write(f'    [OK] Created equipment: {equipment.asset_number} ({year} {manufacturer} {model}){mount_info}')
 
         return equipment_list
+
+    def _create_inspections(self, customers, equipment, employees):
+        """Create inspection runs with defects following data contract."""
+        inspections = []
+        config = SeedConfig.INSPECTION_CONFIG
+        inspector_employees = [e for e in employees if e.base_department.code == 'INSP']
+
+        if not inspector_employees:
+            self.stdout.write(self.style.WARNING('  [SKIP] No inspector employees found'))
+            return inspections
+
+        self.stdout.write('  Creating inspections...')
+
+        for equip in equipment:
+            # Create 2 inspections per equipment
+            for i in range(config['per_equipment']):
+                template = random.choice(config['templates'])
+                inspector = random.choice(inspector_employees)
+
+                # Determine inspection status
+                is_completed = random.random() < config['completion_rate']
+                status = 'COMPLETED' if is_completed else random.choice(['DRAFT', 'IN_PROGRESS'])
+
+                # Timestamps
+                started_at = timezone.now() - timedelta(days=random.randint(1, 90))
+                finalized_at = started_at + timedelta(hours=random.randint(1, 4)) if is_completed else None
+
+                inspection = InspectionRun.objects.create(
+                    asset_type='EQUIPMENT',
+                    asset_id=equip.id,
+                    customer=equip.customer,
+                    template_key=template,
+                    status=status,
+                    started_at=started_at,
+                    finalized_at=finalized_at,
+                    inspector_name=f'{inspector.first_name} {inspector.last_name}',
+                    template_snapshot={'modules': [], 'metadata': {}},
+                    step_data={},
+                )
+
+                # Add defects if completed and random
+                if is_completed and random.random() < config['defect_rate']:
+                    num_defects = random.randint(*config['defects_per_inspection_range'])
+                    for d_idx in range(num_defects):
+                        severity_group = random.choice(SeedConfig.DEFECT_TEMPLATES)
+                        defect_template = random.choice(severity_group['templates'])
+
+                        # Generate idempotent defect_identity
+                        identity_string = f"{inspection.id}module{d_idx}step{d_idx}"
+                        defect_identity = hashlib.sha256(identity_string.encode()).hexdigest()
+
+                        InspectionDefect.objects.create(
+                            inspection_run=inspection,
+                            defect_identity=defect_identity,
+                            module_key='inspection_module',
+                            step_key=f'step_{d_idx}',
+                            severity=severity_group['severity'],
+                            status='OPEN',
+                            title=defect_template['title'],
+                            description=f"Defect identified during {template.replace('_', ' ')} inspection.",
+                            defect_details={
+                                'component': defect_template['component'],
+                                'location': defect_template['location'],
+                                'standard_reference': 'ANSI A92.2-2021 Section 8.2.3',
+                            }
+                        )
+
+                inspections.append(inspection)
+                if i == 0:  # Only log first inspection per equipment
+                    self.stdout.write(f'    [OK] Created inspection for {equip.asset_number} ({template})')
+
+        return inspections
+
+    def _create_work_orders(self, customers, vehicles, equipment, departments, inspections):
+        """Create work orders from various sources following new single-source pattern."""
+        work_orders = []
+        config = SeedConfig.WORK_ORDER_CONFIG
+        service_dept = next((d for d in departments if d.code == 'SVCRPR'), departments[0])
+
+        self.stdout.write('  Creating work orders...')
+
+        # Get all assets (vehicles + equipment)
+        all_assets = []
+        for v in vehicles:
+            all_assets.append({'type': 'VEHICLE', 'id': v.id, 'customer': v.customer, 'name': v.unit_number})
+        for e in equipment:
+            all_assets.append({'type': 'EQUIPMENT', 'id': e.id, 'customer': e.customer, 'name': e.asset_number})
+
+        # Get completed inspections with defects for INSPECTION_DEFECT source type
+        inspections_with_defects = [
+            i for i in inspections
+            if i.status == 'COMPLETED' and i.defects.exists()
+        ]
+
+        for customer in customers:
+            customer_assets = [a for a in all_assets if a['customer'] == customer]
+            if not customer_assets:
+                continue
+
+            num_work_orders = random.randint(*config['per_customer'])
+
+            for i in range(num_work_orders):
+                # Randomly select source type
+                rand = random.random()
+                cumulative = 0
+                source_type = 'MANUAL'
+                for s_type, prob in config['source_type_distribution'].items():
+                    cumulative += prob
+                    if rand < cumulative:
+                        source_type = s_type
+                        break
+
+                # Select asset
+                asset = random.choice(customer_assets)
+
+                # Determine source_id based on source_type
+                source_id = None
+                title_suffix = ''
+                if source_type == 'INSPECTION_DEFECT' and inspections_with_defects:
+                    # Link to a defect from an inspection for the SAME asset
+                    matching_inspections = [
+                        i for i in inspections_with_defects
+                        if i.asset_id == asset['id']
+                    ]
+                    if matching_inspections:
+                        inspection = random.choice(matching_inspections)
+                        open_defects = list(inspection.defects.filter(status='OPEN'))
+                        if open_defects:
+                            defect = random.choice(open_defects)
+                            source_id = defect.id
+                            title_suffix = f" - {defect.title}"
+                        else:
+                            # No open defects, fall back to MANUAL
+                            source_type = 'MANUAL'
+                    else:
+                        # No matching inspections, fall back to MANUAL
+                        source_type = 'MANUAL'
+
+                # Randomly select status and priority
+                rand_status = random.random()
+                cumulative = 0
+                wo_status = 'DRAFT'
+                for s, prob in config['status_distribution'].items():
+                    cumulative += prob
+                    if rand_status < cumulative:
+                        wo_status = s
+                        break
+
+                rand_priority = random.random()
+                cumulative = 0
+                wo_priority = 'NORMAL'
+                for p, prob in config['priority_distribution'].items():
+                    cumulative += prob
+                    if rand_priority < cumulative:
+                        wo_priority = p
+                        break
+
+                # Build description based on source type
+                if source_type == 'INSPECTION_DEFECT':
+                    description = f"Repair defect identified during inspection{title_suffix}"
+                elif source_type == 'CUSTOMER_REQUEST':
+                    description = random.choice([
+                        "Customer requested preventive maintenance",
+                        "Scheduled service per customer contract",
+                        "Customer reported operational issue",
+                    ])
+                elif source_type == 'BREAKDOWN':
+                    description = random.choice([
+                        "Emergency repair - equipment failure",
+                        "Breakdown repair - immediate attention required",
+                        "Critical repair - unit out of service",
+                    ])
+                else:
+                    description = "General maintenance and service"
+
+                # Create work order following new single-source pattern
+                work_order = WorkOrder.objects.create(
+                    customer=customer,
+                    asset_type=asset['type'],
+                    asset_id=asset['id'],
+                    department=service_dept,
+                    source_type=source_type,
+                    source_id=source_id,
+                    title=f"Service {asset['name']}{title_suffix}",
+                    description=description,
+                    status=wo_status,
+                    priority=wo_priority,
+                    scheduled_date=(timezone.now() + timedelta(days=random.randint(1, 30))).date() if wo_status == 'PENDING' else None,
+                )
+
+                # Add 1-3 work order lines
+                num_lines = random.randint(1, 3)
+                for line_num in range(1, num_lines + 1):
+                    verb = random.choice(['Repair', 'Replace', 'Inspect', 'Adjust', 'Service'])
+                    noun = random.choice(['Hydraulic System', 'Electrical System', 'Boom Assembly', 'Platform', 'Controls'])
+                    location = random.choice(['BOOM', 'PLATFORM', 'CHASSIS', 'OUTRIGGERS', 'CONTROLS'])
+
+                    WorkOrderLine.objects.create(
+                        work_order=work_order,
+                        line_number=line_num,
+                        verb=verb,
+                        noun=noun,
+                        service_location=location,
+                        description=f"{verb} {noun.lower()} at {location.lower()}",
+                        status='PENDING' if wo_status in ['DRAFT', 'PENDING'] else wo_status,
+                        blocks_operation=random.random() < 0.2,  # 20% chance
+                    )
+
+                work_orders.append(work_order)
+                if i == 0:  # Only log first WO per customer
+                    self.stdout.write(f'    [OK] Created work order for {customer.name} ({source_type})')
+
+        return work_orders

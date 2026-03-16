@@ -312,6 +312,71 @@ class SeedConfig:
         'drivers_range': (5, 65),
     }
 
+    # Inspection configuration
+    INSPECTION_CONFIG = {
+        'templates': [
+            'ansi_a92_2_2021_annual_aerial_vehicle',
+            'ansi_a92_2_2021_periodic_inspection',
+            'ansi_a92_2_2021_frequent_inspection',
+        ],
+        'per_equipment': 2,  # Create 2 inspections per equipment
+        'completion_rate': 0.8,  # 80% completed, 20% draft/in-progress
+        'defect_rate': 0.6,  # 60% of completed inspections have defects
+        'defects_per_inspection_range': (1, 4),  # 1-4 defects per inspection
+    }
+
+    # Work order configuration
+    WORK_ORDER_CONFIG = {
+        'per_customer': (2, 5),  # 2-5 work orders per customer
+        'source_type_distribution': {
+            'INSPECTION_DEFECT': 0.5,  # 50% from inspections
+            'CUSTOMER_REQUEST': 0.3,   # 30% customer requests
+            'BREAKDOWN': 0.15,          # 15% breakdowns
+            'MANUAL': 0.05,             # 5% manual
+        },
+        'status_distribution': {
+            'DRAFT': 0.1,
+            'PENDING': 0.2,
+            'IN_PROGRESS': 0.3,
+            'COMPLETED': 0.35,
+            'CANCELLED': 0.05,
+        },
+        'priority_distribution': {
+            'LOW': 0.2,
+            'NORMAL': 0.5,
+            'HIGH': 0.25,
+            'EMERGENCY': 0.05,
+        },
+    }
+
+    # Defect seed data (following data contract)
+    DEFECT_TEMPLATES = [
+        {
+            'severity': 'CRITICAL',
+            'templates': [
+                {'title': 'Hydraulic Leak at Boom Cylinder', 'component': 'Boom Cylinder', 'location': 'BOOM'},
+                {'title': 'Structural Crack in Platform Rail', 'component': 'Platform Rail', 'location': 'PLATFORM'},
+                {'title': 'Emergency Stop Button Not Functioning', 'component': 'Emergency Stop', 'location': 'CONTROLS'},
+            ],
+        },
+        {
+            'severity': 'MAJOR',
+            'templates': [
+                {'title': 'Boom Extension Cylinder Seal Wear', 'component': 'Extension Cylinder', 'location': 'BOOM'},
+                {'title': 'Leveling System Malfunction', 'component': 'Leveling System', 'location': 'CHASSIS'},
+                {'title': 'Outrigger Hydraulic Leak', 'component': 'Outrigger', 'location': 'OUTRIGGERS'},
+            ],
+        },
+        {
+            'severity': 'MINOR',
+            'templates': [
+                {'title': 'Platform Decking Worn', 'component': 'Platform Decking', 'location': 'PLATFORM'},
+                {'title': 'Boom Rotation Slow', 'component': 'Rotation Motor', 'location': 'BOOM'},
+                {'title': 'Warning Light Not Illuminating', 'component': 'Warning Light', 'location': 'CHASSIS'},
+            ],
+        },
+    ]
+
     @staticmethod
     def get_random_hire_date(min_days=30, max_days=1000):
         """Get a random hire date in the past."""

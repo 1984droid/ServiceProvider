@@ -32,10 +32,16 @@ PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d postgres -c "CREATE DATA
 echo "🔄 Running migrations..."
 python manage.py migrate
 
+echo "👥 Creating roles and groups..."
+python manage.py create_roles
+
+echo "🌱 Seeding test data..."
+python manage.py seed_data
+
 echo ""
 echo "✅ Database reset complete!"
 echo ""
-echo "Next steps:"
-echo "1. Create superuser: python manage.py createsuperuser"
-echo "2. Load fixtures (if any): python manage.py loaddata <fixture>"
+echo "You can now log in with:"
+echo "  Username: inspector1, inspector2, service1, service2, or support1"
+echo "  Password: password123"
 echo ""
