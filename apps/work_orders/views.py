@@ -40,6 +40,8 @@ class WorkOrderViewSet(viewsets.ModelViewSet):
     - DELETE /work-orders/{id}/ - Delete work order
     - POST /work-orders/from_defect/ - Create work order from defect
     - POST /work-orders/from_inspection/ - Create work orders from inspection
+    - GET /work-orders/available_assets/ - Get available assets for customer
+    - POST /work-orders/{id}/request_approval/ - Request approval for work order
     - POST /work-orders/{id}/approve/ - Approve work order
     - POST /work-orders/{id}/reject/ - Reject work order
     - POST /work-orders/{id}/start/ - Start work order
@@ -69,7 +71,7 @@ class WorkOrderViewSet(viewsets.ModelViewSet):
         'asset_type',
         'is_active',
     ]
-    search_fields = ['title', 'description', 'notes', 'source_type']
+    search_fields = ['work_order_number', 'title', 'description', 'notes']
     ordering_fields = ['created_at', 'scheduled_date', 'due_date', 'priority', 'status']
     ordering = ['-created_at']
 
@@ -153,6 +155,89 @@ class WorkOrderViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED
         )
+
+    @action(detail=False, methods=['get'])
+    def available_assets(self, request):
+        """
+        Get available assets for a customer filtered by asset type.
+
+        GET /api/work-orders/available_assets/?customer={uuid}&asset_type={VEHICLE|EQUIPMENT}
+        """
+        customer_id = request.query_params.get('customer')
+        asset_type = request.query_params.get('asset_type')
+
+        if not customer_id:
+            return Response(
+                {'error': 'customer parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not asset_type or asset_type not in ['VEHICLE', 'EQUIPMENT']:
+            return Response(
+                {'error': 'asset_type must be either VEHICLE or EQUIPMENT'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from apps.customers.models import Customer
+        customer = get_object_or_404(Customer, id=customer_id)
+
+        if asset_type == 'VEHICLE':
+            from apps.assets.models import Vehicle
+            from apps.assets.serializers import VehicleSerializer
+
+            assets = Vehicle.objects.filter(
+                customer=customer,
+                is_active=True
+            ).order_by('unit_number', '-year')
+
+            serializer = VehicleSerializer(assets, many=True)
+        else:  # EQUIPMENT
+            from apps.assets.models import Equipment
+            from apps.assets.serializers import EquipmentSerializer
+
+            assets = Equipment.objects.filter(
+                customer=customer,
+                is_active=True
+            ).order_by('serial_number')
+
+            serializer = EquipmentSerializer(assets, many=True)
+
+        return Response({
+            'count': len(assets),
+            'assets': serializer.data
+        })
+
+    @action(detail=True, methods=['post'])
+    def request_approval(self, request, pk=None):
+        """
+        Request approval for a work order.
+
+        POST /api/work-orders/{id}/request_approval/
+        """
+        work_order = self.get_object()
+
+        if work_order.approval_status != 'DRAFT':
+            return Response(
+                {'error': f'Cannot request approval from {work_order.approval_status} status'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not work_order.description:
+            return Response(
+                {'error': 'Work order must have a description'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if work_order.lines.count() == 0:
+            return Response(
+                {'error': 'Work order must have at least one line item'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        work_order.approval_status = 'PENDING_APPROVAL'
+        work_order.save()
+
+        return Response(WorkOrderSerializer(work_order).data)
 
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):

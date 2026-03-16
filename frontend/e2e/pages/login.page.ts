@@ -28,7 +28,17 @@ export class LoginPage {
   async login(username: string, password: string) {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
+
+    // Wait for the login API call to complete
+    const responsePromise = this.page.waitForResponse(
+      response => response.url().includes('/api/auth/login') && response.status() === 200,
+      { timeout: 5000 }
+    );
+
     await this.loginButton.click();
+
+    // Wait for successful response
+    await responsePromise;
   }
 
   async expectErrorMessage(message: string) {

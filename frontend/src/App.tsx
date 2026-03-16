@@ -24,8 +24,9 @@ import { EmployeeListPage } from '@/features/employees/EmployeeListPage';
 import { EmployeeFormPage } from '@/features/employees/EmployeeFormPage';
 import { WorkOrdersListPage } from '@/features/work-orders/WorkOrdersListPage';
 import { WorkOrderDetailPage } from '@/features/work-orders/WorkOrderDetailPage';
+import { WorkOrderCreatePage } from '@/features/work-orders/WorkOrderCreatePage';
 
-type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'inspection-review' | 'work-orders' | 'work-order-detail' | 'employees' | 'employees-create' | 'employees-edit';
+type Page = 'dashboard' | 'customers' | 'customers-create' | 'customers-detail' | 'contacts-detail' | 'contacts-edit' | 'assets' | 'assets-create-vehicle' | 'assets-create-equipment' | 'inspections' | 'inspection-execute' | 'inspection-review' | 'work-orders' | 'work-orders-create' | 'work-order-detail' | 'employees' | 'employees-create' | 'employees-edit';
 
 interface NavigationState {
   customerId?: string;
@@ -553,12 +554,24 @@ function App() {
             />
           )}
           {currentPage === 'work-orders' && (
-            <WorkOrdersListPage onNavigateToDetail={navigateToWorkOrder} />
+            <WorkOrdersListPage
+              onNavigateToDetail={navigateToWorkOrder}
+              onNavigateToCreate={() => setCurrentPage('work-orders-create')}
+            />
           )}
           {currentPage === 'work-order-detail' && navState.workOrderId && (
             <WorkOrderDetailPage
               workOrderId={navState.workOrderId}
               onBack={() => setCurrentPage('work-orders')}
+            />
+          )}
+          {currentPage === 'work-orders-create' && (
+            <WorkOrderCreatePage
+              onCancel={() => setCurrentPage('work-orders')}
+              onSuccess={(workOrderId) => {
+                setNavState({ workOrderId });
+                setCurrentPage('work-order-detail');
+              }}
             />
           )}
           {currentPage === 'employees' && (

@@ -130,6 +130,7 @@ class WorkOrderSerializer(serializers.ModelSerializer):
         model = WorkOrder
         fields = [
             'id',
+            'work_order_number',
             'customer',
             'customer_name',
             'asset_type',
@@ -278,6 +279,10 @@ class WorkOrderCreateSerializer(serializers.ModelSerializer):
             )
 
         return work_order
+
+    def to_representation(self, instance):
+        """Return full WorkOrderSerializer representation after creation."""
+        return WorkOrderSerializer(instance, context=self.context).data
 
 
 class DefectToWorkOrderSerializer(serializers.Serializer):

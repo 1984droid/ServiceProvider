@@ -18,18 +18,23 @@ export class WorkOrdersListPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByRole('heading', { name: /work orders/i });
-    this.createButton = page.getByRole('button', { name: /create.*work order/i });
-    this.searchInput = page.getByPlaceholder(/search/i);
-    this.statusFilter = page.getByLabel(/status/i);
-    this.priorityFilter = page.getByLabel(/priority/i);
-    this.workOrderCards = page.locator('[data-testid="work-order-card"]');
-    this.workOrderRows = page.locator('[data-testid="work-order-row"]');
+    this.heading = page.locator('h1').filter({ hasText: 'Work Orders' });
+    this.createButton = page.getByTestId('create-work-order-btn');
+    this.searchInput = page.getByTestId('work-order-search');
+    this.statusFilter = page.getByTestId('status-filter');
+    this.priorityFilter = page.getByTestId('priority-filter');
+    this.workOrderCards = page.getByTestId('work-order-card');
+    this.workOrderRows = this.workOrderCards; // Same element for this component
   }
 
   async goto() {
-    await this.page.goto('/work-orders');
+    // App uses state-based routing, so we need to click the nav button
+    // instead of using page.goto()
+    const workOrdersButton = this.page.getByRole('button', { name: /work orders/i });
+    await workOrdersButton.click();
     await this.page.waitForLoadState('networkidle');
+    // Wait for either heading or error message to appear
+    await this.page.waitForSelector('h1, .text-red-600', { timeout: 10000 }).catch(() => {});
   }
 
   async getWorkOrderCount(): Promise<number> {
@@ -177,20 +182,27 @@ export class WorkOrderCreatePage {
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading', { name: /create work order/i });
-    this.customerSelect = page.getByLabel(/customer/i);
-    this.assetTypeSelect = page.getByLabel(/asset type/i);
-    this.assetSelect = page.getByLabel(/asset/i);
-    this.titleInput = page.getByLabel(/title/i);
-    this.descriptionInput = page.getByLabel(/description/i);
-    this.prioritySelect = page.getByLabel(/priority/i);
-    this.sourceTypeSelect = page.getByLabel(/source/i);
+    this.customerSelect = page.locator('#customer');
+    this.assetTypeSelect = page.locator('#asset-type');
+    this.assetSelect = page.locator('#asset');
+    this.titleInput = page.locator('#title');
+    this.descriptionInput = page.locator('#description');
+    this.prioritySelect = page.locator('#priority');
+    this.sourceTypeSelect = page.locator('#source');
     this.addLineButton = page.getByRole('button', { name: /add line/i });
     this.saveButton = page.getByRole('button', { name: /save|create/i });
     this.cancelButton = page.getByRole('button', { name: /cancel/i });
   }
 
   async goto() {
-    await this.page.goto('/work-orders/new');
+    // App uses state-based routing, so we need to click the nav button first,
+    // then click the create button
+    const workOrdersButton = this.page.getByRole('button', { name: /work orders/i });
+    await workOrdersButton.click();
+    await this.page.waitForLoadState('networkidle');
+
+    const createButton = this.page.getByTestId('create-work-order-btn');
+    await createButton.click();
     await this.page.waitForLoadState('networkidle');
   }
 

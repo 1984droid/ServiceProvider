@@ -19,6 +19,7 @@ export function WorkOrderDetailPage({
 }: WorkOrderDetailPageProps) {
   const [workOrder, setWorkOrder] = useState<WorkOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isActionLoading, setIsActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,6 +36,83 @@ export function WorkOrderDetailPage({
       setError(err.message || 'Failed to load work order');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRequestApproval = async () => {
+    if (!workOrder) return;
+    setIsActionLoading(true);
+    setError(null);
+    try {
+      const updated = await workOrdersApi.requestApproval(workOrder.id);
+      setWorkOrder(updated);
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to request approval');
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!workOrder) return;
+    // TODO: Get actual employee ID from auth context
+    const employeeId = '00000000-0000-0000-0000-000000000000'; // Placeholder
+    setIsActionLoading(true);
+    setError(null);
+    try {
+      const updated = await workOrdersApi.approve(workOrder.id, employeeId);
+      setWorkOrder(updated);
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to approve work order');
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!workOrder) return;
+    const reason = prompt('Please enter rejection reason:');
+    if (!reason) return;
+
+    setIsActionLoading(true);
+    setError(null);
+    try {
+      const updated = await workOrdersApi.reject(workOrder.id, reason);
+      setWorkOrder(updated);
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to reject work order');
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleStartWork = async () => {
+    if (!workOrder) return;
+    setIsActionLoading(true);
+    setError(null);
+    try {
+      const updated = await workOrdersApi.start(workOrder.id);
+      setWorkOrder(updated);
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to start work order');
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    if (!workOrder) return;
+    if (!confirm('Are you sure you want to complete this work order?')) return;
+
+    setIsActionLoading(true);
+    setError(null);
+    try {
+      const updated = await workOrdersApi.complete(workOrder.id);
+      setWorkOrder(updated);
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to complete work order');
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -105,6 +183,7 @@ export function WorkOrderDetailPage({
           <div className="flex items-center gap-4 mb-4">
             <button
               onClick={onBack}
+              aria-label="Back to list" data-testid="back-button"
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
             >
               <svg
@@ -122,7 +201,7 @@ export function WorkOrderDetailPage({
               </svg>
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900" data-testid="work-order-number">
                 {workOrder.work_order_number}
               </h1>
               <p className="text-sm text-gray-600 mt-1">
@@ -133,6 +212,7 @@ export function WorkOrderDetailPage({
 
           <div className="flex items-center gap-3">
             <span
+              data-testid="status-badge"
               className={`px-3 py-1 text-sm font-medium rounded border ${getStatusColor(
                 workOrder.status
               )}`}
@@ -140,13 +220,14 @@ export function WorkOrderDetailPage({
               {workOrder.status.replace('_', ' ')}
             </span>
             <span
+              data-testid="priority-badge"
               className={`px-3 py-1 text-sm font-medium rounded ${getPriorityColor(
                 workOrder.priority
               )}`}
             >
-              {workOrder.priority} Priority
+              {workOrder.priority}
             </span>
-            <span className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded">
+            <span className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded" data-testid="asset-info">
               {workOrder.asset_type}
             </span>
           </div>
@@ -163,19 +244,58 @@ export function WorkOrderDetailPage({
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 {workOrder.title || 'Work Order Description'}
               </h2>
-              <p className="text-gray-700 whitespace-pre-wrap">
+              <p className="text-gray-700 whitespace-pre-wrap" data-testid="description">
                 {workOrder.description}
               </p>
             </div>
 
-            {/* Work Order Lines - placeholder for now */}
+            {/* Work Order Lines */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 Work Items
               </h2>
-              <p className="text-sm text-gray-500">
-                Work order line items will be displayed here
-              </p>
+              {workOrder.lines && workOrder.lines.length > 0 ? (
+                <div className="space-y-3">
+                  {workOrder.lines.map((line: any) => (
+                    <div
+                      key={line.id}
+                      data-testid="work-item"
+                      className="p-4 border border-gray-200 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-medium text-gray-900">
+                              {line.verb} {line.noun}
+                            </span>
+                            {line.service_location && (
+                              <span className="text-xs text-gray-500">
+                                @ {line.service_location}
+                              </span>
+                            )}
+                          </div>
+                          {line.description && (
+                            <p className="text-sm text-gray-600">{line.description}</p>
+                          )}
+                        </div>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded ${
+                            line.status === 'COMPLETED'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {line.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  No work items have been added yet
+                </p>
+              )}
             </div>
           </div>
 
@@ -186,14 +306,20 @@ export function WorkOrderDetailPage({
               <h3 className="font-semibold text-gray-900 mb-4">Details</h3>
               <div className="space-y-3 text-sm">
                 <div>
+                  <div className="text-gray-500">Customer</div>
+                  <div className="text-gray-900 font-medium" data-testid="customer-info">
+                    {workOrder.customer_name || workOrder.customer?.name || 'N/A'}
+                  </div>
+                </div>
+                <div>
                   <div className="text-gray-500">Source Type</div>
-                  <div className="text-gray-900 font-medium">
+                  <div className="text-gray-900 font-medium" data-testid="source-type">
                     {workOrder.source_type.replace('_', ' ')}
                   </div>
                 </div>
                 <div>
                   <div className="text-gray-500">Approval Status</div>
-                  <div className="text-gray-900 font-medium">
+                  <div className="text-gray-900 font-medium" data-testid="approval-status">
                     {workOrder.approval_status.replace('_', ' ')}
                   </div>
                 </div>
@@ -232,25 +358,67 @@ export function WorkOrderDetailPage({
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Actions</h3>
               <div className="space-y-2">
-                {workOrder.status === 'PENDING' && (
-                  <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-                    Start Work Order
+                {workOrder.approval_status === 'DRAFT' && (
+                  <button
+                    onClick={handleRequestApproval}
+                    disabled={isActionLoading}
+                    data-testid="request-approval-button"
+                    className="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isActionLoading ? 'Processing...' : 'Request Approval'}
+                  </button>
+                )}
+                {workOrder.approval_status === 'PENDING_APPROVAL' && (
+                  <>
+                    <button
+                      onClick={handleApprove}
+                      disabled={isActionLoading}
+                      data-testid="approve-button"
+                      className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isActionLoading ? 'Processing...' : 'Approve'}
+                    </button>
+                    <button
+                      onClick={handleReject}
+                      disabled={isActionLoading}
+                      data-testid="reject-button"
+                      className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isActionLoading ? 'Processing...' : 'Reject'}
+                    </button>
+                  </>
+                )}
+                {workOrder.approval_status === 'APPROVED' && workOrder.status === 'PENDING' && (
+                  <button
+                    onClick={handleStartWork}
+                    disabled={isActionLoading}
+                    data-testid="start-work-button"
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isActionLoading ? 'Processing...' : 'Start Work'}
                   </button>
                 )}
                 {workOrder.status === 'IN_PROGRESS' && (
-                  <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
-                    Complete Work Order
+                  <button
+                    onClick={handleComplete}
+                    disabled={isActionLoading}
+                    data-testid="complete-button"
+                    className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isActionLoading ? 'Processing...' : 'Complete Work Order'}
                   </button>
                 )}
-                {workOrder.approval_status === 'DRAFT' && (
-                  <button className="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm font-medium">
-                    Request Approval
-                  </button>
-                )}
-                <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                <button
+                  data-testid="edit-button"
+                  disabled={isActionLoading}
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Edit Work Order
                 </button>
-                <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                <button
+                  disabled={isActionLoading}
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Print Work Order
                 </button>
               </div>

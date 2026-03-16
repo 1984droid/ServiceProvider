@@ -10,18 +10,20 @@ import { workOrdersApi, type WorkOrder } from '@/api/workOrders.api';
 
 interface WorkOrdersListPageProps {
   onNavigateToDetail?: (workOrderId: string) => void;
+  onNavigateToCreate?: () => void;
 }
 
-export function WorkOrdersListPage({ onNavigateToDetail }: WorkOrdersListPageProps) {
+export function WorkOrdersListPage({ onNavigateToDetail, onNavigateToCreate }: WorkOrdersListPageProps) {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadWorkOrders();
-  }, [statusFilter, priorityFilter]);
+  }, [statusFilter, priorityFilter, searchQuery]);
 
   const loadWorkOrders = async () => {
     setIsLoading(true);
@@ -30,6 +32,7 @@ export function WorkOrdersListPage({ onNavigateToDetail }: WorkOrdersListPagePro
       const params: any = {};
       if (statusFilter) params.status = statusFilter;
       if (priorityFilter) params.priority = priorityFilter;
+      if (searchQuery) params.search = searchQuery;
 
       const data = await workOrdersApi.list(params);
       setWorkOrders(data.results || []);
@@ -104,25 +107,60 @@ export function WorkOrdersListPage({ onNavigateToDetail }: WorkOrdersListPagePro
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Work Orders</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Manage service work orders and track progress
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Work Orders</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Manage service work orders and track progress
+              </p>
+            </div>
+            {onNavigateToCreate && (
+              <button
+                onClick={onNavigateToCreate}
+                data-testid="create-work-order-btn"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Create Work Order
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Search and Filters */}
       <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg shadow p-4 space-y-4">
+          {/* Search */}
+          <div>
+            <label htmlFor="work-order-search" className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <input
+              id="work-order-search"
+              type="text"
+              placeholder="Search by work order number, title, or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              data-testid="work-order-search"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Filters Row */}
           <div className="flex gap-4">
             {/* Status Filter */}
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-2">
                 Status
               </label>
               <select
+                id="status-filter"
                 value={statusFilter || ''}
                 onChange={(e) => setStatusFilter(e.target.value || null)}
+                data-testid="status-filter"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">All Statuses</option>
@@ -137,12 +175,14 @@ export function WorkOrdersListPage({ onNavigateToDetail }: WorkOrdersListPagePro
 
             {/* Priority Filter */}
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="priority-filter" className="block text-sm font-medium text-gray-700 mb-2">
                 Priority
               </label>
               <select
+                id="priority-filter"
                 value={priorityFilter || ''}
                 onChange={(e) => setPriorityFilter(e.target.value || null)}
+                data-testid="priority-filter"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">All Priorities</option>
@@ -154,16 +194,17 @@ export function WorkOrdersListPage({ onNavigateToDetail }: WorkOrdersListPagePro
             </div>
 
             {/* Clear Filters */}
-            {(statusFilter || priorityFilter) && (
+            {(statusFilter || priorityFilter || searchQuery) && (
               <div className="flex items-end">
                 <button
                   onClick={() => {
                     setStatusFilter(null);
                     setPriorityFilter(null);
+                    setSearchQuery('');
                   }}
                   className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
-                  Clear Filters
+                  Clear All
                 </button>
               </div>
             )}
@@ -203,6 +244,7 @@ export function WorkOrdersListPage({ onNavigateToDetail }: WorkOrdersListPagePro
               <div
                 key={wo.id}
                 onClick={() => onNavigateToDetail?.(wo.id)}
+                data-testid="work-order-card"
                 className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer border border-gray-200 hover:border-blue-300"
               >
                 <div className="p-6">
