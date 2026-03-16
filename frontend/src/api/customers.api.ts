@@ -101,6 +101,44 @@ export type CustomerCreateData = {
   notes?: string;
 };
 
+export type DuplicateCheckRequest = {
+  name: string;
+  legal_name?: string;
+  usdot_number?: string;
+  mc_number?: string;
+  city?: string;
+  state?: string;
+  exclude_customer_id?: string;
+};
+
+export type MatchDetails = {
+  total_score: number;
+  base_score: number;
+  name_similarity: number;
+  legal_name_similarity: number;
+  regulatory_match: boolean;
+  usdot_match: boolean;
+  mc_match: boolean;
+  address_score: number;
+  city_similarity: number;
+  state_match: boolean;
+  popularity_multiplier: number;
+  selection_count: number;
+};
+
+export type DuplicateMatch = {
+  customer: Customer;
+  score: number;
+  confidence: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW';
+  match_details: MatchDetails;
+};
+
+export type DuplicateCheckResponse = {
+  found_duplicates: boolean;
+  count: number;
+  matches: DuplicateMatch[];
+};
+
 export const customersApi = {
   /**
    * Create a new customer
@@ -170,5 +208,21 @@ export const customersApi = {
    */
   async deleteContact(id: string): Promise<void> {
     await apiClient.delete(`/contacts/${id}/`);
+  },
+
+  /**
+   * Check for duplicate customers
+   */
+  async checkDuplicates(data: DuplicateCheckRequest): Promise<DuplicateCheckResponse> {
+    const response = await apiClient.post<DuplicateCheckResponse>('/customers/check_duplicates/', data);
+    return response.data;
+  },
+
+  /**
+   * Increment selection count for popularity tracking
+   */
+  async incrementSelection(id: string): Promise<Customer> {
+    const response = await apiClient.post<Customer>(`/customers/${id}/increment_selection/`);
+    return response.data;
   },
 };

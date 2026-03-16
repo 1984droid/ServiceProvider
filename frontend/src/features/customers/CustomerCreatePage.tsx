@@ -11,8 +11,10 @@
 import { useState } from 'react';
 import { CustomerForm } from './CustomerForm';
 import { USDOTSearch } from './USDOTSearch';
-import { customersApi, type CustomerCreateData } from '@/api/customers.api';
+import { DuplicateWarningModal } from './DuplicateWarningModal';
+import { customersApi, type CustomerCreateData, type DuplicateMatch } from '@/api/customers.api';
 import { type USDOTProfile } from '@/api/usdot.api';
+import { useNavigate } from '@tanstack/react-router';
 
 type Step = 'lookup' | 'form';
 
@@ -21,11 +23,15 @@ interface CustomerCreatePageProps {
 }
 
 export function CustomerCreatePage({ onSuccess }: CustomerCreatePageProps) {
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>('lookup');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [initialData, setInitialData] = useState<Partial<CustomerCreateData>>({});
+  const [duplicateMatches, setDuplicateMatches] = useState<DuplicateMatch[]>([]);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [pendingCustomerData, setPendingCustomerData] = useState<CustomerCreateData | null>(null);
 
   const handleProfileFound = (profile: USDOTProfile) => {
     // Map USDOT profile data to customer form data
@@ -52,6 +58,35 @@ export function CustomerCreatePage({ onSuccess }: CustomerCreatePageProps) {
     setError(null);
 
     try {
+      // Check for duplicates before creating
+      const duplicateCheck = await customersApi.checkDuplicates({
+        name: data.name,
+        legal_name: data.legal_name,
+        usdot_number: data.usdot_number,
+        mc_number: data.mc_number,
+        city: data.city,
+        state: data.state,
+      });
+
+      if (duplicateCheck.found_duplicates && duplicateCheck.matches.length > 0) {
+        // Show duplicate warning modal
+        setDuplicateMatches(duplicateCheck.matches);
+        setPendingCustomerData(data);
+        setShowDuplicateModal(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // No duplicates, proceed with creation
+      await createCustomer(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to check for duplicates');
+      setIsSubmitting(false);
+    }
+  };
+
+  const createCustomer = async (data: CustomerCreateData) => {
+    try {
       await customersApi.create(data);
       setSuccess(true);
       // Navigate back to customer list after 2 seconds
@@ -63,6 +98,35 @@ export function CustomerCreatePage({ onSuccess }: CustomerCreatePageProps) {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSelectExisting = async (customerId: string) => {
+    try {
+      // Increment selection count for popularity tracking
+      await customersApi.incrementSelection(customerId);
+
+      // Navigate to existing customer
+      setShowDuplicateModal(false);
+      navigate({ to: `/customers/${customerId}` });
+    } catch (err: any) {
+      console.error('Failed to increment selection count:', err);
+      // Still navigate even if tracking fails
+      navigate({ to: `/customers/${customerId}` });
+    }
+  };
+
+  const handleCreateNewAnyway = async () => {
+    setShowDuplicateModal(false);
+    if (pendingCustomerData) {
+      setIsSubmitting(true);
+      await createCustomer(pendingCustomerData);
+    }
+  };
+
+  const handleCancelDuplicate = () => {
+    setShowDuplicateModal(false);
+    setDuplicateMatches([]);
+    setPendingCustomerData(null);
   };
 
   return (
@@ -161,6 +225,15 @@ export function CustomerCreatePage({ onSuccess }: CustomerCreatePageProps) {
           </div>
         )}
       </div>
+
+      {/* Duplicate Warning Modal */}
+      <DuplicateWarningModal
+        matches={duplicateMatches}
+        onSelectExisting={handleSelectExisting}
+        onCreateNew={handleCreateNewAnyway}
+        onCancel={handleCancelDuplicate}
+        isOpen={showDuplicateModal}
+      />
     </div>
   );
 }

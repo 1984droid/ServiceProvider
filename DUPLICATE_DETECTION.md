@@ -212,8 +212,79 @@ REGULATORY_WEIGHT = 0.1  # USDOT/MC# exact match
 ADDRESS_WEIGHT = 0.1     # Physical address
 ```
 
+## Frontend Integration
+
+### Components
+
+**`DuplicateWarningModal`** (`frontend/src/features/customers/DuplicateWarningModal.tsx`)
+- Modal dialog showing potential duplicate matches
+- Color-coded confidence badges (VERY_HIGH=red, HIGH=orange, MEDIUM=yellow, LOW=gray)
+- Match details: name, legal name, USDOT/MC#, location
+- Selection count displayed with star icon
+- Actions: "Use This Customer" or "Create New Customer Anyway"
+
+**`CustomerCreatePage`** (Updated)
+- Automatic duplicate check on form submission
+- Shows duplicate modal if matches found
+- Navigates to existing customer if selected
+- Increments selection_count for popularity tracking
+- Allows override to create anyway
+
+### User Flow
+
+1. **User fills customer form** in CustomerCreatePage
+2. **On submit**, frontend calls `POST /api/customers/check_duplicates/`
+3. **If duplicates found**:
+   - Show DuplicateWarningModal with matches
+   - User can:
+     - **Select existing:** Navigate to customer + increment selection_count
+     - **Create anyway:** Proceed with creation (user override)
+     - **Cancel:** Return to form
+4. **If no duplicates**: Create customer immediately
+
+### TypeScript Types
+
+```typescript
+type DuplicateCheckRequest = {
+  name: string;
+  legal_name?: string;
+  usdot_number?: string;
+  mc_number?: string;
+  city?: string;
+  state?: string;
+};
+
+type DuplicateMatch = {
+  customer: Customer;
+  score: number;
+  confidence: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW';
+  match_details: MatchDetails;
+};
+
+type DuplicateCheckResponse = {
+  found_duplicates: boolean;
+  count: number;
+  matches: DuplicateMatch[];
+};
+```
+
+### API Client Methods
+
+```typescript
+// Check for duplicates
+await customersApi.checkDuplicates({
+  name: "ABC Trucking",
+  usdot_number: "123456",
+  city: "Los Angeles",
+  state: "CA"
+});
+
+// Increment selection count
+await customersApi.incrementSelection(customerId);
+```
+
 ## Future Enhancements
-- [ ] Frontend duplicate warning modal
+- [ ] Real-time duplicate suggestions as user types
 - [ ] Merge duplicate customers functionality
 - [ ] Analytics dashboard for duplicate detection effectiveness
 - [ ] ML-based similarity scoring
