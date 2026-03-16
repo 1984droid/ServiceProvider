@@ -244,9 +244,10 @@ class TestMonolithicTemplateEnums:
         template = TemplateService.get_template_object(template_key)
 
         assert 'severity' in template.enums, f"{template_key} missing severity enum"
-        severity_values = template.enums['severity']
+        severity_options = template.enums['severity']
 
-        # Check standard severity values
+        # Check standard severity values (now EnumOption objects with value/label)
+        severity_values = [opt.value if hasattr(opt, 'value') else opt for opt in severity_options]
         assert 'SAFE' in severity_values
         assert 'UNSAFE_OUT_OF_SERVICE' in severity_values
 
@@ -256,18 +257,22 @@ class TestMonolithicTemplateEnums:
         'ansi_a92_2_load_test_only',
         'ansi_a92_2_major_structural_inspection'
     ])
-    def test_enums_are_lists_not_objects(self, template_key):
-        """Test that enums are simple arrays, not objects."""
+    def test_enums_are_lists_of_enum_options(self, template_key):
+        """Test that enums are lists of EnumOption objects with value/label pairs."""
         template = TemplateService.load_template(template_key)
 
         for enum_name, enum_values in template['enums'].items():
             assert isinstance(enum_values, list), \
                 f"{template_key} enum {enum_name} is not a list"
 
-            # Check all values are strings
-            for value in enum_values:
-                assert isinstance(value, str), \
-                    f"{template_key} enum {enum_name} contains non-string value: {value}"
+            # Each value should be a dict with 'value' and 'label' keys
+            for option in enum_values:
+                assert isinstance(option, dict), \
+                    f"{template_key} enum {enum_name} contains non-dict value: {option}"
+                assert 'value' in option, \
+                    f"{template_key} enum {enum_name} option missing 'value' key: {option}"
+                assert 'label' in option, \
+                    f"{template_key} enum {enum_name} option missing 'label' key: {option}"
 
 
 class TestMonolithicTemplateRules:
@@ -415,15 +420,17 @@ class TestMonolithicTemplateConsistency:
             'ansi_a92_2_major_structural_inspection'
         ]
 
-        severity_enums = []
+        severity_value_sets = []
         for template_key in templates:
             template = TemplateService.get_template_object(template_key)
-            severity_enums.append(set(template.enums['severity']))
+            # Extract 'value' field from each EnumOption object
+            severity_values = set([opt.value for opt in template.enums['severity']])
+            severity_value_sets.append(severity_values)
 
         # All should have the same severity values
-        first = severity_enums[0]
-        for severity_enum in severity_enums[1:]:
-            assert severity_enum == first, "Severity enums are inconsistent across templates"
+        first = severity_value_sets[0]
+        for severity_value_set in severity_value_sets[1:]:
+            assert severity_value_set == first, "Severity enums are inconsistent across templates"
 
     def test_all_use_af_inspection_template_format(self):
         """Test that all templates use AF_INSPECTION_TEMPLATE format."""

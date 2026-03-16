@@ -272,26 +272,26 @@ class WorkOrderSignalsTest(TestCase):
         self.assertEqual(wo.status, 'COMPLETED')
 
     def test_signal_handles_nonexistent_defect(self):
-        """Test signal handler gracefully handles deleted/nonexistent defect."""
+        """Test that source_id validation prevents creation with nonexistent defect."""
+        from django.core.exceptions import ValidationError
         import uuid
 
-        # Create work order with non-existent defect ID
-        wo = WorkOrder.objects.create(
-            customer=self.customer,
-            asset_type='VEHICLE',
-            asset_id=self.vehicle.id,
-            title='Test Work Order',
-            description='Test work order description',
-            source_type='INSPECTION_DEFECT',
-            source_id=uuid.uuid4(),  # Random UUID that doesn't exist
-            status='PENDING',
-            approval_status='APPROVED'
-        )
+        # Attempt to create work order with non-existent defect ID should fail validation
+        with pytest.raises(ValidationError) as exc_info:
+            WorkOrder.objects.create(
+                customer=self.customer,
+                asset_type='VEHICLE',
+                asset_id=self.vehicle.id,
+                title='Test Work Order',
+                description='Test work order description',
+                source_type='INSPECTION_DEFECT',
+                source_id=uuid.uuid4(),  # Random UUID that doesn't exist
+                status='PENDING',
+                approval_status='APPROVED'
+            )
 
-        # Complete work order - should not error
-        wo.status = 'COMPLETED'
-        wo.completed_at = timezone.now()
-        wo.save()
+        # Validation should fail on source_id
+        assert 'source_id' in exc_info.value.message_dict
 
         # No error should occur
 

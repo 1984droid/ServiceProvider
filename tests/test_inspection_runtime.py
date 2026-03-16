@@ -32,7 +32,7 @@ class TestInspectionCreation:
         )
 
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment,
             inspector_name='John Smith'
         )
@@ -41,7 +41,7 @@ class TestInspectionCreation:
         assert inspection.asset_type == 'EQUIPMENT'
         assert inspection.asset_id == equipment.id
         assert inspection.customer == equipment.customer
-        assert inspection.template_key == 'ansi_a92_2_periodic_dielectric'
+        assert inspection.template_key == 'ansi_a92_2_periodic_dielectric_test'
         assert inspection.status == 'DRAFT'
         assert inspection.inspector_name == 'John Smith'
         assert inspection.template_snapshot is not None
@@ -51,7 +51,7 @@ class TestInspectionCreation:
         vehicle = VehicleFactory()
 
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=vehicle,
             inspector_name='Jane Doe'
         )
@@ -63,7 +63,7 @@ class TestInspectionCreation:
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
 
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -77,7 +77,7 @@ class TestInspectionCreation:
 
         # This should work - equipment customer matches
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -90,7 +90,7 @@ class TestInspectionCreation:
         start_time = timezone.now()
 
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment,
             started_at=start_time
         )
@@ -105,7 +105,7 @@ class TestStepResponseSaving:
     def test_save_step_response_simple(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -129,7 +129,7 @@ class TestStepResponseSaving:
     def test_save_step_response_updates_status(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -148,7 +148,7 @@ class TestStepResponseSaving:
     def test_save_step_response_validation_fails(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -168,7 +168,7 @@ class TestStepResponseSaving:
     def test_save_step_response_skip_validation(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -189,7 +189,7 @@ class TestStepResponseSaving:
     def test_save_step_response_to_finalized_inspection_fails(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -210,7 +210,7 @@ class TestStepResponseSaving:
     def test_save_step_response_invalid_step_key(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -229,7 +229,7 @@ class TestStepResponseRetrieval:
     def test_get_step_response_exists(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -248,7 +248,7 @@ class TestStepResponseRetrieval:
     def test_get_step_response_not_exists(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -263,7 +263,7 @@ class TestCompletionTracking:
     def test_calculate_completion_empty(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -277,7 +277,7 @@ class TestCompletionTracking:
     def test_calculate_completion_partial(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -298,7 +298,7 @@ class TestCompletionTracking:
     def test_calculate_completion_to_dict(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -321,7 +321,7 @@ class TestFinalization:
     def test_finalize_ready_inspection(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -338,7 +338,7 @@ class TestFinalization:
     def test_finalize_with_signature(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -360,7 +360,7 @@ class TestFinalization:
     def test_finalize_already_finalized_fails(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -374,7 +374,7 @@ class TestFinalization:
     def test_finalize_incomplete_without_force_fails(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -385,7 +385,7 @@ class TestFinalization:
     def test_finalize_makes_immutable(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -407,7 +407,7 @@ class TestUtilityMethods:
     def test_get_next_incomplete_step(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -418,7 +418,7 @@ class TestUtilityMethods:
     def test_get_next_incomplete_step_after_completion(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -440,7 +440,7 @@ class TestUtilityMethods:
     def test_clear_step_response(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 
@@ -463,7 +463,7 @@ class TestUtilityMethods:
     def test_clear_step_response_finalized_fails(self):
         equipment = EquipmentFactory(capabilities=['AERIAL_DEVICE'])
         inspection = InspectionRuntime.create_inspection(
-            template_key='ansi_a92_2_periodic_dielectric',
+            template_key='ansi_a92_2_periodic_dielectric_test',
             asset=equipment
         )
 

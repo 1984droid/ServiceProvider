@@ -71,9 +71,9 @@ class TestDepartmentModel:
 
         # Name has sequence appended, so check it starts with the base name
         assert department.name.startswith(default_data['name'])
-        assert department.description == default_data['description']
-        assert department.is_active == default_data['is_active']
-        assert department.allows_floating == default_data['allows_floating']
+        assert department.description == default_data.get('description', '')
+        assert department.is_active == default_data.get('is_active', True)
+        assert department.allows_floating == default_data.get('allows_floating', True)
 
     def test_department_creation_variants(self):
         """Test creating department variants."""

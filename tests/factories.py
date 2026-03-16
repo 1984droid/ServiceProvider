@@ -505,19 +505,19 @@ class CompanyFactory(DjangoModelFactory):
     class Meta:
         model = Company
 
-    name = factory.LazyFunction(lambda: get_test_data('company', 'default')['name'])
-    dba_name = factory.LazyFunction(lambda: get_test_data('company', 'default')['dba_name'])
-    phone = factory.LazyFunction(lambda: get_test_data('company', 'default')['phone'])
-    email = factory.LazyFunction(lambda: get_test_data('company', 'default')['email'])
-    website = factory.LazyFunction(lambda: get_test_data('company', 'default')['website'])
-    address_line1 = factory.LazyFunction(lambda: get_test_data('company', 'default')['address_line1'])
-    address_line2 = factory.LazyFunction(lambda: get_test_data('company', 'default')['address_line2'])
-    city = factory.LazyFunction(lambda: get_test_data('company', 'default')['city'])
-    state = factory.LazyFunction(lambda: get_test_data('company', 'default')['state'])
-    zip_code = factory.LazyFunction(lambda: get_test_data('company', 'default')['zip_code'])
-    tax_id = factory.LazyFunction(lambda: get_test_data('company', 'default')['tax_id'])
-    usdot_number = factory.LazyFunction(lambda: get_test_data('company', 'default')['usdot_number'])
-    settings = factory.LazyFunction(lambda: get_test_data('company', 'default')['settings'])
+    name = factory.LazyFunction(lambda: get_test_data('company', 'default').get('name', 'Test Company'))
+    dba_name = factory.LazyFunction(lambda: get_test_data('company', 'default').get('dba_name', ''))
+    phone = ''
+    email = ''
+    website = ''
+    address_line1 = factory.LazyFunction(lambda: get_test_data('company', 'default').get('address_line1', ''))
+    address_line2 = ''
+    city = factory.LazyFunction(lambda: get_test_data('company', 'default').get('city', ''))
+    state = factory.LazyFunction(lambda: get_test_data('company', 'default').get('state', ''))
+    zip_code = factory.LazyFunction(lambda: get_test_data('company', 'default').get('zip_code', ''))
+    tax_id = ''
+    usdot_number = ''
+    settings = factory.Dict({})
 
     @classmethod
     def minimal(cls, **kwargs):
