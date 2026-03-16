@@ -19,15 +19,6 @@ export interface InspectionTemplate {
   step_count?: number;
   rule_count?: number;
   required_capabilities?: string[] | null;
-
-  // Legacy fields for backwards compatibility
-  key?: string;
-  version?: string;
-  description?: string;
-  equipment_types?: string[];
-  vehicle_types?: string[];
-  published?: boolean;
-  standard_reference?: string;
 }
 
 export interface TemplateListResponse {

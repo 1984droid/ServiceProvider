@@ -223,10 +223,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
         """
         vehicle = self.get_object()
 
-        # TODO: Implement actual VIN decode via NHTSA API
-        # https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/{VIN}?format=json
-
-        # Placeholder response
+        # Placeholder response (NHTSA API integration not implemented)
         decode_data = {
             'vin': vehicle.vin,
             'decoded': False,
@@ -577,10 +574,7 @@ class VINDecodeDataViewSet(viewsets.ModelViewSet):
         # Clean VIN
         clean_vin = vin.upper().strip()
 
-        # TODO: Implement actual NHTSA API integration
-        # https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/{VIN}?format=json
-
-        # Placeholder response structure
+        # Placeholder response structure (NHTSA API integration not implemented)
         decode_result = {
             'vin': clean_vin,
             'decoded': False,

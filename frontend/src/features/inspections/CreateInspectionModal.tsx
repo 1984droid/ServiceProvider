@@ -165,13 +165,12 @@ export function CreateInspectionModal({
                 </label>
                 <div className="space-y-2">
                   {templates.map((template) => {
-                    const templateKey = template.template_key || template.key || '';
                     return (
                       <button
-                        key={templateKey}
-                        onClick={() => setSelectedTemplate(templateKey)}
+                        key={template.template_key}
+                        onClick={() => setSelectedTemplate(template.template_key)}
                         className={`w-full text-left border rounded-lg p-4 transition-all ${
-                          selectedTemplate === templateKey
+                          selectedTemplate === template.template_key
                             ? 'border-blue-500 bg-blue-50 ring-2 ring-2-blue-500'
                             : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                         }`}
@@ -179,17 +178,16 @@ export function CreateInspectionModal({
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h4 className="font-semibold text-gray-900">{template.name}</h4>
-                            {(template.standard_code || template.standard_reference) && (
+                            {template.standard_code && (
                               <p className="text-xs text-gray-500 mt-0.5">
                                 {template.standard_code} {template.standard_revision && `(${template.standard_revision})`}
-                                {!template.standard_code && template.standard_reference}
                               </p>
                             )}
                             {template.inspection_kind && (
                               <p className="text-xs text-gray-500 mt-1">{template.inspection_kind}</p>
                             )}
                           </div>
-                          {selectedTemplate === templateKey && (
+                          {selectedTemplate === template.template_key && (
                             <svg className="w-6 h-6 text-blue-600 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>

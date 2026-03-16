@@ -196,11 +196,7 @@ class RuleEvaluator:
         if step_key and step_key not in step_data:
             return False  # Step not completed
 
-        # TODO: Add support for more complex when conditions
-        # - field_equals
-        # - all/any conditions
-        # For now, just check step existence
-
+        # Only step existence checking is implemented
         return True
 
     @classmethod

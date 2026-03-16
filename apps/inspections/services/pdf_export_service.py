@@ -402,17 +402,12 @@ class InspectionPDFExporter:
 
         # Parse template structure
         procedure = template_snapshot.get('procedure', {})
-        modules = template_snapshot.get('modules', [])
 
-        # Handle both procedure-based and module-based templates
+        # Build procedure steps
         if procedure and 'steps' in procedure:
-            # New procedure-based format
             elements.extend(self._build_procedure_steps(procedure, step_data))
-        elif modules:
-            # Legacy module-based format
-            elements.extend(self._build_module_steps(modules, step_data))
         else:
-            # Fallback: raw step data
+            # Fallback: raw step data if procedure not available
             elements.extend(self._build_raw_step_data(step_data))
 
         return elements
@@ -497,74 +492,6 @@ class InspectionPDFExporter:
         ]))
 
         elements.append(table)
-        return elements
-
-    def _build_module_steps(self, modules, step_data):
-        """Build steps from module-based template (legacy)."""
-        elements = []
-
-        elements.append(Paragraph("Inspection Results", self.styles['SectionHeader']))
-
-        for module in modules:
-            module_name = module.get('name', 'Unknown Module')
-            module_steps = module.get('steps', [])
-
-            if not module_steps:
-                continue
-
-            # Module header
-            elements.append(Paragraph(module_name, self.styles['SubSection']))
-
-            # Build step table for this module
-            data = [['Step', 'Result', 'Status']]
-
-            for step in module_steps:
-                step_key = step.get('step_key')
-                title = step.get('title', step_key)
-                standard_ref = step.get('standard_reference', '')
-                standard_text_data = step.get('standard_text', {})
-
-                response = step_data.get(step_key, 'Not Performed')
-                formatted_response = self._format_step_response(response, step)
-                status = self._determine_step_status(response, step)
-
-                # Build step title with standard reference
-                step_title_parts = [title]
-
-                if standard_ref:
-                    step_title_parts.append(f"\n<font size=7 color='#7f8c8d'>{standard_ref}</font>")
-
-                if standard_text_data and 'excerpt' in standard_text_data:
-                    excerpt = standard_text_data['excerpt']
-                    if len(excerpt) > 120:
-                        excerpt = excerpt[:117] + '...'
-                    step_title_parts.append(f"\n<font size=6 color='#95a5a6'><i>\"{excerpt}\"</i></font>")
-
-                step_title_html = ''.join(step_title_parts)
-
-                data.append([Paragraph(step_title_html, self.styles['ReportBody']), formatted_response, status])
-
-            # Create table
-            table = Table(data, colWidths=[3*inch, 2*inch, 1*inch])
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495e')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 9),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 8),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 3),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ecf0f1')]),
-            ]))
-
-            elements.append(table)
-            elements.append(Spacer(1, 0.1*inch))
-
         return elements
 
     def _build_raw_step_data(self, step_data):

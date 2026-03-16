@@ -241,8 +241,7 @@ class TemplateFilterService:
         Returns:
             True if template applies to this body type
         """
-        # TODO: Implement when we create body-type-specific templates
-        # For now, all vehicle templates apply to all body types
+        # All vehicle templates apply to all body types
         return True
 
     @classmethod
