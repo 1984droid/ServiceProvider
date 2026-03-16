@@ -50,6 +50,9 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Windows null device corruption
+nul
+
 # Testing
 .coverage
 htmlcov/
