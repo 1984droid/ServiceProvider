@@ -494,3 +494,143 @@ class PDFStandardTextIntegrationTest(TestCase):
             # Verify it starts with PDF header
             pdf_content = pdf_buffer.getvalue()
             self.assertTrue(pdf_content.startswith(b'%PDF'))
+
+
+class PDFPhotoEmbeddingTest(TestCase):
+    """Test PDF generation with photo embedding."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        from PIL import Image as PILImage
+        import os
+        from django.conf import settings
+
+        # Create customer
+        self.customer = Customer.objects.create(
+            name="Test Customer",
+            city="Chicago",
+            state="IL"
+        )
+
+        # Create vehicle
+        self.vehicle = Vehicle.objects.create(
+            customer=self.customer,
+            vin="1HGCM82633A123456",
+            unit_number="TEST-001",
+            year=2020,
+            make="Ford",
+            model="F-350"
+        )
+
+        # Create inspection
+        self.inspection = InspectionRun.objects.create(
+            asset_type='VEHICLE',
+            asset_id=self.vehicle.id,
+            customer=self.customer,
+            template_key='test_inspection',
+            status='COMPLETED',
+            started_at=timezone.now(),
+            finalized_at=timezone.now(),
+            template_snapshot={'modules': [], 'metadata': {}}
+        )
+
+        # Create defect
+        self.defect = InspectionDefect.objects.create(
+            inspection_run=self.inspection,
+            defect_identity=hashlib.sha256(b'test_photo_defect').hexdigest(),
+            step_key='visual_inspection',
+            severity='CRITICAL',
+            status='OPEN',
+            title='Hydraulic Leak with Photo Evidence',
+            description='Leak detected on boom cylinder',
+            defect_details={'location': 'BOOM'}
+        )
+
+        # Create test image files for photos
+        self.test_images = []
+        media_root = Path(settings.MEDIA_ROOT)
+        test_photo_dir = media_root / 'test_photos'
+        test_photo_dir.mkdir(parents=True, exist_ok=True)
+
+        for i in range(3):
+            # Create a small test image
+            img = PILImage.new('RGB', (300, 300), color=(100 + i*50, 150, 200))
+            img_path = test_photo_dir / f'test_photo_{i}.jpg'
+            img.save(img_path, 'JPEG')
+            self.test_images.append(img_path)
+
+    def tearDown(self):
+        """Clean up test files."""
+        import shutil
+        from django.conf import settings
+
+        # Remove test photos
+        test_photo_dir = Path(settings.MEDIA_ROOT) / 'test_photos'
+        if test_photo_dir.exists():
+            shutil.rmtree(test_photo_dir)
+
+    def test_pdf_with_embedded_photos(self):
+        """Test PDF generation includes embedded photo thumbnails."""
+        from apps.inspections.models import InspectionPhoto
+        from django.core.files import File
+
+        # Add photos to defect
+        for i, img_path in enumerate(self.test_images):
+            with open(img_path, 'rb') as f:
+                photo = InspectionPhoto.objects.create(
+                    inspection=self.inspection,
+                    defect=self.defect,
+                    step_key='visual_inspection',
+                    image=File(f, name=f'test_photo_{i}.jpg'),
+                    caption=f'Photo {i+1} of hydraulic leak'
+                )
+
+        # Generate PDF
+        exporter = InspectionPDFExporter(self.inspection)
+        pdf_buffer = exporter.generate()
+
+        # Verify PDF was generated
+        self.assertIsNotNone(pdf_buffer)
+        pdf_content = pdf_buffer.getvalue()
+        self.assertGreater(len(pdf_content), 0)
+        self.assertTrue(pdf_content.startswith(b'%PDF'))
+
+        # Verify PDF is larger than one without photos (photos add content)
+        # Create a baseline inspection without photos
+        inspection_no_photos = InspectionRun.objects.create(
+            asset_type='VEHICLE',
+            asset_id=self.vehicle.id,
+            customer=self.customer,
+            template_key='test_inspection',
+            status='COMPLETED',
+            started_at=timezone.now(),
+            finalized_at=timezone.now(),
+            template_snapshot={'modules': [], 'metadata': {}}
+        )
+
+        InspectionDefect.objects.create(
+            inspection_run=inspection_no_photos,
+            defect_identity=hashlib.sha256(b'test_no_photo').hexdigest(),
+            step_key='visual_inspection',
+            severity='CRITICAL',
+            status='OPEN',
+            title='Defect without photos',
+            description='No photo evidence'
+        )
+
+        exporter_no_photos = InspectionPDFExporter(inspection_no_photos)
+        pdf_no_photos = exporter_no_photos.generate()
+
+        # PDF with photos should be larger
+        self.assertGreater(len(pdf_content), len(pdf_no_photos.getvalue()))
+
+    def test_pdf_without_photos(self):
+        """Test PDF generation works normally when defect has no photos."""
+        # Generate PDF (defect has no photos)
+        exporter = InspectionPDFExporter(self.inspection)
+        pdf_buffer = exporter.generate()
+
+        # Verify PDF was generated
+        self.assertIsNotNone(pdf_buffer)
+        self.assertGreater(len(pdf_buffer.getvalue()), 0)
+        self.assertTrue(pdf_buffer.getvalue().startswith(b'%PDF'))

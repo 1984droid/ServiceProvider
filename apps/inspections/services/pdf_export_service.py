@@ -16,11 +16,11 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, KeepTogether
+    PageBreak, KeepTogether, Image
 )
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 
-from apps.inspections.models import InspectionRun
+from apps.inspections.models import InspectionRun, InspectionPhoto
 
 
 class InspectionPDFExporter:
@@ -793,11 +793,6 @@ class InspectionPDFExporter:
         if corrective_action:
             data.append(['Corrective Action:', corrective_action])
 
-        # Photo Evidence
-        photos = defect_details.get('photos', [])
-        if photos:
-            data.append(['Photo Evidence:', f"{len(photos)} photo(s) attached"])
-
         # Status
         data.append(['Status:', defect.get_status_display()])
 
@@ -821,6 +816,101 @@ class InspectionPDFExporter:
         ]))
 
         elements.append(detail_table)
+
+        # Add photo evidence thumbnails if available
+        photo_grid = self._build_photo_grid(defect)
+        if photo_grid:
+            elements.append(Spacer(1, 0.1*inch))
+            elements.append(Paragraph(
+                f"Photo Evidence ({len(defect.photos.all())} photo(s)):",
+                self.styles['ReportSmall']
+            ))
+            elements.append(Spacer(1, 0.05*inch))
+            elements.extend(photo_grid)
+
+        return elements
+
+    def _build_photo_grid(self, defect):
+        """
+        Build a grid of photo thumbnails for a defect.
+
+        Limits to 3 photos maximum to keep PDF file size reasonable.
+        Uses thumbnails (300x300) for optimal file size.
+
+        Args:
+            defect: InspectionDefect instance
+
+        Returns:
+            List of reportlab elements or None if no photos
+        """
+        import os
+        from django.conf import settings
+
+        # Get photos for this defect
+        photos = defect.photos.all()[:3]  # Limit to 3 photos
+
+        if not photos:
+            return None
+
+        elements = []
+        photo_images = []
+
+        # Build Image objects for each photo
+        for photo in photos:
+            try:
+                # Use thumbnail if available, otherwise original
+                image_path = photo.thumbnail.path if photo.thumbnail else photo.image.path
+
+                # Check if file exists
+                if not os.path.exists(image_path):
+                    continue
+
+                # Create reportlab Image with fixed size (2 inches wide, maintaining aspect ratio)
+                img = Image(image_path, width=2*inch, height=2*inch)
+                photo_images.append(img)
+
+            except Exception as e:
+                # Skip photos that can't be loaded
+                continue
+
+        if not photo_images:
+            return None
+
+        # Create a table to display photos in a row (up to 3 photos per row)
+        # Calculate dynamic column widths based on number of photos
+        num_photos = len(photo_images)
+        col_width = 2*inch
+        spacing = 0.2*inch
+
+        if num_photos == 1:
+            # Single photo, centered
+            photo_table = Table([[photo_images[0]]], colWidths=[col_width])
+        elif num_photos == 2:
+            # Two photos side by side
+            photo_table = Table([photo_images], colWidths=[col_width, col_width])
+        else:
+            # Three photos in a row
+            photo_table = Table([photo_images], colWidths=[col_width, col_width, col_width])
+
+        photo_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('LEFTPADDING', (0, 0), (-1, -1), spacing/2),
+            ('RIGHTPADDING', (0, 0), (-1, -1), spacing/2),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+        ]))
+
+        elements.append(photo_table)
+
+        # Add note if more photos exist
+        total_photos = defect.photos.count()
+        if total_photos > 3:
+            elements.append(Spacer(1, 0.05*inch))
+            elements.append(Paragraph(
+                f"<i>({total_photos - 3} additional photo(s) not shown)</i>",
+                self.styles['ReportSmall']
+            ))
 
         return elements
 
