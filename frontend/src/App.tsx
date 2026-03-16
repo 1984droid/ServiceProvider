@@ -84,12 +84,6 @@ function App() {
     window.history.pushState({}, '', `/inspections/${inspectionId}`);
   };
 
-  const navigateToInspectionReview = (inspectionId: string) => {
-    setNavState({ inspectionId });
-    setCurrentPage('inspection-review');
-    window.history.pushState({}, '', `/inspections/${inspectionId}/review`);
-  };
-
   const navigateToWorkOrder = (workOrderId: string) => {
     setNavState({ workOrderId });
     setCurrentPage('work-order-detail');

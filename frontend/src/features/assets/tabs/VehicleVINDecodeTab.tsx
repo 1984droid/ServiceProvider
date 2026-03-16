@@ -21,11 +21,7 @@ export function VehicleVINDecodeTab({ vehicle, onVINDecoded }: VehicleVINDecodeT
     setDecodeError(null);
 
     try {
-      // TODO: Implement VIN decode API call
-      // await vehiclesApi.decodeVIN(vehicle.id);
-      console.log('Decode VIN:', vehicle.vin);
-
-      // For now, show placeholder
+      // VIN decode API integration not implemented
       setDecodeError('VIN decode API integration coming soon');
 
       // onVINDecoded();

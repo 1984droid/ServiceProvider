@@ -216,9 +216,9 @@ class DefectGenerator:
                     )
                     if defect:
                         defects.append(defect)
-                except Exception as e:
-                    # Log error but continue processing other defects
-                    print(f"Error processing manual defect in step {step_key}: {e}")
+                except Exception:
+                    # Skip invalid defects and continue processing
+                    pass
 
         return defects
 

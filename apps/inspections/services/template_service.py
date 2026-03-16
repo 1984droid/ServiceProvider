@@ -181,9 +181,8 @@ class TemplateService:
                     template = cls.get_template_object(template_file.stem, use_cache=False)
                     summary = TemplateSummary.from_template(template)
                     templates.append(summary.model_dump())
-                except (TemplateNotFoundError, TemplateValidationError) as e:
-                    # Log error but continue
-                    print(f"Warning: Skipping invalid template {template_file.name}: {e}")
+                except (TemplateNotFoundError, TemplateValidationError):
+                    # Skip invalid templates silently
                     continue
 
         # Sort by name

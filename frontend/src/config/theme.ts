@@ -32,8 +32,6 @@ export async function loadTheme(theme: Theme): Promise<void> {
 
   // In a real implementation, you would dynamically load the CSS file
   // For now, we'll rely on the @import in index.css
-  // But this function can be used to switch themes at runtime
-  console.log(`Loading theme: ${themeConfig.name}`);
 }
 
 /**

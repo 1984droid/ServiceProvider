@@ -180,9 +180,7 @@ export function InspectionExecutePage({
   };
 
   const handleComplete = async () => {
-    // TODO: Add validation in Milestone 7
-    // TODO: Add finalize API call in Milestone 7
-    console.log('Complete inspection - will implement in Milestone 7');
+    // Validation and finalize API call not yet implemented
   };
 
   // Loading state
