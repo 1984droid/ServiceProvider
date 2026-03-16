@@ -72,6 +72,18 @@ class Customer(BaseModel):
     # Internal Notes
     notes = models.TextField(blank=True, help_text="Internal notes about this customer")
 
+    # Popularity Tracking (for duplicate detection ranking)
+    selection_count = models.IntegerField(
+        default=0,
+        db_index=True,
+        help_text="Number of times this customer has been selected (for ranking duplicate detection results)"
+    )
+    last_selected_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last time this customer was selected"
+    )
+
     class Meta:
         db_table = 'customers'
         ordering = ['name']
@@ -80,6 +92,7 @@ class Customer(BaseModel):
             models.Index(fields=['usdot_number']),
             models.Index(fields=['mc_number']),
             models.Index(fields=['primary_contact']),
+            models.Index(fields=['-selection_count']),  # For popularity ranking
         ]
 
     def clean(self):

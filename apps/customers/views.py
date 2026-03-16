@@ -7,6 +7,7 @@ Provides REST API endpoints for:
 - USDOTProfile management
 """
 
+import logging
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -23,6 +24,8 @@ from .serializers import (
     ContactDetailSerializer,
     USDOTProfileSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -171,6 +174,98 @@ class CustomerViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': 'Contact not found or does not belong to this customer'},
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=False, methods=['post'])
+    def check_duplicates(self, request):
+        """
+        Check for potential duplicate customers before creation
+        POST /api/customers/check_duplicates/
+        Body: {
+            "name": "ABC Trucking",
+            "legal_name": "ABC Trucking LLC",
+            "usdot_number": "123456",
+            "mc_number": "MC-123456",
+            "city": "Los Angeles",
+            "state": "CA",
+            "exclude_customer_id": "uuid"  // Optional: for update scenarios
+        }
+
+        Returns list of potential duplicates with similarity scores
+        """
+        from .services import DuplicateDetectionService
+
+        name = request.data.get('name', '').strip()
+        if not name:
+            return Response(
+                {'error': 'name is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        service = DuplicateDetectionService()
+
+        try:
+            matches = service.find_duplicates(
+                name=name,
+                legal_name=request.data.get('legal_name'),
+                usdot_number=request.data.get('usdot_number'),
+                mc_number=request.data.get('mc_number'),
+                city=request.data.get('city'),
+                state=request.data.get('state'),
+                max_results=10,
+                exclude_customer_id=request.data.get('exclude_customer_id')
+            )
+
+            # Serialize results
+            results = []
+            for match in matches:
+                customer = match['customer']
+                results.append({
+                    'customer': CustomerListSerializer(customer).data,
+                    'score': match['score'],
+                    'confidence': match['confidence'],
+                    'match_details': match['match_details'],
+                })
+
+            return Response({
+                'found_duplicates': len(results) > 0,
+                'count': len(results),
+                'matches': results
+            })
+
+        except Exception as e:
+            logger.error(f"Error checking duplicates: {e}")
+            return Response(
+                {'error': 'Failed to check for duplicates', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'])
+    def increment_selection(self, request, pk=None):
+        """
+        Increment selection count for popularity tracking
+        POST /api/customers/{id}/increment_selection/
+
+        Called when user selects this customer (e.g., from duplicate matches or search results)
+        Returns updated customer data
+        """
+        from .services import DuplicateDetectionService
+
+        customer = self.get_object()
+        service = DuplicateDetectionService()
+
+        try:
+            service.increment_selection_count(str(customer.id))
+            customer.refresh_from_db()
+
+            serializer = self.get_serializer(customer)
+            return Response(serializer.data)
+
+        except Exception as e:
+            logger.error(f"Error incrementing selection count: {e}")
+            return Response(
+                {'error': 'Failed to increment selection count', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     @action(detail=True, methods=['get'])
