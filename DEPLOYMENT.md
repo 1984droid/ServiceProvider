@@ -13,9 +13,10 @@ The Dockerfile uses a multi-stage build:
 
 **Stage 1: Frontend Builder**
 - Uses Node.js 22 to build the React/Vite frontend
-- Runs `npm ci` to install dependencies
-- Runs `npm run build` to create production build
+- Runs `npm ci` to install dependencies (with `--legacy-peer-deps` via `.npmrc`)
+- Runs `npm run build` to create production build (skips TypeScript checking for faster builds)
 - Output: `/frontend/dist` directory with static assets
+- Note: TypeScript checking available via `npm run build:check` for development
 
 **Stage 2: Python Builder**
 - Builds Python virtual environment with all dependencies
