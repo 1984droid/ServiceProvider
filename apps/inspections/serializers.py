@@ -328,3 +328,113 @@ class PhotoUploadSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Defect not found")
 
         return data
+
+
+class CreateWorkOrdersRequestSerializer(serializers.Serializer):
+    """
+    Serializer for creating work orders from inspection defects.
+
+    Request body validation for POST /api/inspections/{id}/create_work_orders/
+    """
+
+    defect_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        allow_empty=True,
+        help_text="List of defect UUIDs to create work orders for. If empty or not provided, all OPEN defects will be used."
+    )
+
+    group_by_location = serializers.BooleanField(
+        default=False,
+        help_text="If true, groups defects by service_location into single work orders with multiple lines. If false, creates one work order per defect."
+    )
+
+    department_id = serializers.UUIDField(
+        required=True,
+        help_text="UUID of the department to assign work orders to. Required field."
+    )
+
+    auto_approve = serializers.BooleanField(
+        default=False,
+        help_text="If true, automatically approves the created work orders (sets approval_status='APPROVED'). Default is false (PENDING_APPROVAL)."
+    )
+
+    def validate_department_id(self, value):
+        """Validate department exists."""
+        from apps.organization.models import Department
+
+        try:
+            Department.objects.get(id=value)
+        except Department.DoesNotExist:
+            raise serializers.ValidationError(f"Department with id {value} does not exist")
+
+        return value
+
+    def validate(self, data):
+        """Cross-field validation."""
+        # Get inspection from context
+        inspection = self.context.get('inspection')
+
+        if not inspection:
+            raise serializers.ValidationError("Inspection context required")
+
+        # Validate inspection is completed
+        if inspection.status != 'COMPLETED':
+            raise serializers.ValidationError(
+                "Inspection must be finalized (status='COMPLETED') before creating work orders. "
+                f"Current status: {inspection.status}"
+            )
+
+        # Validate defect_ids if provided
+        defect_ids = data.get('defect_ids')
+        if defect_ids:
+            # Check all defects exist and belong to this inspection
+            from apps.inspections.models import InspectionDefect
+
+            existing_defects = InspectionDefect.objects.filter(
+                id__in=defect_ids,
+                inspection_run=inspection
+            )
+
+            if existing_defects.count() != len(defect_ids):
+                found_ids = set(str(d.id) for d in existing_defects)
+                provided_ids = set(str(d) for d in defect_ids)
+                missing_ids = provided_ids - found_ids
+                raise serializers.ValidationError(
+                    f"Some defect IDs do not exist or do not belong to this inspection: {missing_ids}"
+                )
+
+            # Check at least one defect is OPEN
+            open_defects = existing_defects.filter(status='OPEN')
+            if not open_defects.exists():
+                raise serializers.ValidationError(
+                    "None of the specified defects have status='OPEN'. "
+                    "Work orders can only be created from OPEN defects."
+                )
+
+        return data
+
+
+class WorkOrderSummarySerializer(serializers.Serializer):
+    """
+    Summary of a created work order.
+
+    Used in the response for create_work_orders endpoint.
+    """
+
+    id = serializers.UUIDField(help_text="Work order UUID")
+    work_order_number = serializers.CharField(help_text="Auto-generated work order number (e.g. WO-2026-00123)")
+    title = serializers.CharField(help_text="Work order title")
+    priority = serializers.CharField(help_text="Work order priority (LOW, NORMAL, HIGH, EMERGENCY)")
+    line_count = serializers.IntegerField(help_text="Number of work order lines (tasks)")
+    defect_count = serializers.IntegerField(help_text="Number of defects associated with this work order")
+
+
+class CreateWorkOrdersResponseSerializer(serializers.Serializer):
+    """
+    Response serializer for create_work_orders endpoint.
+    """
+
+    created_work_orders = WorkOrderSummarySerializer(many=True)
+    total_work_orders = serializers.IntegerField(help_text="Total number of work orders created")
+    total_defects_processed = serializers.IntegerField(help_text="Total number of defects processed")

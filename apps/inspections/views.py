@@ -38,7 +38,9 @@ from .serializers import (
     CreateInspectionSerializer,
     SaveStepResponseSerializer,
     FinalizeInspectionSerializer,
-    InspectionDefectSerializer
+    InspectionDefectSerializer,
+    CreateWorkOrdersRequestSerializer,
+    CreateWorkOrdersResponseSerializer
 )
 
 
@@ -520,8 +522,9 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
         if self.action == 'destroy':
             # Only admins can delete inspections
             return [IsAuthenticated(), IsAdmin(), CannotEditFinalizedInspection()]
-        elif self.action in ['list', 'retrieve', 'export_pdf', 'defects', 'completion']:
-            # Read-only actions require authentication only
+        elif self.action in ['list', 'retrieve', 'export_pdf', 'defects', 'completion', 'create_work_orders']:
+            # Read-only actions and work order creation require authentication only
+            # (create_work_orders has its own validation that inspection must be COMPLETED)
             return [IsAuthenticated()]
         else:
             # Create, update, finalize require custom permissions
@@ -1315,3 +1318,134 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
         photo.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])
+    def create_work_orders(self, request, pk=None):
+        """
+        Generate work orders from inspection defects.
+
+        POST /api/inspections/{id}/create_work_orders/
+
+        Request body:
+        {
+            "defect_ids": ["uuid1", "uuid2"],  // Optional - defaults to all OPEN defects
+            "group_by_location": false,  // Optional - defaults to false
+            "department_id": "uuid",  // Required
+            "auto_approve": false  // Optional - defaults to false
+        }
+
+        Returns:
+            200: Work orders created successfully
+            400: Validation error (inspection not completed, invalid defects, etc.)
+            404: Inspection not found
+
+        Example Response:
+        {
+            "created_work_orders": [
+                {
+                    "id": "uuid",
+                    "work_order_number": "WO-2026-00123",
+                    "title": "Fix Hydraulic System Leak",
+                    "priority": "HIGH",
+                    "line_count": 2,
+                    "defect_count": 2
+                }
+            ],
+            "total_work_orders": 1,
+            "total_defects_processed": 2
+        }
+        """
+        from .services.defect_to_work_order_service import DefectToWorkOrderService
+
+        inspection = self.get_object()
+
+        # Validate request
+        serializer = CreateWorkOrdersRequestSerializer(
+            data=request.data,
+            context={'inspection': inspection}
+        )
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Extract validated data
+            defect_ids = serializer.validated_data.get('defect_ids')
+            group_by_location = serializer.validated_data.get('group_by_location', False)
+            department_id = serializer.validated_data.get('department_id')
+            auto_approve = serializer.validated_data.get('auto_approve', False)
+
+            # Handle specific defect IDs if provided
+            if defect_ids:
+                # Filter to specific defects only (already validated by serializer)
+                defects = InspectionDefect.objects.filter(
+                    id__in=defect_ids,
+                    inspection_run=inspection,
+                    status='OPEN'
+                )
+
+                # Generate work orders individually for specific defects (no grouping for specific IDs)
+                work_orders = []
+                for defect in defects:
+                    wo = DefectToWorkOrderService.generate_work_order_from_defect(
+                        defect=defect,
+                        department_id=department_id,
+                        auto_approve=auto_approve
+                    )
+                    work_orders.append(wo)
+            else:
+                # Generate work orders from all OPEN defects
+                work_orders = DefectToWorkOrderService.generate_work_orders_from_inspection(
+                    inspection=inspection,
+                    group_by_location=group_by_location,
+                    department_id=department_id,
+                    auto_approve=auto_approve
+                )
+
+            # Check if any work orders were created
+            if not work_orders:
+                return Response(
+                    {'error': 'No OPEN defects found to create work orders from'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Build response
+            work_order_summaries = []
+
+            for wo in work_orders:
+                # Count defects for this work order
+                if wo.source_id == inspection.id:
+                    # Grouped WO - count lines (each line = one defect)
+                    defect_count = wo.lines.count()
+                else:
+                    # Individual WO - one defect
+                    defect_count = 1
+
+                work_order_summaries.append({
+                    'id': str(wo.id),
+                    'work_order_number': wo.work_order_number,
+                    'title': wo.title,
+                    'priority': wo.priority,
+                    'line_count': wo.lines.count(),
+                    'defect_count': defect_count
+                })
+
+            # Count total defects that were processed
+            total_defects_processed = InspectionDefect.objects.filter(
+                inspection_run=inspection,
+                status='WORK_ORDER_CREATED'
+            ).count()
+
+            response_serializer = CreateWorkOrdersResponseSerializer({
+                'created_work_orders': work_order_summaries,
+                'total_work_orders': len(work_orders),
+                'total_defects_processed': total_defects_processed
+            })
+
+            return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to create work orders: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
