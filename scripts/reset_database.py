@@ -65,9 +65,9 @@ def reset_database(skip_confirm=False):
     call_command('create_roles')
     print("[OK] Groups created")
 
-    print("\n[4/5] Seeding test data...")
-    call_command('seed_data')
-    print("[OK] Test data seeded")
+    print("\n[4/5] Seeding realistic test data...")
+    call_command('seed_data_realistic', '--clear')
+    print("[OK] Realistic test data seeded")
 
     print("\n[5/5] Granting superuser privileges to admin employee...")
     from django.contrib.auth import get_user_model
