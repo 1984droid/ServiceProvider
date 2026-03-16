@@ -4,6 +4,7 @@ Tests for Work Order Signals (Phase 5)
 Tests status synchronization between work orders and defects.
 """
 
+import pytest
 from django.test import TestCase
 from django.utils import timezone
 from apps.inspections.models import InspectionRun, InspectionDefect
