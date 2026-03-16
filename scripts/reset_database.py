@@ -4,7 +4,10 @@ Reset Database Script
 WARNING: This will completely destroy all data and recreate the database from scratch.
 
 Usage:
-    python scripts/reset_database.py
+    python scripts/reset_database.py [--yes]
+
+Options:
+    --yes    Skip confirmation prompt
 """
 import os
 import sys
@@ -18,7 +21,7 @@ django.setup()
 from django.core.management import call_command
 from django.db import connection
 
-def reset_database():
+def reset_database(skip_confirm=False):
     """Completely reset the database."""
     print("=" * 80)
     print("DATABASE RESET SCRIPT")
@@ -32,10 +35,11 @@ def reset_database():
     print("  5. Grant superuser to admin employee")
     print("\n" + "=" * 80)
 
-    response = input("\nType 'YES' to continue: ")
-    if response != 'YES':
-        print("Aborted.")
-        return
+    if not skip_confirm:
+        response = input("\nType 'YES' to continue: ")
+        if response != 'YES':
+            print("Aborted.")
+            return
 
     print("\n[1/5] Dropping all tables...")
     with connection.cursor() as cursor:
@@ -90,4 +94,5 @@ def reset_database():
     print("\n" + "=" * 80)
 
 if __name__ == '__main__':
-    reset_database()
+    skip_confirm = '--yes' in sys.argv or '-y' in sys.argv
+    reset_database(skip_confirm=skip_confirm)
