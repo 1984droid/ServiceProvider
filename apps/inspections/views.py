@@ -6,11 +6,12 @@ ViewSets for inspection templates and inspection execution.
 
 from datetime import datetime
 from django.http import HttpResponse
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from django.core.exceptions import ValidationError as DjangoValidationError
+import rest_framework.parsers
 
 from apps.authentication.permissions import (
     CanEditOwnInspection,
@@ -1170,3 +1171,147 @@ class InspectionRunViewSet(viewsets.ModelViewSet):
                 {'error': f'Failed to generate PDF: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    @action(detail=True, methods=['post'], parser_classes=[rest_framework.parsers.MultiPartParser, rest_framework.parsers.FormParser])
+    def upload_photo(self, request, pk=None):
+        """
+        Upload photo to inspection.
+
+        POST /api/inspections/{id}/upload_photo/
+
+        Body (multipart/form-data):
+        - image: Image file (required)
+        - step_key: Step where photo was captured (required)
+        - defect_id: Defect ID if photo is evidence (optional)
+        - caption: Photo caption (optional)
+
+        Returns:
+            201: Photo uploaded successfully with URLs
+            400: Validation error
+            403: Cannot edit completed inspection
+            404: Inspection not found
+
+        Example Response:
+        {
+            "id": "uuid",
+            "url": "/media/inspections/.../photo.jpg",
+            "thumbnail_url": "/media/inspections/.../thumb_photo.jpg",
+            "caption": "Crack in boom",
+            "file_size": 1024000,
+            "width": 1920,
+            "height": 1080,
+            "created_at": "2026-03-16T10:00:00Z"
+        }
+        """
+        from .models import InspectionPhoto
+        from .serializers import PhotoUploadSerializer, InspectionPhotoSerializer
+
+        inspection = self.get_object()
+
+        # Validate upload data
+        serializer = PhotoUploadSerializer(
+            data=request.data,
+            context={'inspection': inspection}
+        )
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create photo
+        photo = InspectionPhoto.objects.create(
+            inspection=inspection,
+            step_key=serializer.validated_data['step_key'],
+            defect=serializer.validated_data.get('defect'),
+            image=serializer.validated_data['image'],
+            caption=serializer.validated_data.get('caption', ''),
+            uploaded_by=request.user
+        )
+
+        # Return photo data with URLs
+        photo_serializer = InspectionPhotoSerializer(photo)
+        return Response(photo_serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'])
+    def photos(self, request, pk=None):
+        """
+        List all photos for inspection.
+
+        GET /api/inspections/{id}/photos/
+
+        Query parameters:
+        - step_key: Filter by step (optional)
+        - defect_id: Filter by defect (optional)
+
+        Returns:
+            200: List of photos with URLs
+
+        Example Response:
+        {
+            "count": 5,
+            "photos": [
+                {
+                    "id": "uuid",
+                    "url": "/media/...",
+                    "thumbnail_url": "/media/...",
+                    "step_key": "visual_inspection",
+                    ...
+                }
+            ]
+        }
+        """
+        from .serializers import InspectionPhotoSerializer
+
+        inspection = self.get_object()
+        photos = inspection.photos.all()
+
+        # Filter by step_key
+        step_key = request.query_params.get('step_key')
+        if step_key:
+            photos = photos.filter(step_key=step_key)
+
+        # Filter by defect
+        defect_id = request.query_params.get('defect_id')
+        if defect_id:
+            photos = photos.filter(defect_id=defect_id)
+
+        serializer = InspectionPhotoSerializer(photos, many=True)
+        return Response({
+            'count': len(serializer.data),
+            'photos': serializer.data
+        })
+
+    @action(detail=True, methods=['delete'], url_path='photos/(?P<photo_id>[^/.]+)')
+    def delete_photo(self, request, pk=None, photo_id=None):
+        """
+        Delete a photo.
+
+        DELETE /api/inspections/{id}/photos/{photo_id}/
+
+        Returns:
+            204: Photo deleted
+            403: Cannot delete from completed inspection
+            404: Photo not found
+        """
+        from .models import InspectionPhoto
+
+        inspection = self.get_object()
+
+        try:
+            photo = InspectionPhoto.objects.get(id=photo_id, inspection=inspection)
+        except InspectionPhoto.DoesNotExist:
+            return Response(
+                {'error': 'Photo not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check permissions
+        if inspection.status == 'COMPLETED':
+            return Response(
+                {'error': 'Cannot delete photos from completed inspection'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Delete photo (model will handle file cleanup)
+        photo.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

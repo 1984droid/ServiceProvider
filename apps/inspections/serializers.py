@@ -3,8 +3,10 @@ Serializers for Inspection models and runtime operations.
 """
 
 from rest_framework import serializers
-from apps.inspections.models import InspectionRun, InspectionDefect
+from apps.inspections.models import InspectionRun, InspectionDefect, InspectionPhoto
 from apps.inspections.services.runtime_service import InspectionRuntime
+from PIL import Image
+from io import BytesIO
 
 
 class InspectionDefectSerializer(serializers.ModelSerializer):
@@ -207,3 +209,122 @@ class FinalizeInspectionSerializer(serializers.Serializer):
 
     signature_data = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     force = serializers.BooleanField(default=False)
+
+
+class InspectionPhotoSerializer(serializers.ModelSerializer):
+    """
+    Serializer for inspection photos.
+
+    Includes URLs for both full-size image and thumbnail.
+    """
+
+    url = serializers.ReadOnlyField()
+    thumbnail_url = serializers.ReadOnlyField()
+    uploaded_by_name = serializers.ReadOnlyField()
+
+    class Meta:
+        model = InspectionPhoto
+        fields = [
+            'id',
+            'inspection',
+            'defect',
+            'step_key',
+            'image',
+            'thumbnail',
+            'url',
+            'thumbnail_url',
+            'caption',
+            'file_size',
+            'width',
+            'height',
+            'uploaded_by',
+            'uploaded_by_name',
+            'created_at',
+        ]
+        read_only_fields = [
+            'id',
+            'file_size',
+            'width',
+            'height',
+            'created_at',
+            'thumbnail',
+            'url',
+            'thumbnail_url'
+        ]
+
+
+class PhotoUploadSerializer(serializers.Serializer):
+    """
+    Serializer for photo upload validation.
+
+    Validates:
+    - Image file format and size
+    - Inspection exists and is editable
+    - Step key is valid
+    """
+
+    step_key = serializers.CharField(max_length=100)
+    defect_id = serializers.UUIDField(required=False, allow_null=True)
+    image = serializers.ImageField()
+    caption = serializers.CharField(max_length=255, required=False, allow_blank=True)
+
+    def validate_image(self, value):
+        """
+        Validate image file.
+
+        Checks:
+        - File size (max 10MB)
+        - Valid image format
+        - Image can be opened
+        """
+        # Check file size (max 10MB)
+        if value.size > 10 * 1024 * 1024:
+            raise serializers.ValidationError(
+                "Image file size cannot exceed 10MB. Please compress the image."
+            )
+
+        # Validate image format by attempting to open
+        try:
+            img = Image.open(value)
+            img.verify()
+            # Reset file pointer after verify
+            value.seek(0)
+        except Exception as e:
+            raise serializers.ValidationError(
+                f"Invalid image file: {str(e)}"
+            )
+
+        return value
+
+    def validate(self, data):
+        """
+        Cross-field validation.
+
+        Ensures defect belongs to same inspection if provided.
+        """
+        # Get inspection from context
+        inspection = self.context.get('inspection')
+
+        if not inspection:
+            raise serializers.ValidationError("Inspection context required")
+
+        # Validate inspection is not completed
+        if inspection.status == 'COMPLETED':
+            raise serializers.ValidationError(
+                "Cannot upload photos to completed inspection"
+            )
+
+        # Validate defect belongs to inspection
+        defect_id = data.get('defect_id')
+        if defect_id:
+            try:
+                defect = InspectionDefect.objects.get(id=defect_id)
+                if defect.inspection_run_id != inspection.id:
+                    raise serializers.ValidationError(
+                        "Defect does not belong to this inspection"
+                    )
+                data['defect'] = defect
+            except InspectionDefect.DoesNotExist:
+                raise serializers.ValidationError("Defect not found")
+
+        return data

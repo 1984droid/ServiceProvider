@@ -24,6 +24,8 @@ interface AddDefectModalProps {
   initialData?: Partial<DefectData>; // Pre-populate from assessment
   editMode?: boolean;
   context?: DefectContext; // Context from step assessment
+  inspectionId: string; // For photo uploads
+  stepKey: string; // Current step identifier
 }
 
 const SEVERITY_OPTIONS = [
@@ -50,6 +52,8 @@ export function AddDefectModal({
   initialData = {},
   editMode = false,
   context,
+  inspectionId,
+  stepKey,
 }: AddDefectModalProps) {
   const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState<Partial<DefectData>>({
@@ -389,9 +393,13 @@ export function AddDefectModal({
                   </div>
                 )}
                 <PhotoField
+                  inspectionId={inspectionId}
+                  stepKey={stepKey}
+                  defectId={formData.defect_id}
                   value={formData.photo_evidence || []}
                   onChange={(value) => handleChange('photo_evidence', value)}
                   multiple={true}
+                  showCaptions={true}
                 />
               </FormField>
             </div>

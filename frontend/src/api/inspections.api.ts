@@ -83,6 +83,30 @@ export interface CreateInspectionRequest {
   inspector_name?: string;
 }
 
+// Inspection Photo Types
+export interface InspectionPhoto {
+  id: string;
+  inspection: string;
+  defect?: string | null;
+  step_key: string;
+  image: string;
+  thumbnail: string;
+  url: string;
+  thumbnail_url: string;
+  caption: string;
+  file_size: number;
+  width: number | null;
+  height: number | null;
+  uploaded_by?: string | null;
+  uploaded_by_name?: string | null;
+  created_at: string;
+}
+
+export interface PhotoListResponse {
+  count: number;
+  photos: InspectionPhoto[];
+}
+
 export const inspectionsApi = {
   // ===== Templates =====
 
@@ -189,5 +213,72 @@ export const inspectionsApi = {
       force: false,
     });
     return response.data;
+  },
+
+  // ===== Photos =====
+
+  /**
+   * Upload photo to inspection
+   *
+   * @param inspectionId - Inspection ID
+   * @param stepKey - Step identifier where photo was captured
+   * @param file - Image file to upload
+   * @param options - Optional defect ID and caption
+   */
+  async uploadPhoto(
+    inspectionId: string,
+    stepKey: string,
+    file: File,
+    options?: { defectId?: string; caption?: string }
+  ): Promise<InspectionPhoto> {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('step_key', stepKey);
+
+    if (options?.caption) {
+      formData.append('caption', options.caption);
+    }
+
+    if (options?.defectId) {
+      formData.append('defect_id', options.defectId);
+    }
+
+    const response = await apiClient.post<InspectionPhoto>(
+      `/inspections/${inspectionId}/upload_photo/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  /**
+   * List photos for inspection
+   *
+   * @param inspectionId - Inspection ID
+   * @param filters - Optional filters for step_key or defect_id
+   */
+  async listPhotos(
+    inspectionId: string,
+    filters?: { step_key?: string; defect_id?: string }
+  ): Promise<PhotoListResponse> {
+    const response = await apiClient.get<PhotoListResponse>(
+      `/inspections/${inspectionId}/photos/`,
+      { params: filters }
+    );
+    return response.data;
+  },
+
+  /**
+   * Delete photo from inspection
+   *
+   * @param inspectionId - Inspection ID
+   * @param photoId - Photo ID to delete
+   */
+  async deletePhoto(inspectionId: string, photoId: string): Promise<void> {
+    await apiClient.delete(`/inspections/${inspectionId}/photos/${photoId}/`);
   },
 };

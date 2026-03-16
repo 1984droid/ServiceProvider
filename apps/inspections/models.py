@@ -445,3 +445,243 @@ class InspectionDefect(BaseModel):
         """Save with validation."""
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+def inspection_photo_upload_path(instance, filename):
+    """
+    Generate upload path for inspection photos.
+
+    Pattern: inspections/{inspection_id}/photos/{photo_id}_{filename}
+
+    Args:
+        instance: InspectionPhoto instance
+        filename: Original filename
+
+    Returns:
+        Upload path string
+    """
+    import os
+    ext = os.path.splitext(filename)[1].lower()
+    safe_filename = f"{instance.id}{ext}"
+    return f'inspections/{instance.inspection.id}/photos/{safe_filename}'
+
+
+class InspectionPhoto(BaseModel):
+    """
+    Photo attached to an inspection or defect.
+
+    Photos are stored in local/network filesystem and served via Nginx.
+    Automatic thumbnail generation for fast preview loading.
+
+    Storage Location:
+    - Production: /var/www/serviceprovider/media/inspections/{id}/photos/
+    - Development: {BASE_DIR}/media/inspections/{id}/photos/
+
+    File Naming:
+    - Original: {photo_uuid}.jpg
+    - Thumbnail: thumb_{photo_uuid}.jpg
+    """
+
+    inspection = models.ForeignKey(
+        'InspectionRun',
+        on_delete=models.CASCADE,
+        related_name='photos',
+        help_text='Inspection this photo belongs to'
+    )
+
+    defect = models.ForeignKey(
+        'InspectionDefect',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='photos',
+        help_text='Defect this photo is evidence for (optional)'
+    )
+
+    step_key = models.CharField(
+        max_length=100,
+        db_index=True,
+        help_text='Step where photo was captured'
+    )
+
+    image = models.ImageField(
+        upload_to=inspection_photo_upload_path,
+        help_text='Original photo file'
+    )
+
+    thumbnail = models.ImageField(
+        upload_to=inspection_photo_upload_path,
+        null=True,
+        blank=True,
+        help_text='Auto-generated thumbnail (300x300)'
+    )
+
+    caption = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Optional photo caption or description'
+    )
+
+    file_size = models.IntegerField(
+        help_text='File size in bytes'
+    )
+
+    width = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text='Image width in pixels'
+    )
+
+    height = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text='Image height in pixels'
+    )
+
+    uploaded_by = models.ForeignKey(
+        'auth.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='uploaded_inspection_photos',
+        help_text='User who uploaded the photo'
+    )
+
+    class Meta:
+        ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['inspection', 'step_key']),
+            models.Index(fields=['defect']),
+            models.Index(fields=['inspection', 'created_at']),
+        ]
+        verbose_name = 'Inspection Photo'
+        verbose_name_plural = 'Inspection Photos'
+
+    def __str__(self):
+        return f"Photo for {self.inspection} - {self.step_key}"
+
+    def save(self, *args, **kwargs):
+        """
+        Save photo with automatic thumbnail generation.
+
+        Process:
+        1. Extract image dimensions
+        2. Calculate file size
+        3. Generate thumbnail if not exists
+        4. Save to filesystem
+        """
+        # Check if this is a new photo (not yet saved to database)
+        is_new = self._state.adding
+
+        if self.image and (is_new or not self.file_size):  # New upload or missing metadata
+            # Extract image metadata
+            from PIL import Image
+
+            # Seek to beginning to ensure we can read the file
+            if hasattr(self.image, 'seek'):
+                self.image.seek(0)
+
+            img = Image.open(self.image)
+            self.width, self.height = img.size
+
+            # Get file size - handle different file types
+            if hasattr(self.image, 'size'):
+                self.file_size = self.image.size
+            elif hasattr(self.image, 'file'):
+                # For InMemoryUploadedFile
+                self.image.file.seek(0, 2)  # Seek to end
+                self.file_size = self.image.file.tell()
+                self.image.file.seek(0)  # Seek back to beginning
+            else:
+                # Fallback: read the entire file
+                self.image.seek(0)
+                self.file_size = len(self.image.read())
+                self.image.seek(0)
+
+            # Generate thumbnail
+            if not self.thumbnail:
+                self.thumbnail = self._create_thumbnail()
+
+        super().save(*args, **kwargs)
+
+    def _create_thumbnail(self, size=(300, 300)):
+        """
+        Create thumbnail from original image.
+
+        Args:
+            size: Tuple of (width, height) for thumbnail
+
+        Returns:
+            InMemoryUploadedFile for thumbnail
+        """
+        from PIL import Image
+        from io import BytesIO
+        from django.core.files.uploadedfile import InMemoryUploadedFile
+        import os
+
+        # Open original image
+        img = Image.open(self.image)
+
+        # Resize maintaining aspect ratio
+        img.thumbnail(size, Image.Resampling.LANCZOS)
+
+        # Convert RGBA/LA/P to RGB (for JPEG compatibility)
+        if img.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'RGBA':
+                background.paste(img, mask=img.split()[-1])
+            else:
+                background.paste(img)
+            img = background
+
+        # Save to BytesIO
+        thumb_io = BytesIO()
+        img.save(thumb_io, format='JPEG', quality=85, optimize=True)
+        thumb_io.seek(0)
+
+        # Generate thumbnail filename
+        original_name = os.path.basename(self.image.name)
+        thumb_name = f'thumb_{original_name}'.replace(
+            os.path.splitext(original_name)[1], '.jpg'
+        )
+
+        # Create InMemoryUploadedFile
+        return InMemoryUploadedFile(
+            thumb_io,
+            None,
+            thumb_name,
+            'image/jpeg',
+            thumb_io.getbuffer().nbytes,
+            None
+        )
+
+    def delete(self, *args, **kwargs):
+        """
+        Delete photo and clean up files.
+
+        Ensures both original and thumbnail are deleted from filesystem.
+        """
+        # Delete files from storage
+        if self.image:
+            self.image.delete(save=False)
+        if self.thumbnail:
+            self.thumbnail.delete(save=False)
+
+        super().delete(*args, **kwargs)
+
+    @property
+    def url(self):
+        """Get URL for full-size image."""
+        return self.image.url if self.image else None
+
+    @property
+    def thumbnail_url(self):
+        """Get URL for thumbnail image."""
+        return self.thumbnail.url if self.thumbnail else None
+
+    @property
+    def uploaded_by_name(self):
+        """Get name of user who uploaded photo."""
+        if self.uploaded_by:
+            return self.uploaded_by.get_full_name() or self.uploaded_by.username
+        return None
