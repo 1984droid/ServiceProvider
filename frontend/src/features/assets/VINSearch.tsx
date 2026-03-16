@@ -35,17 +35,28 @@ export function VINSearch({ onVINFound, onSkip }: VINSearchProps) {
     setError(null);
 
     try {
+      // First check if we have cached decode data
+      const cachedData = await vinApi.lookupByVIN(vin);
+
+      if (cachedData) {
+        // Use cached data
+        onVINFound(cachedData);
+        setIsSearching(false);
+        return;
+      }
+
+      // No cached data, decode from NHTSA
       const data = await vinApi.decode(vin);
 
       // Check if decode was successful
-      if (data.error_code !== '0') {
+      if (data.error_code && data.error_code !== '0') {
         setError(data.error_text || 'VIN decode failed');
         return;
       }
 
       onVINFound(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to decode VIN');
+      setError(err.response?.data?.error || err.message || 'Failed to decode VIN');
     } finally {
       setIsSearching(false);
     }

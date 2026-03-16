@@ -562,6 +562,9 @@ class VINDecodeDataViewSet(viewsets.ModelViewSet):
         If vehicle_id provided, links decode to that vehicle
         Otherwise, just stores decode data without vehicle linkage
         """
+        from apps.assets.services import NHTSAService
+        import requests as requests_lib
+
         vin = request.data.get('vin')
         vehicle_id = request.data.get('vehicle_id')
 
@@ -571,24 +574,69 @@ class VINDecodeDataViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Clean VIN
-        clean_vin = vin.upper().strip()
+        try:
+            service = NHTSAService()
 
-        # Placeholder response structure (NHTSA API integration not implemented)
-        decode_result = {
-            'vin': clean_vin,
-            'decoded': False,
-            'message': 'NHTSA VIN decode integration not yet implemented',
-            'note': 'This is a placeholder. Actual implementation will call NHTSA vPIC API.',
-            # Example of what real decode would return:
-            # 'model_year': 2020,
-            # 'make': 'Honda',
-            # 'model': 'Accord',
-            # 'manufacturer': 'HONDA',
-            # 'vehicle_type': 'Passenger Car',
-            # 'body_class': 'Sedan/Saloon',
-            # 'engine_model': 'K20C3',
-            # 'fuel_type_primary': 'Gasoline',
-        }
+            # Decode VIN via NHTSA
+            decode_result = service.decode_vin(vin)
 
-        return Response(decode_result, status=status.HTTP_501_NOT_IMPLEMENTED)
+            # Save to VINDecodeData model
+            clean_vin = vin.upper().strip()
+            vehicle_obj = None
+
+            if vehicle_id:
+                try:
+                    vehicle_obj = Vehicle.objects.get(id=vehicle_id)
+                except Vehicle.DoesNotExist:
+                    return Response(
+                        {'error': f'Vehicle with id {vehicle_id} not found'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+
+            # Create or update VINDecodeData record
+            vin_decode_data, created = VINDecodeData.objects.update_or_create(
+                vin=clean_vin,
+                defaults={
+                    'vehicle': vehicle_obj,
+                    'model_year': decode_result.get('year'),
+                    'make': decode_result.get('make', ''),
+                    'model': decode_result.get('model', ''),
+                    'manufacturer': decode_result.get('manufacturer', ''),
+                    'vehicle_type': decode_result.get('vehicle_type', ''),
+                    'body_class': decode_result.get('body_class', ''),
+                    'engine_model': decode_result.get('engine_model', ''),
+                    'engine_configuration': decode_result.get('engine_configuration', ''),
+                    'engine_cylinders': decode_result.get('engine_cylinders'),
+                    'displacement_liters': decode_result.get('displacement_liters'),
+                    'fuel_type_primary': decode_result.get('fuel_type_primary', ''),
+                    'fuel_type_secondary': decode_result.get('fuel_type_secondary', ''),
+                    'gvwr': decode_result.get('gvwr', ''),
+                    'abs': decode_result.get('abs', ''),
+                    'airbag_locations': decode_result.get('airbag_locations', ''),
+                    'plant_city': decode_result.get('plant_city', ''),
+                    'plant_state': decode_result.get('plant_state', ''),
+                    'plant_country': decode_result.get('plant_country', ''),
+                    'error_code': decode_result.get('error_code', '0'),
+                    'error_text': decode_result.get('error_text', ''),
+                    'raw_response': decode_result.get('raw_nhtsa_data'),
+                }
+            )
+
+            serializer = self.get_serializer(vin_decode_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValueError as e:
+            return Response(
+                {'error': str(e), 'decoded': False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except requests_lib.HTTPError as e:
+            return Response(
+                {'error': 'NHTSA API error', 'details': str(e), 'decoded': False},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {'error': 'Unexpected error during VIN decode', 'details': str(e), 'decoded': False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

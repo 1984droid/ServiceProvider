@@ -35,9 +35,27 @@ export interface VINDecodeResult {
 export const vinApi = {
   /**
    * Decode a VIN using NHTSA vPIC API
+   * Creates/updates VINDecodeData record
    */
   async decode(vin: string): Promise<VINDecodeResult> {
-    const response = await apiClient.post<VINDecodeResult>('/vin/decode/', { vin });
+    const response = await apiClient.post<VINDecodeResult>('/vin-decode-data/decode_vin/', { vin });
     return response.data;
+  },
+
+  /**
+   * Lookup existing VIN decode data by VIN
+   */
+  async lookupByVIN(vin: string): Promise<VINDecodeResult | null> {
+    try {
+      const response = await apiClient.get<VINDecodeResult>(`/vin-decode-data/lookup_by_vin/`, {
+        params: { vin },
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   },
 };
